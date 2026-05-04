@@ -25,9 +25,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(Long id, User user) {
-        user.setId(id);
-        return userRepository.save(user);
+    public User updateUser(Long id, User userDto) {
+        Optional<User> existingUser = userRepository.findById(id);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.setName(userDto.getName());
+            user.setEmail(userDto.getEmail());
+            user.setDescription(userDto.getDescription());
+            return userRepository.save(user);
+        }
+        return null;
     }
 
     public void deleteUser(Long id) {
