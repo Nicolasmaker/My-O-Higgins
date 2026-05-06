@@ -43,3 +43,4 @@ logs/
 .settings/
 bin/
 .m2/
+node_modules/
