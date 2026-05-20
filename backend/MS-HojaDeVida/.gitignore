@@ -1,0 +1,8 @@
+# Ignorar directorios de compilación y de datos temporales de H2
+/target/
+/data/
+
+# Ignorar archivos de configuración local de IDE
+*.iml
+.idea/
+*.log

@@ -1,0 +1,131 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+		"name": "MS-HojaDeVida My-O-Higgins",
+		"description": "Colección para probar los endpoints del microservicio de Hoja de Vida.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Crear Hoja de Vida (POST)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"estudianteUsuRut\": 12345678,\n  \"matriculaId\": 101\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8083/api/hojas-vida",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"hojas-vida"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener Todas (GET)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/api/hojas-vida",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"hojas-vida"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener por ID (GET)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/api/hojas-vida/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"hojas-vida",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Actualizar Hoja de Vida (PUT)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"estudianteUsuRut\": 12345678,\n  \"matriculaId\": 102\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8083/api/hojas-vida/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"hojas-vida",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar Hoja de Vida (DELETE)",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/api/hojas-vida/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"hojas-vida",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
