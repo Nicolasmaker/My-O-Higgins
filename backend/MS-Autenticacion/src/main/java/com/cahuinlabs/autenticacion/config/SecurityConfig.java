@@ -29,6 +29,24 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF porque se esta usando jwt
             .authorizeHttpRequests(auth -> auth
+                 // MODO DESARROLLO: Permitir todo el tráfico temporalmente para facilitar pruebas de integración
+                .anyRequest().permitAll()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //Esto es para q no use cookies pq la peticion sera validada por el token
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); //Se cambia el filtro por defecto por el que se creo 
+        return http.build();
+    }
+}
+
+ /* ESTE CODIGO TIENE RESTRICCIONES Y ESTA DESAHBILITADO PARA PODER HACER CUALQUIER PETICION ENTRE MICROSERVICIOS PARA 
+ QUE NO TENGAN BLOQUEOS DE SEGURIDAD DEL TIPO 403 (EL @BEAN DE ARRIBA PERMITE TODO Y ES EL CODIGO QUE SE ESTA USANDO AHORA)
+
+  @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF porque se esta usando jwt
+            .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/login").permitAll() //Ruta del login publica
                 .requestMatchers(
                     "/v3/api-docs/**",
@@ -49,6 +67,7 @@ public class SecurityConfig {
                 .requestMatchers("/funcionarios/inspector/**").hasAuthority("ROLE_INSPECTOR")
 
              //Solo los estudiantes pueden ver las rutas de estudiantes
+                .requestMatchers(HttpMethod.GET, "/estudiantes/**").permitAll()
                 .requestMatchers("/estudiantes/**").hasAuthority("ROLE_ESTUDIANTE")
 
                 .anyRequest().authenticated() //Todas las demas rutas requerien un toekn valido
@@ -59,3 +78,7 @@ public class SecurityConfig {
         return http.build();
     }
 }
+ 
+ 
+*/
+
