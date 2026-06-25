@@ -182,8 +182,8 @@ public class GestionReunionesService {
                 .orElseThrow(() -> new EntityNotFoundException("Reunión general no encontrada: " + idBitReuGen));
     }
 
-    // Metodo privado que pregunta al microservicio de Autenticacion si el funcionario existe
-    // Devuelve true si existe, false si no fue encontrado
+    // metodo privado que pregunta al microservicio de Autenticacion si el funcionario existe
+    // devuelve true si existe, false si no fue encontrado
     private boolean existeFuncionario(Long rut) {
         try {
             FuncionarioDTO funcionario = autenticacionRestClient.get()
@@ -193,7 +193,7 @@ public class GestionReunionesService {
 
             return funcionario != null;
         } catch (HttpClientErrorException.NotFound e) {
-            // El microservicio de Autenticacion respondio 404, el funcionario no existe
+            // el microservicio de Autenticacion respondio 404, el funcionario no existe
             return false;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
