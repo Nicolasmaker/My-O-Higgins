@@ -29,6 +29,15 @@ public class MatriculaController {
         return ResponseEntity.ok(matriculaService.listarTodas());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Matricula> obtenerPorId(@PathVariable Long id) {
+        Matricula matricula = matriculaService.buscarPorId(id);
+        if (matricula != null) {
+            return ResponseEntity.ok(matricula);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     // Endpoint para ACTUALIZAR una matrícula (PUT http://localhost:8081/api/matriculas/{id})
     @PutMapping("/{id}")
     public ResponseEntity<Matricula> actualizarMatricula(@PathVariable Long id, @RequestBody Matricula detallesMatricula) {

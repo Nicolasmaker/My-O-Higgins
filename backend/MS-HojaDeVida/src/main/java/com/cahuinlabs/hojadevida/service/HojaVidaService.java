@@ -10,20 +10,24 @@ import com.cahuinlabs.hojadevida.exception.ResourceNotFoundException;
 import com.cahuinlabs.hojadevida.model.HojaVidaEstudiante;
 import com.cahuinlabs.hojadevida.repository.HojaVidaRepository;
 
-//NO BORREN ESTAS WEAS ES PARA VER SI FUNCA LA COMUNICACION
-import org.springframework.web.client.RestClient; 
-import org.springframework.web.client.HttpClientErrorException; 
-import com.cahuinlabs.hojadevida.dto.EstudianteDTO; 
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.HttpClientErrorException;
+import com.cahuinlabs.hojadevida.dto.EstudianteDTO;
+import com.cahuinlabs.hojadevida.dto.MatriculaDTO;
 
 @Service
 public class HojaVidaService {
 
     private final HojaVidaRepository hojaVidaRepository;
     private final RestClient autenticacionRestClient;
+    private final RestClient matriculaRestClient;
 
-    public HojaVidaService(RestClient autenticacionRestClient, HojaVidaRepository hojaVidaRepository) {
+    public HojaVidaService(RestClient autenticacionRestClient,
+                           RestClient matriculaRestClient,
+                           HojaVidaRepository hojaVidaRepository) {
         this.hojaVidaRepository = hojaVidaRepository;
-        this.autenticacionRestClient = autenticacionRestClient; //nuevo
+        this.autenticacionRestClient = autenticacionRestClient;
+        this.matriculaRestClient = matriculaRestClient;
     }
 
     public List<HojaVidaEstudianteDTO> obtenerTodasLasHojasDeVida() {
@@ -39,33 +43,39 @@ public class HojaVidaService {
     }
 
     public HojaVidaEstudianteDTO crearHojaVida(HojaVidaEstudianteDTO request) {
-
-        //NUEVO: Antes de crearla, validamos comunicándonos con el otro microservicio
+        // Validamos que el estudiante exista en Autenticacion
         if (!existeEstudiante(request.getEstudianteUsuRut())) {
-            throw new IllegalArgumentException("No se puede crear: El estudiante con RUT " + request.getEstudianteUsuRut() + " no existe o no tiene el rol correcto en Autenticación.");
+            throw new IllegalArgumentException("No se puede crear: el estudiante con RUT " + request.getEstudianteUsuRut() + " no existe o no tiene el rol correcto en Autenticacion.");
+        }
+        // Validamos que la matricula exista en GestionMatricula
+        if (!existeMatricula(request.getMatriculaId())) {
+            throw new IllegalArgumentException("No se puede crear: la matricula con ID " + request.getMatriculaId() + " no existe en el sistema.");
         }
 
         HojaVidaEstudiante hojaVidaEstudiante = new HojaVidaEstudiante();
         hojaVidaEstudiante.setEstudianteUsuRut(request.getEstudianteUsuRut());
         hojaVidaEstudiante.setMatriculaId(request.getMatriculaId());
-        
+
         HojaVidaEstudiante guardado = hojaVidaRepository.save(hojaVidaEstudiante);
         return mapearADTO(guardado);
     }
 
     public HojaVidaEstudianteDTO actualizarHojaVida(Long idHojaVida, HojaVidaEstudianteDTO request) {
-
-        //NUEVO: También validamos al actualizar por si intentan poner un RUT falso
+        // Validamos que el estudiante exista en Autenticacion
         if (!existeEstudiante(request.getEstudianteUsuRut())) {
-            throw new IllegalArgumentException("No se puede actualizar: El estudiante con RUT " + request.getEstudianteUsuRut() + " no existe en Autenticación.");
+            throw new IllegalArgumentException("No se puede actualizar: el estudiante con RUT " + request.getEstudianteUsuRut() + " no existe en Autenticacion.");
+        }
+        // Validamos que la matricula exista en GestionMatricula
+        if (!existeMatricula(request.getMatriculaId())) {
+            throw new IllegalArgumentException("No se puede actualizar: la matricula con ID " + request.getMatriculaId() + " no existe en el sistema.");
         }
 
         HojaVidaEstudiante hojaVidaEstudiante = hojaVidaRepository.findById(idHojaVida)
                 .orElseThrow(() -> new ResourceNotFoundException("Hoja de vida no encontrada: " + idHojaVida));
-        
+
         hojaVidaEstudiante.setEstudianteUsuRut(request.getEstudianteUsuRut());
         hojaVidaEstudiante.setMatriculaId(request.getMatriculaId());
-        
+
         HojaVidaEstudiante actualizado = hojaVidaRepository.save(hojaVidaEstudiante);
         return mapearADTO(actualizado);
     }
@@ -77,21 +87,37 @@ public class HojaVidaService {
         hojaVidaRepository.deleteById(idHojaVida);
     }
 
-        // NUEVO: Este es el método que hace la magia de ir a preguntar al otro MS
+    // Verifica si el estudiante existe en Autenticacion y tiene el rol correcto
     private boolean existeEstudiante(Long rut) {
         try {
             EstudianteDTO estudiante = autenticacionRestClient.get()
-                    .uri("/estudiantes/{rut}", rut) //URL a /estudiantes en base al ms de autenticacion
+                    .uri("/estudiantes/{rut}", rut)
                     .retrieve()
                     .body(EstudianteDTO.class);
-            
-            return estudiante != null 
-                && estudiante.rol() != null 
-                && "ROLE_ESTUDIANTE".equalsIgnoreCase(estudiante.rol().rolNombre()); 
+
+            return estudiante != null
+                && estudiante.rol() != null
+                && "ROLE_ESTUDIANTE".equalsIgnoreCase(estudiante.rol().rolNombre());
         } catch (HttpClientErrorException.NotFound e) {
             return false;
         } catch (Exception e) {
-            throw new RuntimeException("Error al comunicarse con el servicio de autenticación", e);
+            throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion", e);
+        }
+    }
+
+    // Verifica si la matricula existe en el microservicio de GestionMatricula
+    private boolean existeMatricula(Long idMatricula) {
+        try {
+            MatriculaDTO matricula = matriculaRestClient.get()
+                    .uri("/api/matriculas/{id}", idMatricula)
+                    .retrieve()
+                    .body(MatriculaDTO.class);
+            return matricula != null;
+        } catch (HttpClientErrorException.NotFound e) {
+            // GestionMatricula respondio 404, la matricula no existe
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al comunicarse con el microservicio de GestionMatricula", e);
         }
     }
 

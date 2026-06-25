@@ -7,14 +7,27 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 public class RestClientConfig {
-    // Lee la URL configurada en application.properties
+
+    // Lee la URL del microservicio de Autenticacion desde application.properties
     @Value("${app.services.autenticacion-url}")
     private String autenticacionUrl;
-    
+
+    // Lee la URL del microservicio de Gestion Matricula desde application.properties
+    // Si no está definida, usa localhost:8081 por defecto (coordinar puerto con el equipo)
+    @Value("${app.services.matricula-url:http://localhost:8081}")
+    private String matriculaUrl;
+
     @Bean
     public RestClient autenticacionRestClient() {
         return RestClient.builder()
                 .baseUrl(autenticacionUrl)
+                .build();
+    }
+
+    @Bean
+    public RestClient matriculaRestClient() {
+        return RestClient.builder()
+                .baseUrl(matriculaUrl)
                 .build();
     }
 }
