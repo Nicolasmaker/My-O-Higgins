@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.cahuinlabs.anotaciones.dto.FuncionarioDTO;
+import com.cahuinlabs.anotaciones.dto.HojaVidaDTO;
 import com.cahuinlabs.anotaciones.models.entities.Anotacion;
 import com.cahuinlabs.anotaciones.models.request.AnotacionDTO;
 import com.cahuinlabs.anotaciones.repository.AnotacionRepository;
@@ -24,8 +26,13 @@ public class AnotacionService {
     // RestClient para comunicarse con el microservicio de Autenticacion
     private final RestClient autenticacionRestClient;
 
-    public AnotacionService(RestClient autenticacionRestClient) {
+    // RestClient para comunicarse con el microservicio de HojaDeVida
+    private final RestClient hojaVidaRestClient;
+
+    public AnotacionService(@Qualifier("autenticacionRestClient") RestClient autenticacionRestClient,
+                            @Qualifier("hojaVidaRestClient") RestClient hojaVidaRestClient) {
         this.autenticacionRestClient = autenticacionRestClient;
+        this.hojaVidaRestClient = hojaVidaRestClient;
     }
 
     // crea una nueva anotacion asignando tipo, descripcion, fecha actual y relacionandola con la hoja de vida
@@ -33,6 +40,10 @@ public class AnotacionService {
         // Validamos que el funcionario (docente o inspector) exista en Autenticacion
         if (!existeFuncionario(dto.getFuncionarioUsuRut())) {
             throw new IllegalArgumentException("No se puede crear la anotacion: el funcionario con RUT " + dto.getFuncionarioUsuRut() + " no existe en el sistema.");
+        }
+        // Validamos que la hoja de vida exista en HojaDeVida
+        if (!existeHojaVida(dto.getIdHojaVida())) {
+            throw new IllegalArgumentException("No se puede crear la anotacion: la hoja de vida con ID " + dto.getIdHojaVida() + " no existe en el sistema.");
         }
 
         Anotacion anotacion = new Anotacion();
@@ -83,6 +94,22 @@ public class AnotacionService {
             return false;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
+        }
+    }
+
+    // Verifica si la hoja de vida existe en el microservicio de HojaDeVida
+    private boolean existeHojaVida(Long idHojaVida) {
+        try {
+            HojaVidaDTO hojaVida = hojaVidaRestClient.get()
+                    .uri("/api/hojas-vida/{id}", idHojaVida)
+                    .retrieve()
+                    .body(HojaVidaDTO.class);
+            return hojaVida != null;
+        } catch (HttpClientErrorException.NotFound e) {
+            // El microservicio de HojaDeVida respondio 404, la hoja de vida no existe
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al comunicarse con el microservicio de HojaDeVida: " + e.getMessage());
         }
     }
 }
