@@ -5,7 +5,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.HttpClientErrorException;
 
+import com.myohiggins.msmensajeria.dto.UsuarioDTO;
 import com.myohiggins.msmensajeria.models.entities.Message;
 import com.myohiggins.msmensajeria.models.request.MessageDTO;
 import com.myohiggins.msmensajeria.repository.MessageRepository;
@@ -18,8 +21,24 @@ public class MessageService {
     @Autowired
     private MessageRepository messageRepository;
 
+    // RestClient para comunicarse con el microservicio de Autenticacion
+    private final RestClient autenticacionRestClient;
+
+    public MessageService(RestClient autenticacionRestClient) {
+        this.autenticacionRestClient = autenticacionRestClient;
+    }
+
     // RF-14: Enviar mensaje — fecha y estado leido se setean server-side
     public Message enviarMensaje(MessageDTO dto) {
+        // Validamos que el remitente exista en Autenticacion
+        if (!existeUsuario(dto.getRemitenteRut())) {
+            throw new IllegalArgumentException("No se puede enviar el mensaje: el remitente con RUT " + dto.getRemitenteRut() + " no existe en el sistema.");
+        }
+        // Validamos que el destinatario exista en Autenticacion
+        if (!existeUsuario(dto.getDestinatarioRut())) {
+            throw new IllegalArgumentException("No se puede enviar el mensaje: el destinatario con RUT " + dto.getDestinatarioRut() + " no existe en el sistema.");
+        }
+
         Message mensaje = new Message();
         mensaje.setRemitenteRut(dto.getRemitenteRut());
         mensaje.setDestinatarioRut(dto.getDestinatarioRut());
@@ -54,5 +73,21 @@ public class MessageService {
             throw new EntityNotFoundException("Mensaje no encontrado: " + idMensaje);
         }
         messageRepository.deleteById(idMensaje);
+    }
+
+    // Verifica si el usuario (cualquier tipo) existe en el microservicio de Autenticacion
+    private boolean existeUsuario(Long rut) {
+        try {
+            UsuarioDTO usuario = autenticacionRestClient.get()
+                    .uri("/usuarios/{rut}", rut)
+                    .retrieve()
+                    .body(UsuarioDTO.class);
+            return usuario != null;
+        } catch (HttpClientErrorException.NotFound e) {
+            // El microservicio de Autenticacion respondio 404, el usuario no existe
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
+        }
     }
 }
