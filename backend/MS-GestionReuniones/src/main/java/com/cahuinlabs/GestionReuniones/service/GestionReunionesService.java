@@ -18,8 +18,11 @@ import jakarta.persistence.EntityNotFoundException;
 import com.cahuinlabs.GestionReuniones.repository.BitReunionApoderadoRepository;
 import com.cahuinlabs.GestionReuniones.repository.BitReunionGeneralRepository;
 import com.cahuinlabs.GestionReuniones.repository.BitReunionIndividualRepository;
+import com.cahuinlabs.GestionReuniones.dto.FuncionarioDTO;
 
 import jakarta.transaction.Transactional;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.HttpClientErrorException;
 
 
 
@@ -37,9 +40,22 @@ public class GestionReunionesService {
     @Autowired
     private BitReunionGeneralRepository generalRepository;
 
+    // RestClient para comunicarse con el microservicio de Autenticacion
+    private final RestClient autenticacionRestClient;
+
+    public GestionReunionesService(RestClient autenticacionRestClient) {
+        this.autenticacionRestClient = autenticacionRestClient;
+    }
+
     // crea una reunion base con apoderado, guarda fecha, compromisos, observaciones y docente
     @Transactional
     public BitReunionApoderado registrarReunionApoderado(BitReunionApoderadoRequest request) {
+
+        // Verificamos que el funcionario exista en el microservicio de Autenticacion
+        if (!existeFuncionario(request.getDocenteUsuRut())) {
+            throw new IllegalArgumentException("No se puede registrar la reunion: el funcionario con RUT " + request.getDocenteUsuRut() + " no existe en el sistema.");
+        }
+
         BitReunionApoderado base = new BitReunionApoderado();
         base.setBitReuFec(request.getBitReuFec());
         base.setBitReuCompromisos(request.getBitReuCompromisos());
@@ -52,6 +68,12 @@ public class GestionReunionesService {
     // primero guarda la base, luego los detalles de la entrevista confidencial
     @Transactional
     public BitReunionIndividual registrarReunionIndividual(ReunionIndividualRequest request) {
+
+        // Verificamos que el funcionario exista en el microservicio de Autenticacion
+        if (!existeFuncionario(request.getDocenteUsuRut())) {
+            throw new IllegalArgumentException("No se puede registrar la reunion: el funcionario con RUT " + request.getDocenteUsuRut() + " no existe en el sistema.");
+        }
+
         //  guardar la bitcora base
         BitReunionApoderado base = new BitReunionApoderado();
         base.setBitReuFec(request.getBitReuFec());
@@ -75,7 +97,12 @@ public class GestionReunionesService {
     // primero guarda la base, luego los detalles de acuerdos institucionales
     @Transactional
     public BitReunionGeneral registrarReunionGeneral(ReunionGeneralRequest request) {
-    
+
+        // Verificamos que el funcionario exista en el microservicio de Autenticacion
+        if (!existeFuncionario(request.getDocenteUsuRut())) {
+            throw new IllegalArgumentException("No se puede registrar la reunion: el funcionario con RUT " + request.getDocenteUsuRut() + " no existe en el sistema.");
+        }
+
         BitReunionApoderado base = new BitReunionApoderado();
         base.setBitReuFec(request.getBitReuFec());
         base.setBitReuCompromisos(request.getBitReuCompromisos());
@@ -153,5 +180,23 @@ public class GestionReunionesService {
     public BitReunionGeneral obtenerDetalleGeneral(Long idBitReuGen) {
         return generalRepository.findById(idBitReuGen)
                 .orElseThrow(() -> new EntityNotFoundException("Reunión general no encontrada: " + idBitReuGen));
+    }
+
+    // Metodo privado que pregunta al microservicio de Autenticacion si el funcionario existe
+    // Devuelve true si existe, false si no fue encontrado
+    private boolean existeFuncionario(Long rut) {
+        try {
+            FuncionarioDTO funcionario = autenticacionRestClient.get()
+                    .uri("/funcionarios/{rut}", rut)
+                    .retrieve()
+                    .body(FuncionarioDTO.class);
+
+            return funcionario != null;
+        } catch (HttpClientErrorException.NotFound e) {
+            // El microservicio de Autenticacion respondio 404, el funcionario no existe
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
+        }
     }
 }
