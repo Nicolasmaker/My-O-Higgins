@@ -1,7 +1,7 @@
 // =============================================================
 // HOOK useAuth — useAuth.js
 // =============================================================
-// Punto de acceso al contexto de autenticación.
+// Punto de acceso al contexto (carpeta context) de autenticación.
 //
 // En vez de escribir esto en cada componente que lo necesite:
 //   const context = useContext(AuthContext)
