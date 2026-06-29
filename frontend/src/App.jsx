@@ -25,7 +25,7 @@ import { AuthProvider } from './context/AuthContext'
 
 // ── Páginas (se importan a medida que se crean) ──────────────
 // import Home        from './pages/Home/Home'
-// import Login       from './pages/Login/Login'
+import Login       from './pages/Login/Login'
 // import Registro    from './pages/Registro/Registro'
 
 // ── Layout con Navbar + Footer ────────────────────────────────
@@ -45,7 +45,9 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* Página temporal hasta crear Home */}
-          <Route path="/" element={<div style={{ padding: '2rem' }}>WATONA, WATONA KLA FEA!</div>} />
+          <Route path="/" element={<div style={{ padding: '2rem' }}>Watona, watona klia fea<br/><br/><a href="/login">Ir a probar el Login</a></div>} />
+          
+          <Route path="/login" element={<Login />} />
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
           <Route path="*" element={<Navigate to="/" replace />} />
