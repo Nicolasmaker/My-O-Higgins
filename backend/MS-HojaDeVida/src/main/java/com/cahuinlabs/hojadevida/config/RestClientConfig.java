@@ -14,7 +14,7 @@ public class RestClientConfig {
 
     // Lee la URL del microservicio de Gestion Matricula desde application.properties
     // Si no está definida, usa localhost:8081 por defecto (coordinar puerto con el equipo)
-    @Value("${app.services.matricula-url:http://localhost:8081}")
+    @Value("${app.services.matricula-url:http://localhost:8086}")
     private String matriculaUrl;
 
     @Bean
