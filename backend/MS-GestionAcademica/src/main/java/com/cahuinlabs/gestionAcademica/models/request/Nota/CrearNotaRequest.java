@@ -23,5 +23,9 @@ public class CrearNotaRequest {
 
     @NotNull(message = "El ID de la evaluación es obligatorio.")
     @Positive(message = "El ID de la evaluación debe ser un número válido positivo.")
-    private Integer   idEvaluacion; 
+    private Integer   idEvaluacion;
+
+    @NotNull(message = "El RUT del estudiante es obligatorio.")
+    @Positive(message = "El RUT del estudiante debe ser un número válido positivo.")
+    private Integer   estudianteUsuRut;
 }
