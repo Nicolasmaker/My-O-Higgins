@@ -24,7 +24,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider } from './context/AuthContext'
 
 // ── Páginas (se importan a medida que se crean) ──────────────
-// import Home        from './pages/Home/Home'
+import Home        from './pages/Home/Home'
 import Login       from './pages/Login/Login'
 // import Registro    from './pages/Registro/Registro'
 
@@ -44,8 +44,8 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Página temporal hasta crear Home */}
-          <Route path="/" element={<div style={{ padding: '2rem' }}>Watona, watona klia fea<br/><br/><a href="/login">Ir a probar el Login</a></div>} />
+          {/* Home - Landing Page Principal */}
+          <Route path="/" element={<Home />} />
           
           <Route path="/login" element={<Login />} />
 

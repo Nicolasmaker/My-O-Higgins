@@ -1,0 +1,181 @@
+import Button from '../../components/UI/Button';
+import Navbar from '../../components/Navbar/Navbar';
+import Footer from '../../components/Footer/Footer';
+import styles from './Home.module.css';
+
+export default function Home() {
+  // Datos de Accesos Rápidos
+  const quickAccess = [
+    {
+      id: 1,
+      icon: '📅',
+      title: 'Calendario Escolar',
+      description: 'Consulta fechas importantes, feriados y períodos académicos del año.',
+      link: '#',
+    },
+    {
+      id: 2,
+      icon: '📚',
+      title: 'Portal Académico',
+      description: 'Acceso a calificaciones, horarios y material educativo de tus cursos.',
+      link: '#',
+    },
+    {
+      id: 3,
+      icon: '📜',
+      title: 'Certificados',
+      description: 'Descarga certificados de conducta, asistencia y otros documentos.',
+      link: '#',
+    },
+  ];
+
+  // Datos de Noticias Destacadas
+  const news = [
+    {
+      id: 1,
+      image: 'https://images.unsplash.com/photo-1427504494785-cdba58dadff0?w=600&h=400&fit=crop',
+      category: 'Académico',
+      title: 'Inicio del Nuevo Período Académico 2024',
+      excerpt:
+        'Nos complace anunciar el inicio del nuevo período académico. Todos los estudiantes deben presentarse con sus útiles y uniformes completos.',
+      link: '#',
+    },
+    {
+      id: 2,
+      image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop',
+      category: 'Actividades',
+      title: 'Jornada de Integración 2024',
+      excerpt:
+        'Se realizará una jornada de integración para todos los cursos con actividades recreativas y deportivas en el patio principal.',
+      link: '#',
+    },
+    {
+      id: 3,
+      image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop',
+      category: 'Tecnología',
+      title: 'Nueva Plataforma de Aula Virtual',
+      excerpt:
+        'Hemos implementado una nueva plataforma de educación a distancia con mejores herramientas de comunicación y seguimiento académico.',
+      link: '#',
+    },
+    {
+      id: 4,
+      image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=400&fit=crop',
+      category: 'Eventos',
+      title: 'Ceremonia de Premiación a la Excelencia',
+      excerpt:
+        'Se llevará a cabo la ceremonia anual de premiación a los estudiantes destacados académica y deportivamente.',
+      link: '#',
+    },
+  ];
+
+  return (
+    <div className={styles.page}>
+      {/* Navbar */}
+      <Navbar />
+
+      {/* SECCIÓN HERO */}
+      <section className={styles.heroSection}>
+        <div className={styles.heroContainer}>
+          {/* Contenido Izquierdo */}
+          <div className={styles.heroContent}>
+            <h1 className={styles.heroTitle}>Colegio Bernardo O'Higgins</h1>
+            <p className={styles.heroDescription}>
+              Plataforma de gestión institucional que conecta a estudiantes, apoderados y 
+              docentes en un único espacio digital. Acceso fácil a calificaciones, calendarios, 
+              certificados y toda la información académica importante.
+            </p>
+            <div className={styles.heroButtons}>
+              <Button variant="primary">Ingresar a My O'Higgins →</Button>
+              <Button variant="outline">Proceso de Matrícula</Button>
+            </div>
+          </div>
+
+          {/* Contenido Derecho - Imagen Placeholder */}
+          <div className={styles.heroImage}>
+            <img
+              src="https://images.unsplash.com/photo-1427504494785-cdba58dadff0?w=600&h=500&fit=crop"
+              alt="Estudiantes en el colegio"
+              className={styles.heroImg}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN ACCESOS RÁPIDOS */}
+      <section className={styles.quickAccessSection}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <h2 className={styles.sectionTitle}>Accesos Rápidos</h2>
+              <p className={styles.sectionSubtitle}>
+                Accede rápidamente a las herramientas más utilizadas del portal
+              </p>
+            </div>
+          </div>
+
+          {/* Grid de Tarjetas */}
+          <div className={styles.cardsGrid}>
+            {quickAccess.map((item) => (
+              <div key={item.id} className={styles.card}>
+                <div className={styles.cardIcon}>{item.icon}</div>
+                <h3 className={styles.cardTitle}>{item.title}</h3>
+                <p className={styles.cardDescription}>{item.description}</p>
+                <a href={item.link} className={styles.cardLink}>
+                  Ver →
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN NOTICIAS DESTACADAS */}
+      <section className={styles.newsSection}>
+        <div className={styles.container}>
+          {/* Cabecera */}
+          <div className={styles.newsHeader}>
+            <div>
+              <h2 className={styles.sectionTitle}>Noticias Destacadas</h2>
+              <p className={styles.sectionSubtitle}>
+                Mantente informado de todas las novedades del colegio
+              </p>
+            </div>
+            <a href="#" className={styles.viewAllLink}>
+              Ver todas las noticias →
+            </a>
+          </div>
+
+          {/* Grid de Noticias */}
+          <div className={styles.newsGrid}>
+            {news.map((item) => (
+              <article key={item.id} className={styles.newsCard}>
+                {/* Imagen */}
+                <div className={styles.newsImageWrapper}>
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className={styles.newsImage}
+                  />
+                </div>
+
+                {/* Contenido */}
+                <div className={styles.newsContent}>
+                  <span className={styles.newsCategory}>{item.category}</span>
+                  <h3 className={styles.newsTitle}>{item.title}</h3>
+                  <p className={styles.newsExcerpt}>{item.excerpt}</p>
+                  <a href={item.link} className={styles.newsLink}>
+                    Leer más
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
+}
