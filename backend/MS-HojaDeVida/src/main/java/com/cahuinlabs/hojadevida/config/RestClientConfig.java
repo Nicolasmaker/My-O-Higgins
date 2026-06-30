@@ -9,7 +9,7 @@ import org.springframework.web.client.RestClient;
 public class RestClientConfig {
 
     // Lee la URL del microservicio de Autenticacion desde application.properties
-    @Value("${app.services.autenticacion-url}")
+    @Value("${app.services.autenticacion-url:http://localhost:8080}")
     private String autenticacionUrl;
 
     // Lee la URL del microservicio de Gestion Matricula desde application.properties
