@@ -1,6 +1,10 @@
 /* Importar Variables de My O'Higgins */
 @import './styles/_variables.css';
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;

@@ -2,38 +2,43 @@ import Button from '../../components/UI/Button';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 import styles from './Home.module.css';
+import fachadaColegioBO from '../../assets/fachadaColegioBO.png';
+import iconoCalendario from '../../assets/iconoCalendario.png';
+import iconoPortal from '../../assets/iconoPortal.png';
+import iconoCertificado from '../../assets/iconoCertificado.png';
+import academicoImg from '../../assets/academico.png';
+
 
 export default function Home() {
   // Datos de Accesos Rápidos
-  const quickAccess = [
-    {
-      id: 1,
-      icon: '📅',
-      title: 'Calendario Escolar',
-      description: 'Consulta fechas importantes, feriados y períodos académicos del año.',
-      link: '#',
-    },
-    {
-      id: 2,
-      icon: '📚',
-      title: 'Portal Académico',
-      description: 'Acceso a calificaciones, horarios y material educativo de tus cursos.',
-      link: '#',
-    },
-    {
-      id: 3,
-      icon: '📜',
-      title: 'Certificados',
-      description: 'Descarga certificados de conducta, asistencia y otros documentos.',
-      link: '#',
-    },
-  ];
-
+const quickAccess = [
+  {
+    id: 1,
+    icon: iconoCalendario,
+    title: 'Calendario Escolar',
+    description: 'Consulta fechas importantes, feriados y períodos académicos del año.',
+    link: '#calendario',
+  },
+  {
+    id: 2,
+    icon: iconoPortal,
+    title: 'Portal Académico',
+    description: 'Acceso a calificaciones, horarios y material educativo de tus cursos.',
+    link: '#academico',
+  },
+  {
+    id: 3,
+    icon: iconoCertificado,
+    title: 'Certificados',
+    description: 'Descarga certificados de conducta, asistencia y otros documentos.',
+    link: '#certificados',
+  },
+];
   // Datos de Noticias Destacadas
   const news = [
     {
       id: 1,
-      image: 'https://images.unsplash.com/photo-1427504494785-cdba58dadff0?w=600&h=400&fit=crop',
+      image: academicoImg,
       category: 'Académico',
       title: 'Inicio del Nuevo Período Académico 2024',
       excerpt:
@@ -75,7 +80,7 @@ export default function Home() {
       <Navbar />
 
       {/* SECCIÓN HERO */}
-      <section className={styles.heroSection}>
+      <section className={styles.heroSection} id="inicio">
         <div className={styles.heroContainer}>
           {/* Contenido Izquierdo */}
           <div className={styles.heroContent}>
@@ -87,23 +92,23 @@ export default function Home() {
             </p>
             <div className={styles.heroButtons}>
               <Button variant="primary">Ingresar a My O'Higgins →</Button>
-              <Button variant="outline">Proceso de Matrícula</Button>
+              <Button variant="outline" onClick={() => window.location.hash = '#admision'}>Proceso de Matrícula</Button>
             </div>
           </div>
 
           {/* Contenido Derecho - Imagen Placeholder */}
-          <div className={styles.heroImage}>
+          <div className={styles.fachadaColegioBO}>
             <img
-              src="https://images.unsplash.com/photo-1427504494785-cdba58dadff0?w=600&h=500&fit=crop"
+              src={fachadaColegioBO}
               alt="Estudiantes en el colegio"
-              className={styles.heroImg}
+              className={styles.fachadaColegioBO}
             />
           </div>
         </div>
       </section>
 
       {/* SECCIÓN ACCESOS RÁPIDOS */}
-      <section className={styles.quickAccessSection}>
+      <section className={styles.quickAccessSection} id="admision">
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <div>
@@ -118,7 +123,13 @@ export default function Home() {
           <div className={styles.cardsGrid}>
             {quickAccess.map((item) => (
               <div key={item.id} className={styles.card}>
-                <div className={styles.cardIcon}>{item.icon}</div>
+                <div className={styles.cardIcon}>
+                <img 
+                    src={item.icon} 
+                    alt={`Icono de ${item.title}`} 
+                    className={styles.iconImage} // Agregamos una clase opcional por si quieres darle estilos directos a la imagen
+                />
+                </div>
                 <h3 className={styles.cardTitle}>{item.title}</h3>
                 <p className={styles.cardDescription}>{item.description}</p>
                 <a href={item.link} className={styles.cardLink}>
@@ -131,7 +142,7 @@ export default function Home() {
       </section>
 
       {/* SECCIÓN NOTICIAS DESTACADAS */}
-      <section className={styles.newsSection}>
+      <section className={styles.newsSection} id="noticias">
         <div className={styles.container}>
           {/* Cabecera */}
           <div className={styles.newsHeader}>

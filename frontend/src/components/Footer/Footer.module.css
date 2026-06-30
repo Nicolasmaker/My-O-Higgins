@@ -14,6 +14,7 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-2xl);
   margin-bottom: var(--spacing-2xl);
+  text-align: center;
 }
 
 .column {
@@ -41,6 +42,7 @@
   display: flex;
   gap: var(--spacing-md);
   margin-top: var(--spacing-sm);
+  justify-content: center;
 }
 
 .socialIcon {
@@ -68,6 +70,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  align-items: center;
 }
 
 .link {
@@ -85,8 +88,9 @@
 .contactItem {
   display: flex;
   gap: var(--spacing-md);
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: var(--spacing-md);
+  justify-content: center;
 }
 
 .contactItem svg {

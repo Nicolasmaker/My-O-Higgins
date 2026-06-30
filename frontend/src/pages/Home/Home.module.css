@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+
 /* Home.module.css */
 
 .page {
@@ -16,42 +18,45 @@
    ===================================================== */
 .heroSection {
   background-color: var(--color-bg-hero);
-  padding: var(--spacing-3xl) 0;
-  min-height: 600px;
+  padding: var(--spacing-xl) 0 var(--spacing-3xl) 0;
+  min-height: 500px;
   display: flex;
   align-items: center;
 }
-
 .heroContainer {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px; 
+  margin: 0 auto;    
   padding: 0 var(--spacing-md);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-3xl);
   align-items: center;
 }
-
 .heroContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-xl);
+  text-align: left; 
+  align-items: flex-start; 
+  justify-content: center;
 }
-
 .heroTitle {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
+  font-size: 50px;
+  font-weight: 700;
   color: var(--color-primary);
   margin: 0;
   line-height: 1.2;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -1px;
 }
-
 .heroDescription {
-  font-size: var(--font-size-lg);
+  font-size: 18px;
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.9;
   margin: 0;
   max-width: 500px;
+  color: #413c3c;
 }
 
 .heroButtons {
@@ -66,15 +71,14 @@
   flex-shrink: 0;
 }
 
-.heroImage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+.fachadaColegioBO {
+  max-width: 100%;    
+  height: auto;      
+  border-radius: 8px; 
 }
 
 .heroImg {
-  width: 100%;
+  width: 100%; 
   height: 100%;
   max-height: 500px;
   object-fit: cover;
@@ -86,21 +90,25 @@
    SECCIÓN ACCESOS RÁPIDOS
    ===================================================== */
 .quickAccessSection {
-  background-color: var(--color-bg-white);
+ box-shadow: 
+    inset 0px 15px 20px -10px rgb(39, 1, 1), 
+    inset 0px -15px 20px -10px  rgb(39, 1, 1);
+  background-color: #7a0e0eab;
   padding: var(--spacing-3xl) 0;
 }
 
 .sectionHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   margin-bottom: var(--spacing-2xl);
 }
 
 .sectionTitle {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: white;
   margin: 0 0 var(--spacing-sm) 0;
 }
 
@@ -125,6 +133,7 @@
   gap: var(--spacing-md);
   transition: all var(--transition-normal);
   border: 1px solid transparent;
+  text-align: center;
 }
 
 .card:hover {
@@ -133,16 +142,6 @@
   border-color: var(--color-primary);
 }
 
-.cardIcon {
-  font-size: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 80px;
-  background-color: var(--color-bg-white);
-  border-radius: var(--radius-md);
-}
 
 .cardTitle {
   font-size: var(--font-size-xl);
@@ -153,7 +152,7 @@
 
 .cardDescription {
   font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
+  color: #555555;
   margin: 0;
   flex-grow: 1;
   line-height: 1.6;
@@ -165,12 +164,31 @@
   font-weight: var(--font-weight-semibold);
   transition: color var(--transition-fast);
   align-self: flex-start;
+  margin: 0 auto;
+  display:inline-block;
 }
 
 .cardLink:hover {
   color: var(--color-primary-dark);
 }
 
+
+.cardIcon {
+  margin: 0 auto 20px auto;
+  width: 80px; 
+  height: 80px; 
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+ }
+
+.iconImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+  display: block;
+  mix-blend-mode: multiply;
+}
 /* =====================================================
    SECCIÓN NOTICIAS
    ===================================================== */
@@ -288,7 +306,8 @@
    ===================================================== */
 @media (max-width: 1024px) {
   .heroContainer {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
   }
 
   .heroImage {
