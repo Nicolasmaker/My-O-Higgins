@@ -9,15 +9,8 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      // Llamada al backend usando nuestro servicio
       const response = await login(data)
-      
-      // Dependiendo de cómo responda tu backend, ajusta esto.
-      // Por ejemplo, si devuelve { token: "...", usuario: {...} }
-      const token = response.data.token || "token_simulado_si_el_back_no_lo_manda"
-      const usuario = response.data.usuario || { rol: "ADMIN" } // Ajustar según respuesta real
-
-      // Guardamos la sesión en el context global
+      const { token, ...usuario } = response.data
       loginContext(token, usuario)
       
       toast.success('Me conecte con la caga de backend')

@@ -7,8 +7,8 @@
 // =============================================================
 import calendarioHttp from './http/calendarioHttp'
 
-export const getEventos = () => calendarioHttp.get('/eventos')
-export const getEventoById = (id) => calendarioHttp.get(`/eventos/${id}`)
-export const crearEvento = (data) => calendarioHttp.post('/eventos', data)
-export const actualizarEvento = (id, data) => calendarioHttp.put(`/eventos/${id}`, data)
-export const eliminarEvento = (id) => calendarioHttp.delete(`/eventos/${id}`)
+export const getEventos = () => calendarioHttp.get('')
+export const getEventoById = (id) => calendarioHttp.get(`/${id}`)
+export const crearEvento = (data) => calendarioHttp.post('', data)
+export const actualizarEvento = (id, data) => calendarioHttp.put(`/${id}`, data)
+export const eliminarEvento = (id) => calendarioHttp.delete(`/${id}`)

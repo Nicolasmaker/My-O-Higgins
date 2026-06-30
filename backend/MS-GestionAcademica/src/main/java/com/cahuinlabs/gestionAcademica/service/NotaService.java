@@ -30,6 +30,7 @@ public class NotaService {
         nota.setNotCalif(request.getNotCalif());
         nota.setNotFechaRegistrada(request.getNotFechaReg());
         nota.setEvaluacion(evaluacion);
+        nota.setEstudianteUsuRut(request.getEstudianteUsuRut());
 
         return notasRepository.save(nota);
     }
@@ -50,6 +51,10 @@ public class NotaService {
 
     public Optional<Notas> buscarPorId(Integer id) {
         return notasRepository.findById(id);
+    }
+
+    public List<Notas> listarPorEstudiante(Integer estudianteUsuRut) {
+        return notasRepository.findByEstudianteUsuRut(estudianteUsuRut);
     }
 
     public void eliminar(Integer id) {

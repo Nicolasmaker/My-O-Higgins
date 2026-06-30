@@ -42,12 +42,7 @@ public class MatriculaService {
         return matriculaRepository.save(matricula);
     }
 
-    // 2. Registrar una nueva matrícula
-    public Matricula registrarMatricula(Matricula matricula) {
-        return crearMatricula(matricula);
-    }
-
-    // 3. Obtener todas las matrículas registradas
+    // 2. Obtener todas las matrículas registradas
     public List<Matricula> listarTodas() {
         return matriculaRepository.findAll();
     }

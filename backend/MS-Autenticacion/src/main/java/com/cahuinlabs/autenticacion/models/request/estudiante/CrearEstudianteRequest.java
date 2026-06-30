@@ -15,8 +15,9 @@ public class CrearEstudianteRequest {
     private String    estEmail;
     private String    estTel;
     private String    estPassword;
-//Dato de la tabla hija estudiante
+//Datos de la tabla hija estudiante
     private String    estParentesco;
+    private Integer   cursoId;
 //Datos de la tabla direccion
     private String    estDireccion;  
     private Integer   estNumeroDireccion;

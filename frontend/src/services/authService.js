@@ -1,17 +1,40 @@
 // =============================================================
 // SERVICIO DE AUTENTICACIÓN — authService.js
 // =============================================================
-// Funciones para el flujo de login y registro.
-// Cada función llama a un endpoint del MS-Autenticacion (puerto 8080).
-//
-// Uso desde cualquier página:
-//   import { login, register } from '../services/authService'
-//   const res = await login({ email, password })
+// Funciones para el flujo de login/logout y consulta de perfiles.
+// Apunta al MS-Autenticacion (puerto 8080).
 // =============================================================
 import authHttp from './http/authHttp'
 
-// POST /api/auth/auth/login — inicia sesión, retorna el JWT
-export const login = (data) => authHttp.post('/auth/login', data)
+// POST /auth/login — retorna token + datos básicos del usuario
+export const login = async (data) => {
+  const response = await authHttp.post('/auth/login', data)
+  const { token, ...usuario } = response.data
+  localStorage.setItem('app_token', token)
+  localStorage.setItem('app_user', JSON.stringify(usuario))
+  return response
+}
 
-// POST /api/auth/usuarios — registra un nuevo usuario (depende del MS)
-export const register = (data) => authHttp.post('/usuarios', data)
+// Cierra sesión limpiando localStorage
+export const logout = () => {
+  localStorage.removeItem('app_token')
+  localStorage.removeItem('app_user')
+}
+
+// Retorna el usuario guardado en localStorage (sin llamada al backend)
+export const getUsuarioActual = () => {
+  const raw = localStorage.getItem('app_user')
+  return raw ? JSON.parse(raw) : null
+}
+
+// GET /usuarios/me — perfil completo desde el token JWT activo
+export const getMe = () => authHttp.get('/usuarios/me')
+
+// GET /estudiantes/{rut} — datos completos del estudiante (incluye cursoId)
+export const getEstudiante = (rut) => authHttp.get(`/estudiantes/${rut}`)
+
+// GET /funcionarios/{rut} — datos completos del funcionario (docente/inspector/directivo)
+export const getFuncionario = (rut) => authHttp.get(`/funcionarios/${rut}`)
+
+// GET /apoderados/{rut} — datos completos del apoderado
+export const getApoderado = (rut) => authHttp.get(`/apoderados/${rut}`)

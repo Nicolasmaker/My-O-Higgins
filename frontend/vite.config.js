@@ -28,9 +28,9 @@ export default defineConfig({
         target: 'http://localhost:8081',
         changeOrigin: true,
       },
-      // MS-Anotaciones (8082)
+      // MS-Anotaciones (8083)
       '/api/anotaciones': {
-        target: 'http://localhost:8082',
+        target: 'http://localhost:8083',
         changeOrigin: true,
       },
       // MS-HojaDeVida (8084)

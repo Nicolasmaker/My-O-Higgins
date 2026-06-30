@@ -57,6 +57,7 @@ public class EstudianteService {
         nuevoEstudiante.setUsuEstadoActividad(true);
     //Datos de la entidad estudiante
         nuevoEstudiante.setEstParentesco(requestEstudiante.getEstParentesco());
+        nuevoEstudiante.setCursoId(requestEstudiante.getCursoId());
 
         Estudiante estudianteGuardado = usuarioRepository.save(nuevoEstudiante); //Guarda al estudiante
 
@@ -119,6 +120,9 @@ public class EstudianteService {
         }
         if(requestActEstudiante.getEstParentesco() != null){
             estudianteActual.setEstParentesco(requestActEstudiante.getEstParentesco());
+        }
+        if(requestActEstudiante.getCursoId() != null){
+            estudianteActual.setCursoId(requestActEstudiante.getCursoId());
         }
         if(requestActEstudiante.getEstEstadoActividad() != null){
             estudianteActual.setUsuEstadoActividad(requestActEstudiante.getEstEstadoActividad());

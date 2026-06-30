@@ -58,8 +58,8 @@ export function AuthProvider({ children }) {
   //Por ejemplo se usaria para ocultar o mostrar botones dependiendo del rol. 
   const hasRole = useCallback((rol) => {
     if (!usuario) return false
-    if (Array.isArray(rol)) return rol.includes(usuario.rol)
-    return usuario.rol === rol
+    if (Array.isArray(rol)) return rol.includes(usuario.rolNombre)
+    return usuario.rolNombre === rol
   }, [usuario])
 
 
