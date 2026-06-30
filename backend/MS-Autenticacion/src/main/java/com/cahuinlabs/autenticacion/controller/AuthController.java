@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.cahuinlabs.autenticacion.models.entities.usuarios.Usuario;
 import com.cahuinlabs.autenticacion.models.request.AuthRequest;
 import com.cahuinlabs.autenticacion.models.response.AuthResponse;
 import com.cahuinlabs.autenticacion.security.JwtService;
@@ -41,8 +42,19 @@ public class AuthController {
      //Generar token
         String jwtToken = jwtService.generarToken(userDetails);
 
-     //Retornar token
-        return ResponseEntity.ok(new AuthResponse(jwtToken));
+     //Extraer datos del usuario para incluirlos en la respuesta
+        Usuario usuario = (Usuario) userDetails;
+        String rolNombre = usuario.getRol() != null ? usuario.getRol().getRolNombre() : null;
+
+        return ResponseEntity.ok(new AuthResponse(
+            jwtToken,
+            usuario.getUsuRut(),
+            usuario.getUsuPNombre(),
+            usuario.getUsuApePat(),
+            usuario.getUsuEmail(),
+            rolNombre,
+            usuario.getUsuEstadoActividad()
+        ));
     }
 
 }
