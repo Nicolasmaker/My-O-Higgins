@@ -23,16 +23,10 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider } from './context/AuthContext'
 
-<<<<<<< HEAD
-import MainLayout from './components/Layout/MainLayout'
-import Anotaciones from './pages/Anotaciones/Anotaciones'
-import Login from './pages/Login/Login'
-=======
 // ── Páginas (se importan a medida que se crean) ──────────────
 import Home        from './pages/Home/Home'
 import Login       from './pages/Login/Login'
 // import Registro    from './pages/Registro/Registro'
->>>>>>> feat/frontend-homepage
 
 // ── Layout con Navbar + Footer ────────────────────────────────
 // function Layout({ children }) {
@@ -50,16 +44,9 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-<<<<<<< HEAD
-          <Route element={<MainLayout />}>
-            <Route index element={<Navigate to="/anotaciones" replace />} />
-            <Route path="anotaciones" element={<Anotaciones />} />
-          </Route>
-=======
           {/* Home - Landing Page Principal */}
           <Route path="/" element={<Home />} />
           
->>>>>>> feat/frontend-homepage
           <Route path="/login" element={<Login />} />
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
