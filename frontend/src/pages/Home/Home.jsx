@@ -17,7 +17,7 @@ const quickAccess = [
     icon: iconoCalendario,
     title: 'Calendario Escolar',
     description: 'Consulta fechas importantes, feriados y períodos académicos del año.',
-    link: '#calendario',
+    link: '/calendario',
   },
   {
     id: 2,

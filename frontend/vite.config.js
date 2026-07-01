@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { loadEnv } from 'vite'
 
 // ==============================================================================================================
 // CONFIGURACIÓN VITE — vite.config.js ESTO SOLO APLICA PARA EL DESARROLLO PQ SE USARA AWS API GATEWAY PARA ESTO
@@ -13,10 +14,14 @@ import react from '@vitejs/plugin-react'
 // 2. Modifica dinámicamente las URLs (mediante rewrite) para aquellos servicios 
 //    que no exigen el prefijo '/api' o que usan subrutas personalizadas.
 // =============================================================
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const hojaDeVidaTarget = env.HOJA_DE_VIDA_URL || 'http://localhost:8084'
+
+  return {
+    plugins: [react()],
+    server: {
+      proxy: {
       //MS-Autenticacion (8080)
       '/api/auth': {
         target: 'http://localhost:8080',
@@ -35,7 +40,7 @@ export default defineConfig({
       },
       // MS-HojaDeVida (8084)
       '/api/hoja-vida': {
-        target: 'http://localhost:8084',
+        target: hojaDeVidaTarget,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/hoja-vida/, '/api')
       },
@@ -61,6 +66,7 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-  },
+    },
+  }
 })
 
