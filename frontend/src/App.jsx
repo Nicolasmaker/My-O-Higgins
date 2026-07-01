@@ -23,10 +23,9 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider } from './context/AuthContext'
 
-// ── Páginas (se importan a medida que se crean) ──────────────
-// import Home        from './pages/Home/Home'
-import Login       from './pages/Login/Login'
-// import Registro    from './pages/Registro/Registro'
+import MainLayout from './components/Layout/MainLayout'
+import Anotaciones from './pages/Anotaciones/Anotaciones'
+import Login from './pages/Login/Login'
 
 // ── Layout con Navbar + Footer ────────────────────────────────
 // function Layout({ children }) {
@@ -44,9 +43,10 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Página temporal hasta crear Home */}
-          <Route path="/" element={<div style={{ padding: '2rem' }}>Watona, watona klia fea<br/><br/><a href="/login">Ir a probar el Login</a></div>} />
-          
+          <Route element={<MainLayout />}>
+            <Route index element={<Navigate to="/anotaciones" replace />} />
+            <Route path="anotaciones" element={<Anotaciones />} />
+          </Route>
           <Route path="/login" element={<Login />} />
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}

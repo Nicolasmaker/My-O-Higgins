@@ -2,63 +2,67 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { login } from '../../services/authService'
 import { useAuth } from '../../hooks/useAuth'
+import Button from '../../components/UI/Button/Button'
+import Input from '../../components/UI/Input/Input'
+import { emailRules, passwordRules } from '../../validators/fieldValidators'
+import './login.css'
 
 export default function Login() {
-  const { register, handleSubmit } = useForm()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm()
   const { login: loginContext } = useAuth()
 
   const onSubmit = async (data) => {
     try {
-      // Llamada al backend usando nuestro servicio
       const response = await login(data)
-      
-      // Dependiendo de cómo responda tu backend, ajusta esto.
-      // Por ejemplo, si devuelve { token: "...", usuario: {...} }
-      const token = response.data.token || "token_simulado_si_el_back_no_lo_manda"
-      const usuario = response.data.usuario || { rol: "ADMIN" } // Ajustar según respuesta real
+      const token = response.data?.token || response.data?.jwt || response.data?.accessToken
+      const usuario = response.data?.usuario || response.data?.user || response.data?.data || null
 
-      // Guardamos la sesión en el context global
-      loginContext(token, usuario)
-      
-      toast.success('Me conecte con la caga de backend')
-      console.log('Respuesta del backend:', response.data)
-      
+      if (!token) {
+        throw new Error('El backend no devolvió token')
+      }
+
+      loginContext(token, usuario || { rol: 'DOCENTE' })
+      toast.success('Sesión iniciada')
+      window.location.href = '/anotaciones'
     } catch (error) {
-      console.error('Error de conexión:', error)
-      toast.error(error.response?.data?.message || 'Error al conectar con el backend')
+      console.error(error)
+      toast.error(error.response?.data?.message || error.message || 'No se pudo iniciar sesión')
     }
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto' }}>
-      <h2>Login de Prueba</h2>
-      <p>Verificando conexión al MS-Autenticacion (Puerto 8080)</p>
-      
-      <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-        
-        {/* Cambia "email" a "rut" si tu backend pide RUT para el login */}
-        <div>
-          <label>Email culiao:</label><br />
-          <input 
-            type="text" 
-            {...register('email')} // Cambiar a 'rut' si es necesario
-            style={{ padding: '0.5rem', width: '100%' }}
-          />
-        </div>
+    <main className="login-page">
+      <section className="login-card">
+        <p className="eyebrow">MS-Autenticación</p>
+        <h1>Ingresar al panel</h1>
+        <p>
+          Usa tus credenciales para guardar el token en el contexto y entrar al módulo de anotaciones.
+        </p>
 
-        <div>
-          <label>Contraseña:</label><br />
-          <input 
-            type="password" 
-            {...register('password')} 
-            style={{ padding: '0.5rem', width: '100%' }}
+        <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+          <Input
+            label="Usuario o RUT"
+            type="text"
+            placeholder="rut o usuario"
+            error={errors.email?.message}
+            {...register('email', emailRules)}
           />
-        </div>
 
-        <button type="submit" style={{ padding: '0.75rem', cursor: 'pointer' }}>
-          Probar la wea
-        </button>
-      </form>
-    </div>
+          <Input
+            label="Contraseña"
+            type="password"
+            placeholder="••••••••"
+            error={errors.password?.message}
+            {...register('password', passwordRules)}
+          />
+
+          <Button type="submit">Entrar</Button>
+        </form>
+      </section>
+    </main>
   )
 }
