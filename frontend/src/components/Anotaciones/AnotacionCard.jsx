@@ -1,4 +1,4 @@
-import Button from '../UI/Button/Button'
+import Button from '../UI/Button'
 import './AnotacionCard.css'
 
 export default function AnotacionCard({ anotacion, onEdit, onDelete, formatDate }) {
@@ -29,7 +29,7 @@ export default function AnotacionCard({ anotacion, onEdit, onDelete, formatDate 
       </dl>
 
       <div className="anotacion-card__actions">
-        <Button type="button" variant="ghost" onClick={() => onEdit(anotacion)}>
+        <Button type="button" variant="outline" onClick={() => onEdit(anotacion)}>
           Editar
         </Button>
         <Button type="button" variant="danger" onClick={() => onDelete(anotacion.idAnot)}>

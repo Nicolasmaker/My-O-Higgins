@@ -18,7 +18,6 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       const response = await login(data)
-<<<<<<< HEAD
       const token = response.data?.token || response.data?.jwt || response.data?.accessToken
       const usuario = response.data?.usuario || response.data?.user || response.data?.data || null
 
@@ -29,14 +28,6 @@ export default function Login() {
       loginContext(token, usuario || { rol: 'DOCENTE' })
       toast.success('Sesión iniciada')
       window.location.href = '/anotaciones'
-=======
-      const { token, ...usuario } = response.data
-      loginContext(token, usuario)
-      
-      toast.success('Me conecte con la caga de backend')
-      console.log('Respuesta del backend:', response.data)
-      
->>>>>>> feat/frontend-homepage
     } catch (error) {
       console.error(error)
       toast.error(error.response?.data?.message || error.message || 'No se pudo iniciar sesión')

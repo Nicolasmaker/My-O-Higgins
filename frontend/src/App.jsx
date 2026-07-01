@@ -26,6 +26,7 @@ import { AuthProvider } from './context/AuthContext'
 // ── Páginas (se importan a medida que se crean) ──────────────
 import Home        from './pages/Home/Home'
 import Login       from './pages/Login/Login'
+import Anotaciones from './pages/Anotaciones/Anotaciones'
 // import Registro    from './pages/Registro/Registro'
 
 // ── Layout con Navbar + Footer ────────────────────────────────
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           
           <Route path="/login" element={<Login />} />
+          <Route path="/anotaciones" element={<Anotaciones />} />
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
           <Route path="*" element={<Navigate to="/" replace />} />

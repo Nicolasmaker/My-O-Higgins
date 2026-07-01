@@ -1,4 +1,4 @@
-import Button from '../UI/Button/Button'
+import Button from '../UI/Button'
 import './AnotacionesToolbar.css'
 
 export default function AnotacionesToolbar({ total, modeLabel, canSeeLabel, filterHojaVida, setFilterHojaVida, onSearch, onReset }) {
@@ -16,7 +16,7 @@ export default function AnotacionesToolbar({ total, modeLabel, canSeeLabel, filt
           />
         </label>
         <Button type="submit">Buscar</Button>
-        <Button type="button" variant="ghost" onClick={onReset}>
+        <Button type="button" variant="outline" onClick={onReset}>
           Ver todo
         </Button>
       </form>

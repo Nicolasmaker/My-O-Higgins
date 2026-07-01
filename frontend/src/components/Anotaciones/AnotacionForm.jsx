@@ -1,5 +1,5 @@
-import Button from '../UI/Button/Button'
-import Input from '../UI/Input/Input'
+import Button from '../UI/Button'
+import Input from '../UI/Input'
 import { anotacionRules } from '../../validators/fieldValidators'
 import './AnotacionForm.css'
 
@@ -19,7 +19,7 @@ export default function AnotacionForm({
           <h2>{editingId ? `Editar anotación #${editingId}` : 'Nueva anotación'}</h2>
         </div>
         {editingId ? (
-          <Button type="button" variant="ghost" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar edición
           </Button>
         ) : null}

@@ -18,13 +18,19 @@
 
 .ui-button--primary {
   color: #fff;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  box-shadow: 0 12px 24px rgba(107, 35, 35, 0.25);
+}
+
+.ui-button--outline {
+  color: var(--color-primary);
+  background: transparent;
+  border: 1px solid rgba(107, 35, 35, 0.24);
 }
 
 .ui-button--ghost {
-  color: #0f172a;
-  background: rgba(15, 23, 42, 0.06);
+  color: var(--color-primary);
+  background: rgba(107, 35, 35, 0.08);
 }
 
 .ui-button--danger {
