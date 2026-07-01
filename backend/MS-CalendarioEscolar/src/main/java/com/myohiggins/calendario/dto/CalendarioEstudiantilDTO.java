@@ -3,7 +3,7 @@ package com.myohiggins.calendario.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * Objeto de Transferencia de Datos (DTO) para la entidad CalendarioEstudiantil.
@@ -18,8 +18,8 @@ public class CalendarioEstudiantilDTO {
     private Long idCalEst;
     private String tituloEvento;
     private String tipoEvento;
-    private Date fechaInicio;
-    private Date fechaFin;
+    private LocalDate fechaInicio;
+    private LocalDate fechaFin;
     private Long idMuralDigital;
     private Long idAsignatura;
     private String descripcionEvento;

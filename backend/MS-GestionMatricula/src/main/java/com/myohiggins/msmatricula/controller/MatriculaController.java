@@ -19,7 +19,7 @@ public class MatriculaController {
 
     @PostMapping
     public ResponseEntity<Matricula> crearMatricula(@RequestBody Matricula matricula) {
-        Matricula nuevaMatricula = matriculaService.registrarMatricula(matricula);
+        Matricula nuevaMatricula = matriculaService.crearMatricula(matricula);
         return new ResponseEntity<>(nuevaMatricula, HttpStatus.CREATED);
     }
 

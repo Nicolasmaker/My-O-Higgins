@@ -8,16 +8,17 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 
-//ESTA TABLA ESTA ASOCIADA AL ID DE UN CURSO EL CUAL NO SE HA DEFINIDO AUN, 
-//POR LO QUE SE DEBE CREAR UNA CLAVE FORANEA HACIA LA TABLA CURSO CUANDO ESTA SE HAYA DEFINIDO (MS-GestionAcademica)
-
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = true) //esto es para que el equals y hashCode de esta clase incluyan los campos de la clase padre (Usuario)
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "estudiante")
-@PrimaryKeyJoinColumn(name = "usu_rut") //esto es para que la clave primaria de esta tabla sea la misma que la clave primaria de la tabla padre (Usuario)
+@PrimaryKeyJoinColumn(name = "usu_rut")
 public class Estudiante extends Usuario {
 
     @Column(name = "est_parentesco", nullable = false, length = 40)
     private String estParentesco;
+
+    // FK cruzada a MS-GestionAcademica — plain Integer, sin @ManyToOne (distinta BD)
+    @Column(name = "CURSO_id_cur")
+    private Integer cursoId;
 }

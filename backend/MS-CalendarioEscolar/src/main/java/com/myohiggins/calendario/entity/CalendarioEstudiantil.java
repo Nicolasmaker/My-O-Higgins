@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * Entidad que mapea la tabla CALENDARIO_ESTUDIANTIL de la base de datos.
@@ -30,15 +30,13 @@ public class CalendarioEstudiantil {
     private String tipoEvento;
 
     @Column(name = "cal_est_fec_ini", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date fechaInicio;
+    private LocalDate fechaInicio;
 
     @Column(name = "cal_est_fec_fin", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date fechaFin;
+    private LocalDate fechaFin;
 
     // Se guardan las FKs como campos simples ya que son IDs a otros MS o módulos
-    @Column(name = "MURAL_DIGITAL_id_mur_dig", nullable = false)
+    @Column(name = "MURAL_DIGITAL_id_mur_dig")
     private Long idMuralDigital;
 
     @Column(name = "ASIGNATURA_id_asi", nullable = false)

@@ -4,11 +4,26 @@
 // Funciones para gestionar reuniones.
 // Apunta al MS-GestionReuniones (puerto 8081).
 //
+// Tipos de reunión: apoderado, individual (entrevista), general (acta).
 // =============================================================
 import reunionesHttp from './http/reunionesHttp'
 
-export const getReunionesByUsuario = (usuarioId) => reunionesHttp.get(`/usuario/${usuarioId}`)
-export const getReunionById = (id) => reunionesHttp.get(`/${id}`)
-export const crearReunion = (data) => reunionesHttp.post('/', data)
-export const actualizarReunion = (id, data) => reunionesHttp.put(`/${id}`, data)
-export const eliminarReunion = (id) => reunionesHttp.delete(`/${id}`)
+// --- Reuniones con Apoderado ---
+export const getReunionesApoderado = () => reunionesHttp.get('/apoderado')
+export const getReunionApoderadoById = (id) => reunionesHttp.get(`/apoderado/${id}`)
+export const crearReunionApoderado = (data) => reunionesHttp.post('/apoderado', data)
+export const actualizarReunionApoderado = (id, data) => reunionesHttp.put(`/apoderado/${id}`, data)
+
+// --- Entrevistas Individuales ---
+export const getReunionesIndividuales = () => reunionesHttp.get('/individual')
+export const getReunionIndividualById = (id) => reunionesHttp.get(`/individual/${id}`)
+export const crearReunionIndividual = (data) => reunionesHttp.post('/individual', data)
+export const actualizarFirmasIndividual = (id, data) => reunionesHttp.put(`/individual/${id}/firmas`, data)
+
+// --- Reuniones Generales ---
+export const getReunionesGenerales = () => reunionesHttp.get('/general')
+export const getReunionGeneralById = (id) => reunionesHttp.get(`/general/${id}`)
+export const crearReunionGeneral = (data) => reunionesHttp.post('/general', data)
+
+// --- Consulta por funcionario ---
+export const getReunionesApoderadoPorFuncionario = (rut) => reunionesHttp.get(`/funcionario/${rut}`)

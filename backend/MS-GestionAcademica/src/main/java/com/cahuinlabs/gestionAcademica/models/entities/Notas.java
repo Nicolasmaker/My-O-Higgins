@@ -28,4 +28,7 @@ public class Notas {
     @ManyToOne
     @JoinColumn(name = "evaluacion_id_eva", nullable = false)
     private Evaluacion evaluacion;
+
+    @Column(name = "estudiante_usu_rut", nullable = false)
+    private Integer estudianteUsuRut;
 }
