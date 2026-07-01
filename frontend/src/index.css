@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-@import './styles/theme.css';
-=======
 /* Importar Variables de My O'Higgins */
 @import './styles/_variables.css';
 
@@ -63,7 +60,6 @@ html {
 body {
   margin: 0;
 }
->>>>>>> feat/frontend-homepage
 
 #root {
   min-height: 100vh;
