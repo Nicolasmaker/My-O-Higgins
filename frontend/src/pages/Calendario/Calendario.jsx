@@ -10,7 +10,7 @@ import { crearEvento, actualizarEvento, eliminarEvento, getEventos } from '../..
 import { getAsignaturas } from '../../services/asignaturaService'
 import styles from './Calendario.module.css'
 
-const eventTypes = ['Institucional', 'Académico', 'Reunión', 'Actividad']
+const eventTypes = ['Institucional', 'Académico', 'Actividad']
 
 const initialForm = {
   tituloEvento: '',
@@ -121,7 +121,6 @@ export default function Calendario() {
   const [filters, setFilters] = useState({
     Institucional: true,
     Académico: true,
-    Reunión: true,
     Actividad: true,
   })
 
@@ -481,7 +480,7 @@ export default function Calendario() {
           </div>
 
           <Button type="button" variant="primary" onClick={() => document.getElementById('form-evento')?.scrollIntoView({ behavior: 'smooth' })}>
-            <FiPlus /> Agendar evento
+            <FiPlus /> Crear evento
           </Button>
         </section>
 

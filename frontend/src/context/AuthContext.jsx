@@ -24,22 +24,38 @@ import PropTypes from 'prop-types'
 
 export const AuthContext = createContext(null)
 
+function normalizeUser(userData) {
+  if (!userData) return null
+
+  const rawRole = userData.rolNombre ?? userData.rol?.rolNombre ?? userData.rol ?? userData.role ?? null
+  const normalizedRole = typeof rawRole === 'string' && rawRole.trim()
+    ? (rawRole.startsWith('ROLE_') ? rawRole : `ROLE_${rawRole.toUpperCase()}`)
+    : null
+
+  return {
+    ...userData,
+    rolNombre: normalizedRole,
+    rol: normalizedRole,
+  }
+}
+
 export function AuthProvider({ children }) {
   // Lee localStorage solo una vez al montar (lazy initializer)
   const [token, setToken] = useState(() => localStorage.getItem('app_token')) //Qué hace (LINEA 29): Cuando la aplicación se abre o el usuario recarga la página (F5), 
   const [usuario, setUsuario] = useState(() => {                              //React va al disco duro del navegador (localStorage) a buscar si ya había una sesión guardada.
     const stored = localStorage.getItem('app_user')                           //Si la encuentra, la restaura automáticamente. Así el usuario no tiene que iniciar sesión cada vez que refresca la pantalla.
-    return stored ? JSON.parse(stored) : null
+    return stored ? normalizeUser(JSON.parse(stored)) : null
   })
 
   //Este metodo lo que hace es guardar el token y los datos del usuario en el almacenamiento local del navegador (LocalStorage)
   //Y en la memoria de react (useState) recuerden q esto seria un hook de react
 
   const login = useCallback((newToken, userData) => { //useCallback evita recrear estas funciones en cada reinicio de la pagina (F5),
+    const normalizedUser = normalizeUser(userData)
     localStorage.setItem('app_token', newToken)       //lo que causaría re-renders innecesarios en toda la app.
-    localStorage.setItem('app_user', JSON.stringify(userData))
+    localStorage.setItem('app_user', JSON.stringify(normalizedUser))
     setToken(newToken)
-    setUsuario(userData)
+    setUsuario(normalizedUser)
   }, [])
 
   //Este culiao hace lo contrario, borra todo xd por algo se llama logout
@@ -58,8 +74,9 @@ export function AuthProvider({ children }) {
   //Por ejemplo se usaria para ocultar o mostrar botones dependiendo del rol. 
   const hasRole = useCallback((rol) => {
     if (!usuario) return false
-    if (Array.isArray(rol)) return rol.includes(usuario.rolNombre)
-    return usuario.rolNombre === rol
+    const roleName = usuario.rolNombre || usuario.rol || ''
+    if (Array.isArray(rol)) return rol.includes(roleName)
+    return roleName === rol
   }, [usuario])
 
 

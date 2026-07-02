@@ -3,7 +3,10 @@ package com.cahuinlabs.GestionReuniones.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionApoderado;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionGeneral;
@@ -11,6 +14,7 @@ import com.cahuinlabs.GestionReuniones.models.entities.BitReunionIndividual;
 import com.cahuinlabs.GestionReuniones.models.request.ActualizarApoderadoRequest;
 import com.cahuinlabs.GestionReuniones.models.request.ActualizarFirmasRequest;
 import com.cahuinlabs.GestionReuniones.models.request.BitReunionApoderadoRequest;
+import com.cahuinlabs.GestionReuniones.models.request.CalendarioEventoRequest;
 import com.cahuinlabs.GestionReuniones.models.request.ReunionGeneralRequest;
 import com.cahuinlabs.GestionReuniones.models.request.ReunionIndividualRequest;
 
@@ -31,6 +35,8 @@ import org.springframework.web.client.HttpClientErrorException;
 // crea, actualiza y consulta reuniones con apoderados base, individual y general
 public class GestionReunionesService {
 
+    private static final Logger logger = LoggerFactory.getLogger(GestionReunionesService.class);
+
     @Autowired
     private BitReunionApoderadoRepository baseRepository;
 
@@ -42,9 +48,12 @@ public class GestionReunionesService {
 
     // RestClient para comunicarse con el microservicio de Autenticacion
     private final RestClient autenticacionRestClient;
+    private final RestClient calendarioRestClient;
 
-    public GestionReunionesService(RestClient autenticacionRestClient) {
+    public GestionReunionesService(@Qualifier("autenticacionRestClient") RestClient autenticacionRestClient,
+                                   @Qualifier("calendarioRestClient") RestClient calendarioRestClient) {
         this.autenticacionRestClient = autenticacionRestClient;
+        this.calendarioRestClient = calendarioRestClient;
     }
 
     // crea una reunion base con apoderado, guarda fecha, compromisos, observaciones y docente
@@ -61,7 +70,9 @@ public class GestionReunionesService {
         base.setBitReuCompromisos(request.getBitReuCompromisos());
         base.setBitReuObs(request.getBitReuObs());
         base.setDocenteUsuRut(request.getDocenteUsuRut());
-        return baseRepository.save(base);
+        BitReunionApoderado guardada = baseRepository.save(base);
+        sincronizarConCalendario(guardada, "Reunión con apoderado", guardada.getBitReuCompromisos());
+        return guardada;
     }
 
     // crea una reunion individual docente/inspector con apoderado
@@ -90,7 +101,9 @@ public class GestionReunionesService {
         individual.setBitReuIndFirmaApo(0);
         individual.setBitReunionApoderado(base);
 
-        return individualRepository.save(individual);
+        BitReunionIndividual guardada = individualRepository.save(individual);
+        sincronizarConCalendario(base, "Entrevista individual", guardada.getBitReuIndMotivReu() + " - " + guardada.getBitReuIndTemTrat());
+        return guardada;
     }
 
     // crea una reunion general acta de coordinacion con toda la institucion
@@ -118,7 +131,9 @@ public class GestionReunionesService {
         general.setBitReuGenObs(request.getBitReuGenObs());
         general.setBitReunionApoderado(base);
 
-        return generalRepository.save(general);
+        BitReunionGeneral guardada = generalRepository.save(general);
+        sincronizarConCalendario(base, "Reunión general - " + guardada.getBitReuGenTipReu(), guardada.getBitReuGenComunicEmi());
+        return guardada;
     }
 
     // obtiene todas las reuniones base registradas con apoderados
@@ -197,6 +212,27 @@ public class GestionReunionesService {
             return false;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
+        }
+    }
+
+    private void sincronizarConCalendario(BitReunionApoderado base, String titulo, String descripcion) {
+        try {
+            CalendarioEventoRequest evento = new CalendarioEventoRequest();
+            evento.setTituloEvento(titulo);
+            evento.setTipoEvento("Reunión");
+            evento.setFechaInicio(base.getBitReuFec());
+            evento.setFechaFin(base.getBitReuFec());
+            evento.setIdMuralDigital(null);
+            evento.setIdAsignatura(1L);
+            evento.setDescripcionEvento(descripcion);
+
+            calendarioRestClient.post()
+                    .uri("/api/calendarios")
+                    .body(evento)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.warn("No se pudo sincronizar la reunión con el calendario: {}", e.getMessage());
         }
     }
 }

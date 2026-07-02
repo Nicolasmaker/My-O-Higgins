@@ -19,13 +19,19 @@ export default function Login() {
     try {
       const response = await login(data)
       const token = response.data?.token || response.data?.jwt || response.data?.accessToken
-      const usuario = response.data?.usuario || response.data?.user || response.data?.data || null
+      const usuario = response.data?.usuario || response.data?.user || response.data?.data || {
+        usuRut: response.data?.usuRut,
+        usuPNombre: response.data?.usuPNombre,
+        usuApePat: response.data?.usuApePat,
+        usuEmail: response.data?.usuEmail,
+        rolNombre: response.data?.rolNombre || response.data?.rol || response.data?.role,
+      }
 
       if (!token) {
         throw new Error('El backend no devolvió token')
       }
 
-      loginContext(token, usuario || { rol: 'DOCENTE' })
+      loginContext(token, usuario || { rolNombre: 'ROLE_DOCENTE' })
       toast.success('Sesión iniciada')
       window.location.href = '/anotaciones'
     } catch (error) {
