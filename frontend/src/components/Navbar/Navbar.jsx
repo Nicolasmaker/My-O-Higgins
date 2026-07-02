@@ -1,44 +1,93 @@
-import { useState } from 'react';
+// =============================================================
+// BARRA DE NAVEGACIÓN — Navbar.jsx
+// =============================================================
+// Navegación principal conectada a react-router.
+//
+//   - Sin sesión: links institucionales (anclas del Home) +
+//     botón "Iniciar Sesión" que lleva a /login.
+//   - Con sesión: links a todos los módulos del sistema +
+//     nombre del usuario y "Salir".
+//
+// NavLink marca automáticamente el link activo según la ruta.
+// =============================================================
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import Button from '../UI/Button';
 import styles from './Navbar.module.css';
 
-export default function Navbar() {
-  const [activeLink, setActiveLink] = useState('inicio');
+const MODULOS = [
+  { to: '/', label: 'Inicio', end: true },
+  { to: '/anotaciones', label: 'Anotaciones' },
+  { to: '/calendario', label: 'Calendario' },
+  { to: '/reuniones', label: 'Reuniones' },
+  { to: '/mensajeria', label: 'Mensajería' },
+  { to: '/matriculas', label: 'Matrículas' },
+  { to: '/hoja-de-vida', label: 'Hoja de Vida' },
+  { to: '/academico', label: 'Académico' },
+];
 
-  const navLinks = [
-    { id: 'inicio', label: 'Inicio', href: '#inicio' },
-    { id: 'admision', label: 'Admisión', href: '#admision' },
-    { id: 'nosotros', label: 'Nosotros', href: '#noticias' },
-    { id: 'contacto', label: 'Contacto', href: '#contacto' },
-  ];
+const PUBLICOS = [
+  { href: '#inicio', label: 'Inicio' },
+  { href: '#admision', label: 'Admisión' },
+  { href: '#noticias', label: 'Nosotros' },
+  { href: '#contacto', label: 'Contacto' },
+];
+
+export default function Navbar() {
+  const { usuario, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
         {/* Logo */}
-        <div className={styles.logo}>
+        <Link to="/" className={styles.logo}>
           <span className={styles.logoText}>My O'Higgins</span>
-        </div>
+        </Link>
 
         {/* Links del Centro */}
         <div className={styles.navLinks}>
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={link.href}
-              className={`${styles.navLink} ${
-                activeLink === link.id ? styles.active : ''
-              }`}
-              onClick={() => setActiveLink(link.id)}
-            >
-              {link.label}
-            </a>
-          ))}
+          {isAuthenticated
+            ? MODULOS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={link.end}
+                  className={({ isActive }) =>
+                    `${styles.navLink} ${isActive ? styles.active : ''}`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))
+            : PUBLICOS.map((link) => (
+                <a key={link.href} href={link.href} className={styles.navLink}>
+                  {link.label}
+                </a>
+              ))}
         </div>
 
-        {/* Botón Login */}
+        {/* Sesión */}
         <div className={styles.navActions}>
-          <Button variant="primary">Iniciar Sesión</Button>
+          {isAuthenticated ? (
+            <div className={styles.sessionBox}>
+              <span className={styles.userName}>
+                {`${usuario?.usuPNombre || ''} ${usuario?.usuApePat || ''}`.trim() || 'Usuario'}
+              </span>
+              <Button variant="primary" onClick={handleLogout}>
+                Salir
+              </Button>
+            </div>
+          ) : (
+            <Button variant="primary" onClick={() => navigate('/login')}>
+              Iniciar Sesión
+            </Button>
+          )}
         </div>
       </div>
     </nav>

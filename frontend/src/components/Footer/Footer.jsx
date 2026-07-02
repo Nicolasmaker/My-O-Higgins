@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -33,34 +34,34 @@ export default function Footer() {
           <h3 className={styles.columnTitle}>Enlaces Rápidos</h3>
           <ul className={styles.linkList}>
             <li>
-              <a href="#" className={styles.link}>
-                Portal Apoderados
-              </a>
+              <Link to="/reuniones" className={styles.link}>
+                Reuniones
+              </Link>
             </li>
             <li>
-              <a href="#" className={styles.link}>
-                Portal Alumnos
-              </a>
+              <Link to="/mensajeria" className={styles.link}>
+                Mensajería
+              </Link>
             </li>
             <li>
-              <a href="#" className={styles.link}>
+              <Link to="/calendario" className={styles.link}>
                 Calendario Escolar
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className={styles.link}>
+              <Link to="/matriculas" className={styles.link}>
                 Proceso de Matrícula
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className={styles.link}>
-                Certificados
-              </a>
+              <Link to="/hoja-de-vida" className={styles.link}>
+                Hoja de Vida
+              </Link>
             </li>
             <li>
-              <a href="#" className={styles.link}>
-                Noticias
-              </a>
+              <Link to="/academico" className={styles.link}>
+                Portal Académico
+              </Link>
             </li>
           </ul>
         </div>

@@ -28,6 +28,11 @@ import Home        from './pages/Home/Home'
 import Login       from './pages/Login/Login'
 import Anotaciones from './pages/Anotaciones/Anotaciones'
 import Calendario  from './pages/Calendario/Calendario'
+import Reuniones   from './pages/Reuniones/Reuniones'
+import Mensajeria  from './pages/Mensajeria/Mensajeria'
+import Matricula   from './pages/Matricula/Matricula'
+import HojaDeVida  from './pages/HojaDeVida/HojaDeVida'
+import Academico   from './pages/Academico/Academico'
 // import Registro    from './pages/Registro/Registro'
 
 // ── Layout con Navbar + Footer ────────────────────────────────
@@ -52,6 +57,11 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/anotaciones" element={<Anotaciones />} />
           <Route path="/calendario" element={<Calendario />} />
+          <Route path="/reuniones" element={<Reuniones />} />
+          <Route path="/mensajeria" element={<Mensajeria />} />
+          <Route path="/matriculas" element={<Matricula />} />
+          <Route path="/hoja-de-vida" element={<HojaDeVida />} />
+          <Route path="/academico" element={<Academico />} />
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
           <Route path="*" element={<Navigate to="/" replace />} />

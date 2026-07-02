@@ -1,3 +1,4 @@
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/UI/Button';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
@@ -10,6 +11,7 @@ import academicoImg from '../../assets/academico.png';
 
 
 export default function Home() {
+  const navigate = useNavigate();
   // Datos de Accesos Rápidos
 const quickAccess = [
   {
@@ -24,7 +26,7 @@ const quickAccess = [
     icon: iconoPortal,
     title: 'Portal Académico',
     description: 'Acceso a calificaciones, horarios y material educativo de tus cursos.',
-    link: '#academico',
+    link: '/academico',
   },
   {
     id: 3,
@@ -91,7 +93,7 @@ const quickAccess = [
               certificados y toda la información académica importante.
             </p>
             <div className={styles.heroButtons}>
-              <Button variant="primary">Ingresar a My O'Higgins →</Button>
+              <Button variant="primary" onClick={() => navigate('/login')}>Ingresar a My O'Higgins →</Button>
               <Button variant="outline" onClick={() => window.location.hash = '#admision'}>Proceso de Matrícula</Button>
             </div>
           </div>
@@ -132,9 +134,15 @@ const quickAccess = [
                 </div>
                 <h3 className={styles.cardTitle}>{item.title}</h3>
                 <p className={styles.cardDescription}>{item.description}</p>
-                <a href={item.link} className={styles.cardLink}>
-                  Ver →
-                </a>
+                {item.link.startsWith('/') ? (
+                  <Link to={item.link} className={styles.cardLink}>
+                    Ver →
+                  </Link>
+                ) : (
+                  <a href={item.link} className={styles.cardLink}>
+                    Ver →
+                  </a>
+                )}
               </div>
             ))}
           </div>

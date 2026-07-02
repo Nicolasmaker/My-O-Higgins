@@ -1,0 +1,229 @@
+/*
+  Página Mensajería — identidad My O'Higgins sobre Bootstrap 5.
+  Layout tipo cliente de correo: lista izquierda + panel de lectura.
+  Granate (#6B2323) para acciones, marino (#172033) para acentos.
+*/
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-hero);
+}
+
+.shell {
+  flex: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-2xl);
+}
+
+/* ── Encabezado ─────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ── Botón granate ──────────────────────────────────────────── */
+.btnGranate {
+  --bs-btn-bg: var(--color-primary);
+  --bs-btn-border-color: var(--color-primary);
+  --bs-btn-hover-bg: var(--color-primary-dark);
+  --bs-btn-hover-border-color: var(--color-primary-dark);
+  --bs-btn-active-bg: var(--color-primary-dark);
+  --bs-btn-active-border-color: var(--color-primary-dark);
+  --bs-btn-disabled-bg: var(--color-primary-light);
+  --bs-btn-disabled-border-color: var(--color-primary-light);
+  box-shadow: 0 4px 12px rgba(107, 35, 35, 0.25);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btnGranate:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(107, 35, 35, 0.35);
+}
+
+/* ── Pills de carpeta ───────────────────────────────────────── */
+.folderNav {
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-sm);
+}
+
+.folderPill {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.folderNav :global(.nav-link.active) {
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+}
+
+/* ── Lista de mensajes ──────────────────────────────────────── */
+.mailList {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.mailItem {
+  border-color: var(--color-border);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mailItem:hover:not(:global(.active)) {
+  background-color: var(--color-hover);
+}
+
+.mailItem:global(.active) {
+  background: linear-gradient(135deg, var(--color-footer) 0%, #24314d 100%);
+  border-color: var(--color-footer);
+}
+
+.mailItemUnread {
+  background-color: #fdf6f6;
+  border-left: 3px solid var(--color-primary);
+}
+
+.mailItemTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: inherit;
+  opacity: 0.85;
+}
+
+.mailRut {
+  font-weight: var(--font-weight-medium);
+}
+
+.mailSubject {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: 2px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailItemUnread .mailSubject {
+  font-weight: var(--font-weight-bold);
+}
+
+.unreadDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+/* ── Panel de lectura ───────────────────────────────────────── */
+.readPane {
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  min-height: 320px;
+}
+
+.readHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-md);
+}
+
+.readSubject {
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.readMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.readBody {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+/* ── Modal redactar ─────────────────────────────────────────── */
+.composeHeader {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-text-light);
+}
+
+.composeHeader :global(.btn-close) {
+  filter: invert(1);
+}
+
+.composeTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ── Estados vacíos ─────────────────────────────────────────── */
+.emptyState {
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-white);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
