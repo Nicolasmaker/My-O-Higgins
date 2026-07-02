@@ -49,6 +49,11 @@ export default defineConfig(({ mode }) => {
         target: 'http://localhost:8085',
         changeOrigin: true,
       },
+      // MS-CalendarioEscolar (8085) — Mural Digital
+      '/api/murales': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
       // MS-GestionMatricula (8086)
       '/api/matriculas': {
         target: 'http://localhost:8086',

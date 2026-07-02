@@ -11,6 +11,7 @@
 // campo declara `getValue(item)` para precargar la edición.
 // =============================================================
 import { Badge } from 'react-bootstrap'
+import { limpiarRut } from '../../validators/fieldValidators'
 import {
   getCursos, crearCurso, actualizarCurso, eliminarCurso,
   getAsignaturas, crearAsignatura, actualizarAsignatura, eliminarAsignatura,
@@ -128,7 +129,7 @@ export const ENTIDADES = {
       { name: 'evaFec', label: 'Fecha *', type: 'date', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaFecha ?? '' },
       { name: 'evaPerioAcad', label: 'Período académico *', maxLength: 20, width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaPeriodoAcad ?? '' },
       { name: 'evaTip', label: 'Tipo *', type: 'select', options: ['Prueba', 'Control', 'Trabajo', 'Examen'], width: 6, rules: { required: true }, getValue: (i) => i.evaTipo ?? 'Prueba' },
-      { name: 'docenteUsuRut', label: 'RUT docente *', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.docenteUsuRut ?? '' },
+      { name: 'docenteUsuRut', label: 'RUT docente *', type: 'rut', width: 6, getValue: (i) => i.docenteUsuRut ?? '' },
       { name: 'idAsignatura', label: 'ID asignatura *', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.asignatura?.idAsi ?? '', soloCrear: true },
     ],
     defaults: { evaNom: '', evaFec: '', evaPerioAcad: '', evaTip: 'Prueba', docenteUsuRut: '', idAsignatura: '' },
@@ -138,7 +139,7 @@ export const ENTIDADES = {
         evaFec: d.evaFec,
         evaPerioAcad: d.evaPerioAcad,
         evaTip: d.evaTip,
-        docenteUsuRut: Number(d.docenteUsuRut),
+        docenteUsuRut: limpiarRut(d.docenteUsuRut),
       }
       return editing ? base : { ...base, idAsignatura: Number(d.idAsignatura) }
     },
@@ -199,7 +200,7 @@ export const ENTIDADES = {
     campos: [
       { name: 'notCalif', label: 'Calificación (1.0–7.0) *', type: 'decimal', width: 6, rules: { required: 'Obligatorio', min: { value: 1, message: 'Mínimo 1.0' }, max: { value: 7, message: 'Máximo 7.0' } }, getValue: (i) => i.notCalif ?? '' },
       { name: 'notFechaReg', label: 'Fecha de registro *', type: 'date', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.notFechaRegistrada ?? '' },
-      { name: 'estudianteUsuRut', label: 'RUT estudiante *', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.estudianteUsuRut ?? '', soloCrear: true },
+      { name: 'estudianteUsuRut', label: 'RUT estudiante *', type: 'rut', width: 6, getValue: (i) => i.estudianteUsuRut ?? '', soloCrear: true },
       { name: 'idEvaluacion', label: 'ID evaluación *', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaluacion?.idEva ?? '', soloCrear: true },
     ],
     defaults: { notCalif: '', notFechaReg: '', estudianteUsuRut: '', idEvaluacion: '' },
@@ -207,7 +208,7 @@ export const ENTIDADES = {
       const base = { notCalif: Number(d.notCalif), notFechaReg: d.notFechaReg }
       return editing
         ? base
-        : { ...base, estudianteUsuRut: Number(d.estudianteUsuRut), idEvaluacion: Number(d.idEvaluacion) }
+        : { ...base, estudianteUsuRut: limpiarRut(d.estudianteUsuRut), idEvaluacion: Number(d.idEvaluacion) }
     },
   },
 }

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Table, Badge, Button, Alert, Spinner, Form, Row, Col } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
+import { limpiarRut } from '../../validators/fieldValidators'
 import {
   getMatriculas,
   crearMatricula,
@@ -99,11 +100,11 @@ export default function Matricula() {
   const handleSave = async (data) => {
     setSaving(true)
     const payload = {
-      alumnoRut: Number(data.alumnoRut),
-      apoderadoRut: Number(data.apoderadoRut),
+      alumnoRut: limpiarRut(data.alumnoRut),
+      apoderadoRut: limpiarRut(data.apoderadoRut),
       cursoId: data.cursoId ? Number(data.cursoId) : null,
       tipoAlumno: data.tipoAlumno,
-      funcionarioUsuRut: Number(data.funcionarioUsuRut),
+      funcionarioUsuRut: limpiarRut(data.funcionarioUsuRut),
     }
 
     try {

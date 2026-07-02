@@ -1,3 +1,12 @@
+INSERT INTO MURAL_DIGITAL (
+  mur_dig_titulo,
+  mur_dig_contenido,
+  mur_dig_fec_pub,
+  FUNCIONARIO_usu_rut
+) VALUES
+('Bienvenida segundo semestre', 'Damos la bienvenida a toda la comunidad escolar al segundo semestre 2026. Revisar horarios actualizados en secretaría.', '2026-07-10', 11111111),
+('Campaña de vacunación', 'El día 30 de julio se realizará la campaña de vacunación escolar en la enfermería del establecimiento.', '2026-07-12', 11111111);
+
 INSERT INTO CALENDARIO_ESTUDIANTIL (
   cal_est_tit_eve,
   cal_est_tip_eve,

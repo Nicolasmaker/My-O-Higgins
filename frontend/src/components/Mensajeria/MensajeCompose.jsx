@@ -4,13 +4,30 @@
 // Modal de composición para el MS-Mensajeria. El remitente sale
 // de la sesión activa; el backend setea fecha de envío y estado
 // de lectura (no se envían desde el cliente).
+//
+// El destinatario se autocompleta con un <datalist> alimentado
+// desde GET /usuarios (MS-Autenticacion). Si ese MS está caído
+// el campo sigue funcionando como input manual.
 // =============================================================
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Button, Spinner } from 'react-bootstrap'
+import { getUsuarios } from '../../services/authService'
+import { rutRules } from '../../validators/fieldValidators'
 import styles from '../../pages/Mensajeria/Mensajeria.module.css'
 
 export default function MensajeCompose({ show, sending, onSend, onClose }) {
+  const [usuarios, setUsuarios] = useState([])
+
+  // Carga usuarios para el autocompletado al abrir el modal (una vez)
+  useEffect(() => {
+    if (!show || usuarios.length > 0) return
+    getUsuarios()
+      .then((res) => setUsuarios(Array.isArray(res.data) ? res.data : []))
+      .catch(() => {}) // sin autocompletado si falla; el input manual sigue operativo
+  }, [show, usuarios.length])
+
   const {
     register,
     handleSubmit,
@@ -33,11 +50,18 @@ export default function MensajeCompose({ show, sending, onSend, onClose }) {
           <Form.Group className="mb-3" controlId="destinatarioRut">
             <Form.Label>RUT destinatario *</Form.Label>
             <Form.Control
-              type="number"
-              placeholder="Sin puntos ni dígito verificador"
+              list="usuarios-sistema"
+              placeholder="Escribe RUT o busca por nombre"
               isInvalid={!!errors.destinatarioRut}
-              {...register('destinatarioRut', { required: 'El destinatario es obligatorio' })}
+              {...register('destinatarioRut', rutRules)}
             />
+            <datalist id="usuarios-sistema">
+              {usuarios.map((u) => (
+                <option key={u.usuRut} value={u.usuRut}>
+                  {`${u.usuPNombre || ''} ${u.usuApePat || ''}`.trim()}
+                </option>
+              ))}
+            </datalist>
             <Form.Control.Feedback type="invalid">{errors.destinatarioRut?.message}</Form.Control.Feedback>
           </Form.Group>
 

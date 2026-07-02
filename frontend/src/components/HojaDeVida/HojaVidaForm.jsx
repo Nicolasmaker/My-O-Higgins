@@ -9,6 +9,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Button, Spinner } from 'react-bootstrap'
+import { rutRules } from '../../validators/fieldValidators'
 import styles from '../../pages/HojaDeVida/HojaDeVida.module.css'
 
 export default function HojaVidaForm({ show, hoja, saving, onSave, onClose }) {
@@ -41,10 +42,9 @@ export default function HojaVidaForm({ show, hoja, saving, onSave, onClose }) {
           <Form.Group className="mb-3" controlId="estudianteUsuRut">
             <Form.Label>RUT estudiante *</Form.Label>
             <Form.Control
-              type="number"
-              placeholder="Sin puntos ni dígito verificador"
+              placeholder="12345678 o 12345678-5"
               isInvalid={!!errors.estudianteUsuRut}
-              {...register('estudianteUsuRut', { required: 'El RUT del estudiante es obligatorio' })}
+              {...register('estudianteUsuRut', rutRules)}
             />
             <Form.Control.Feedback type="invalid">{errors.estudianteUsuRut?.message}</Form.Control.Feedback>
           </Form.Group>

@@ -30,6 +30,9 @@ export const getUsuarioActual = () => {
 // GET /usuarios/me — perfil completo desde el token JWT activo
 export const getMe = () => authHttp.get('/usuarios/me')
 
+// GET /usuarios — listado de todos los usuarios del sistema
+export const getUsuarios = () => authHttp.get('/usuarios')
+
 // GET /estudiantes/{rut} — datos completos del estudiante (incluye cursoId)
 export const getEstudiante = (rut) => authHttp.get(`/estudiantes/${rut}`)
 

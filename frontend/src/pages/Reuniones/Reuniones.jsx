@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Tabs, Tab, Row, Col, Alert, Spinner, Button, ButtonGroup } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
+import { limpiarRut } from '../../validators/fieldValidators'
 import {
   getReunionesApoderado,
   getReunionesApoderadoPorFuncionario,
@@ -100,7 +101,7 @@ export default function Reuniones() {
       bitReuFec: data.bitReuFec,
       bitReuCompromisos: data.bitReuCompromisos,
       bitReuObs: data.bitReuObs || null,
-      docenteUsuRut: Number(data.docenteUsuRut),
+      docenteUsuRut: limpiarRut(data.docenteUsuRut),
     }
 
     try {

@@ -11,6 +11,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
+import { rutRules } from '../../validators/fieldValidators'
 import styles from '../../pages/Matricula/Matricula.module.css'
 
 const emptyValues = {
@@ -63,10 +64,9 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
               <Form.Group controlId="alumnoRut">
                 <Form.Label>RUT alumno *</Form.Label>
                 <Form.Control
-                  type="number"
-                  placeholder="Sin puntos ni DV"
+                  placeholder="12345678 o 12345678-5"
                   isInvalid={!!errors.alumnoRut}
-                  {...register('alumnoRut', { required: 'El RUT del alumno es obligatorio' })}
+                  {...register('alumnoRut', rutRules)}
                 />
                 <Form.Control.Feedback type="invalid">{errors.alumnoRut?.message}</Form.Control.Feedback>
               </Form.Group>
@@ -75,10 +75,9 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
               <Form.Group controlId="apoderadoRut">
                 <Form.Label>RUT apoderado *</Form.Label>
                 <Form.Control
-                  type="number"
-                  placeholder="Sin puntos ni DV"
+                  placeholder="12345678 o 12345678-5"
                   isInvalid={!!errors.apoderadoRut}
-                  {...register('apoderadoRut', { required: 'El RUT del apoderado es obligatorio' })}
+                  {...register('apoderadoRut', rutRules)}
                 />
                 <Form.Control.Feedback type="invalid">{errors.apoderadoRut?.message}</Form.Control.Feedback>
               </Form.Group>
@@ -103,10 +102,9 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
               <Form.Group controlId="funcionarioUsuRut">
                 <Form.Label>RUT funcionario *</Form.Label>
                 <Form.Control
-                  type="number"
                   placeholder="Quien registra"
                   isInvalid={!!errors.funcionarioUsuRut}
-                  {...register('funcionarioUsuRut', { required: 'El RUT del funcionario es obligatorio' })}
+                  {...register('funcionarioUsuRut', rutRules)}
                 />
                 <Form.Control.Feedback type="invalid">{errors.funcionarioUsuRut?.message}</Form.Control.Feedback>
               </Form.Group>

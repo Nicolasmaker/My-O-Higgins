@@ -14,6 +14,7 @@
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Card, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
+import { rutRules } from '../../validators/fieldValidators'
 import styles from '../../pages/Reuniones/Reuniones.module.css'
 
 const TITULOS = {
@@ -64,10 +65,9 @@ export default function ReunionForm({ tipo, defaultRut, saving, onSubmit, onCanc
               <Form.Group controlId="docenteUsuRut">
                 <Form.Label>RUT funcionario *</Form.Label>
                 <Form.Control
-                  type="number"
-                  placeholder="Sin puntos ni DV"
+                  placeholder="12345678 o 12345678-5"
                   isInvalid={!!errors.docenteUsuRut}
-                  {...register('docenteUsuRut', { required: 'El RUT del funcionario es obligatorio' })}
+                  {...register('docenteUsuRut', rutRules)}
                 />
                 <Form.Control.Feedback type="invalid">{errors.docenteUsuRut?.message}</Form.Control.Feedback>
               </Form.Group>

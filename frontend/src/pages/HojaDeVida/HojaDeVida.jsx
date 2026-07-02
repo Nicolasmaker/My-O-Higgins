@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Row, Col, ListGroup, Accordion, Badge, Button, Alert, Spinner, Table } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
+import { limpiarRut } from '../../validators/fieldValidators'
 import {
   getTodasHojasDeVida,
   crearHojaDeVida,
@@ -121,7 +122,7 @@ export default function HojaDeVida() {
   const handleSaveHoja = async (data) => {
     setSaving(true)
     const payload = {
-      estudianteUsuRut: Number(data.estudianteUsuRut),
+      estudianteUsuRut: limpiarRut(data.estudianteUsuRut),
       matriculaId: Number(data.matriculaId),
     }
     try {

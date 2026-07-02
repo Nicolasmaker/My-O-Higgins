@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Row, Col, Nav, ListGroup, Badge, Button, Alert, Spinner } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
+import { limpiarRut } from '../../validators/fieldValidators'
 import {
   getBandeja,
   getEnviados,
@@ -98,7 +99,7 @@ export default function Mensajeria() {
     try {
       await enviarMensaje({
         remitenteRut: Number(userRut),
-        destinatarioRut: Number(data.destinatarioRut),
+        destinatarioRut: limpiarRut(data.destinatarioRut),
         asunto: data.asunto,
         contenido: data.contenido,
       })

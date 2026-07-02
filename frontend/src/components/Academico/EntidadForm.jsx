@@ -10,6 +10,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
+import { rutRules } from '../../validators/fieldValidators'
 import styles from '../../pages/Academico/Academico.module.css'
 
 export default function EntidadForm({ show, config, item, saving, onSave, onClose }) {
@@ -40,8 +41,11 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
   const camposVisibles = config.campos.filter((c) => !(editing && c.soloCrear))
 
   const renderControl = (campo) => {
-    const common = { isInvalid: !!errors[campo.name], ...register(campo.name, campo.rules) }
+    const rules = campo.type === 'rut' ? rutRules : campo.rules
+    const common = { isInvalid: !!errors[campo.name], ...register(campo.name, rules) }
     switch (campo.type) {
+      case 'rut':
+        return <Form.Control placeholder="12345678 o 12345678-5" {...common} />
       case 'number':
         return <Form.Control type="number" {...common} />
       case 'decimal':

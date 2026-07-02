@@ -55,4 +55,17 @@ public class MatriculaController {
         matriculaService.eliminarMatricula(id);
         return ResponseEntity.noContent().build(); // Devuelve 204 No Content cuando se borra con éxito
     }
+
+    // Manejador de excepciones: validaciones de negocio (alumno/apoderado/funcionario
+    // inexistente en MS-Autenticacion) devuelven 400 con el mensaje, no un 500 crudo
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleValidacion(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    // Errores de comunicación con otros microservicios devuelven 503
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntime(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
+    }
 }

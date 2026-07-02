@@ -22,6 +22,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
 
 // ── Páginas (se importan a medida que se crean) ──────────────
 import Home        from './pages/Home/Home'
@@ -55,13 +56,13 @@ export default function App() {
           <Route path="/" element={<Home />} />
           
           <Route path="/login" element={<Login />} />
-          <Route path="/anotaciones" element={<Anotaciones />} />
-          <Route path="/calendario" element={<Calendario />} />
-          <Route path="/reuniones" element={<Reuniones />} />
-          <Route path="/mensajeria" element={<Mensajeria />} />
-          <Route path="/matriculas" element={<Matricula />} />
-          <Route path="/hoja-de-vida" element={<HojaDeVida />} />
-          <Route path="/academico" element={<Academico />} />
+          <Route path="/anotaciones" element={<ProtectedRoute><Anotaciones /></ProtectedRoute>} />
+          <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
+          <Route path="/reuniones" element={<ProtectedRoute><Reuniones /></ProtectedRoute>} />
+          <Route path="/mensajeria" element={<ProtectedRoute><Mensajeria /></ProtectedRoute>} />
+          <Route path="/matriculas" element={<ProtectedRoute><Matricula /></ProtectedRoute>} />
+          <Route path="/hoja-de-vida" element={<ProtectedRoute><HojaDeVida /></ProtectedRoute>} />
+          <Route path="/academico" element={<ProtectedRoute><Academico /></ProtectedRoute>} />
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
           <Route path="*" element={<Navigate to="/" replace />} />
