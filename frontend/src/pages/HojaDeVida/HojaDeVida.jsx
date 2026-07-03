@@ -238,7 +238,6 @@ export default function HojaDeVida() {
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>
-            <p className={styles.eyebrow}>MS-HojaDeVida</p>
             <h1 className={styles.title}>Hoja de Vida del Estudiante</h1>
             <p className={styles.subtitle}>
               Expediente con antecedentes académicos, de apoderado y médicos

@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../components/UI/Button';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
@@ -8,12 +9,9 @@ import iconoCalendario from '../../assets/iconoCalendario.png';
 import iconoPortal from '../../assets/iconoPortal.png';
 import iconoCertificado from '../../assets/iconoCertificado.png';
 import academicoImg from '../../assets/academico.png';
+import { getRecommendedQuickAccess, initializeQuickAccessItems, updateQuickAccessUsage } from './quickAccessUtils';
 
-
-export default function Home() {
-  const navigate = useNavigate();
-  // Datos de Accesos Rápidos
-const quickAccess = [
+const baseQuickAccess = [
   {
     id: 1,
     icon: iconoCalendario,
@@ -30,13 +28,45 @@ const quickAccess = [
   },
   {
     id: 3,
+    icon: iconoPortal,
+    title: 'Anotaciones',
+    description: 'Revisa y administra tareas, notas y material de tus clases.',
+    link: '/anotaciones',
+  },
+  {
+    id: 5,
+    icon: iconoCalendario,
+    title: 'Reuniones',
+    description: 'Consulta y organiza juntas entre docentes, apoderados y directivos.',
+    link: '/reuniones',
+  },
+  {
+    id: 6,
+    icon: iconoPortal,
+    title: 'Mensajería',
+    description: 'Envía y recibe comunicaciones oficiales del colegio.',
+    link: '/mensajeria',
+  },
+  {
+    id: 7,
     icon: iconoCertificado,
-    title: 'Certificados',
-    description: 'Descarga certificados de conducta, asistencia y otros documentos.',
-    link: '#certificados',
+    title: 'Matrículas',
+    description: 'Gestiona el proceso de matrícula de tu curso o tu pupilo.',
+    link: '/matriculas',
   },
 ];
-  // Datos de Noticias Destacadas
+
+export default function Home() {
+  const navigate = useNavigate();
+  const [quickAccess, setQuickAccess] = useState(() => initializeQuickAccessItems(baseQuickAccess));
+
+  const recommendedQuickAccess = useMemo(() => getRecommendedQuickAccess(quickAccess), [quickAccess]);
+
+  const handleQuickAccessClick = (item) => {
+    setQuickAccess((currentItems) => updateQuickAccessUsage(currentItems, item.id));
+    navigate(item.link);
+  };
+
   const news = [
     {
       id: 1,
@@ -123,26 +153,25 @@ const quickAccess = [
 
           {/* Grid de Tarjetas */}
           <div className={styles.cardsGrid}>
-            {quickAccess.map((item) => (
+            {recommendedQuickAccess.map((item) => (
               <div key={item.id} className={styles.card}>
                 <div className={styles.cardIcon}>
-                <img 
-                    src={item.icon} 
-                    alt={`Icono de ${item.title}`} 
-                    className={styles.iconImage} // Agregamos una clase opcional por si quieres darle estilos directos a la imagen
-                />
+                  <img
+                    src={item.icon}
+                    alt={`Icono de ${item.title}`}
+                    className={styles.iconImage}
+                  />
                 </div>
                 <h3 className={styles.cardTitle}>{item.title}</h3>
                 <p className={styles.cardDescription}>{item.description}</p>
-                {item.link.startsWith('/') ? (
-                  <Link to={item.link} className={styles.cardLink}>
-                    Ver →
-                  </Link>
-                ) : (
-                  <a href={item.link} className={styles.cardLink}>
-                    Ver →
-                  </a>
-                )}
+                <button
+                  type="button"
+                  className={styles.cardLinkButton}
+                  onClick={() => handleQuickAccessClick(item)}
+                  aria-label={`Ir a ${item.title}`}
+                >
+                  Ir a {item.title} →
+                </button>
               </div>
             ))}
           </div>

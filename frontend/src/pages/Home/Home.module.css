@@ -98,6 +98,20 @@
   padding: var(--spacing-3xl) 0;
   scroll-margin-top: 80px;
 }
+/* 1. Pintamos el fondo de tooooda la sección de Borgoña Oscuro */
+.quickAccessSection {
+  background-color: #660019 !important; /* Este es un borgoña bien oscuro y elegante */
+}
+
+/* 2. Hacemos que el título "Accesos Rápidos" sea blanco puro */
+.quickAccessSection .sectionTitle {
+  color: #ffffff !important;
+}
+
+/* 3. Hacemos que el subtítulo debajo también sea blanco (o un blanco un poco más suave si prefieres) */
+.quickAccessSection .sectionSubtitle {
+  color: #f8f9fa !important; /* Un gris muuuy clarito casi blanco para que lea bien */
+}
 
 .sectionHeader {
   display: flex;
@@ -118,6 +132,14 @@
   font-size: var(--font-size-lg);
   color: var(--color-text-secondary);
   margin: 0;
+}
+
+.quickAccessHint {
+  text-align: center;
+  color: #f8f9fa;
+  font-size: 0.95rem;
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.9;
 }
 
 .cardsGrid {
@@ -174,6 +196,22 @@
   color: var(--color-primary-dark);
 }
 
+.cardLinkButton {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  padding: 0;
+  margin: 0 auto;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.cardLinkButton:hover {
+  color: var(--color-primary-dark);
+}
+
 
 .cardIcon {
   margin: 0 auto 20px auto;
@@ -183,6 +221,7 @@
   justify-content: center; 
   align-items: center;
  }
+ 
 
 .iconImage {
   width: 100%;

@@ -173,12 +173,8 @@ export default function Anotaciones() {
       <main className="anotaciones-shell">
         <section className="hero-card">
           <div className="hero-copy-block">
-            <p className="eyebrow">MS-Anotaciones</p>
+
             <h1>Gestión institucional de anotaciones con trazabilidad completa</h1>
-            <p className="hero-copy">
-              Crea, filtra, edita y elimina anotaciones de estudiantes desde una interfaz conectada al backend,
-              con la misma identidad visual del portal principal.
-            </p>
 
             <div className="hero-actions">
               <Button type="button" variant="outline" onClick={() => loadAnotaciones(filterHojaVida.trim())}>

@@ -189,7 +189,6 @@ export default function Reuniones() {
           <div>
             <p className={styles.eyebrow}>MS-GestionReuniones</p>
             <h1 className={styles.title}>Bitácora de Reuniones</h1>
-            <p className={styles.subtitle}>Registro institucional de reuniones con apoderados — Colegio Bernardo O&apos;Higgins</p>
           </div>
           <div className={styles.headerActions}>
             {usuario && (

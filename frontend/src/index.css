@@ -7,8 +7,8 @@ html {
 
 :root {
   --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
+  --text-h: #08060d; /* Este es tu negro para títulos */
+  --bg: #fff; /* Blanco puro para el fondo */
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
@@ -22,11 +22,24 @@ html {
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
+  /* MODO CLARO FIJO */
+  color-scheme: light; 
+
+  /* =========================================
+     EL HACK DE BOOTSTRAP COMPLETADO 
+     ========================================= */
+  --bs-body-bg: var(--bg); /* Fondo blanco */
+  --bs-body-color: var(--text); /* Texto normal gris */
+  --bs-heading-color: var(--text-h); /* Fuerza a los TÍTULOS a ser oscuros */
+  --bs-link-color: var(--text-h); /* Fuerza al MENÚ LATERAL a ser oscuro */
+  --bs-link-hover-color: var(--accent); /* Color al pasar el mouse */
+  --bs-secondary-color: var(--text); /* Textos secundarios legibles */
+  --bs-font-sans-serif: var(--sans);
+
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
   color: var(--text);
-  background: var(--bg);
+  background: var(--bg); 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -37,30 +50,77 @@ html {
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
 body {
   margin: 0;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* REGLA DE SEGURIDAD PARA TÍTULOS */
+/* Esto garantiza que cualquier título de Bootstrap obedezca a tu color oscuro */
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  color: var(--text-h) !important;
+}
+
+/* =========================================
+   PARCHE PARA FILTROS Y CALENDARIO
+   ========================================= */
+
+/* 1. Fuerza el color oscuro en los textos de los filtros (checkboxes/radios) */
+.form-check-label,
+label {
+  color: var(--text-h) !important;
+  opacity: 1 !important; /* Evita que Bootstrap los ponga transparentes */
+}
+
+/* 2. Rescata los textos "silenciados" para que sean legibles */
+.text-muted, 
+.text-secondary {
+  color: var(--text) !important; 
+  opacity: 1 !important;
+}
+
+/* 3. Asegura que los números y días del calendario se vean (cubre tablas y librerías comunes) */
+table td, 
+table th,
+.fc-col-header-cell-cushion, /* Por si usas FullCalendar */
+.fc-daygrid-day-number,      /* Por si usas FullCalendar */
+.rbc-button-link             /* Por si usas React Big Calendar */ {
+  color: var(--text-h) !important;
+}
+
+/* Fuerza el color en celdas que puedan estar usando variables locales de opacidad */
+[class*="calendar"], [class*="fc-"] {
+  --bs-text-opacity: 1;
+}
+/* =========================================
+   ESTILOS EXCLUSIVOS: HOMEPAGE (ACCESOS RÁPIDOS)
+   ========================================= */
+
+/* Fondo Rojo Borgoña */
+.tarjeta-borgona {
+  background-color: #800020 !important; 
+}
+
+/* Forzamos a que TODO sea blanco, ganándole a la regla global oscura */
+.tarjeta-borgona,
+.tarjeta-borgona *,
+.tarjeta-borgona h1,
+.tarjeta-borgona h2,
+.tarjeta-borgona h3,
+.tarjeta-borgona h4,
+.tarjeta-borgona h5,
+.tarjeta-borgona h6,
+.tarjeta-borgona p,
+.tarjeta-borgona span,
+.tarjeta-borgona svg,
+.tarjeta-borgona i {
+  color: #ffffff !important;
+}
+
+.tarjeta-borgona:hover {
+  background-color: #660019 !important;
+  transition: background-color 0.3s ease;
 }

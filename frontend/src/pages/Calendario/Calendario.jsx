@@ -420,11 +420,9 @@ export default function Calendario() {
       <main className={styles.shell}>
         <section className={styles.heroCard}>
           <div>
-            <p className={styles.eyebrow}>MS-CalendarioEscolar</p>
-            <h1>Calendario institucional con programación académica y eventos escolares</h1>
-            <p className={styles.heroCopy}>
-              Vista profesional conectada al backend para consultar, crear, editar y eliminar eventos del calendario escolar.
-            </p>
+
+            <h1>Calendario Escolar</h1>
+
 
             <div className={styles.heroActions}>
               <Button type="button" variant="outline" onClick={() => loadData()}>

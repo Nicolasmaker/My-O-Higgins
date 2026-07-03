@@ -1,9 +1,6 @@
 .page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(107, 35, 35, 0.12), transparent 22%),
-    radial-gradient(circle at top right, rgba(243, 249, 241, 0.9), transparent 24%),
-    linear-gradient(180deg, #fffaf8 0%, #f4f7f2 100%);
+  background: linear-gradient(180deg, #fcfaf8 0%, #ecf2e7 100%);
   color: var(--color-text-primary);
 }
 
@@ -20,10 +17,10 @@
 .formCard,
 .listCard,
 .panelCard {
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(107, 35, 35, 0.08);
-  box-shadow: 0 18px 40px rgba(23, 32, 51, 0.08);
-  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(107, 35, 35, 0.12);
+  box-shadow: 0 22px 48px rgba(23, 32, 51, 0.14);
+  backdrop-filter: blur(10px);
 }
 
 .heroCard {
@@ -32,7 +29,7 @@
   gap: 24px;
   padding: 32px;
   border-radius: 28px;
-  background: linear-gradient(135deg, rgba(243, 249, 241, 0.94) 0%, rgba(255, 255, 255, 0.92) 100%);
+  background: #ffffff;
 }
 
 .eyebrow {
@@ -100,8 +97,9 @@
 .heroStats article {
   padding: 18px;
   border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #fffaf8 100%);
-  border: 1px solid rgba(107, 35, 35, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #fcf7f5 100%);
+  border: 1px solid rgba(107, 35, 35, 0.16);
+  box-shadow: 0 14px 26px rgba(23, 32, 51, 0.14);
 }
 
 .heroStats span,
@@ -113,14 +111,14 @@
 .weekEventsCount,
 .monthNavigator span,
 .panelHeader span {
-  color: var(--color-text-secondary);
+  color: #6a3a3a;
 }
 
 .heroStats strong {
   display: block;
   margin-top: 6px;
-  font-size: 24px;
-  color: var(--color-text-primary);
+  font-size: 26px;
+  color: #3d1313;
 }
 
 .toolbar {
@@ -200,44 +198,45 @@
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 700;
-  color: var(--color-text-secondary);
-  background: rgba(243, 249, 241, 0.8);
+  color: #5a2f2f;
+  background: rgba(255, 255, 255, 0.98);
 }
 
 .weekend {
-  color: #8a5a5a;
+  color: #6f3d3d;
 }
 
 .calendarGrid {
-  background: rgba(107, 35, 35, 0.08);
+  background: transparent;
 }
 
 .dayCell {
   min-height: 132px;
   padding: 12px;
-  border: none;
+  border: 1px solid rgba(107, 35, 35, 0.12);
   text-align: left;
-  background: #fff;
+  background: #ffffff;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .dayCell:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(23, 32, 51, 0.16);
 }
 
 .dayMuted {
-  background: #faf7f7;
-  opacity: 0.72;
+  background: #f3edea;
+  opacity: 1;
 }
 
 .daySelected {
   box-shadow: inset 0 0 0 2px var(--color-primary);
-  background: rgba(107, 35, 35, 0.04);
+  background: rgba(107, 35, 35, 0.08);
 }
 
 .dayToday {
-  box-shadow: inset 0 0 0 2px rgba(23, 32, 51, 0.2);
+  box-shadow: inset 0 0 0 2px rgba(186, 28, 28, 0.35);
 }
 
 .dayNumber {
@@ -247,8 +246,10 @@
   min-width: 32px;
   height: 32px;
   border-radius: 999px;
-  font-weight: 800;
-  color: var(--color-text-primary);
+  font-weight: 900;
+  color: #6f1616;
+  background: rgba(122, 14, 14, 0.08);
+  font-size: 0.95rem;
 }
 
 .cellEvents {
@@ -369,9 +370,10 @@
 
 .detailCard {
   border-radius: 18px;
-  padding: 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #fffaf8 100%);
-  border: 1px solid rgba(107, 35, 35, 0.08);
+  padding: 18px 20px;
+  background: #fbf4f1;
+  border: 1px solid rgba(107, 35, 35, 0.14);
+  box-shadow: 0 14px 28px rgba(23, 32, 51, 0.1);
 }
 
 .detailTop,
@@ -396,12 +398,13 @@
 .listItem p {
   margin: 10px 0;
   line-height: 1.6;
+  color: #5e3d3d;
 }
 
 .detailMeta,
 .listItemMeta {
   flex-wrap: wrap;
-  color: var(--color-text-secondary);
+  color: #6a4a4a;
   font-size: 13px;
 }
 
@@ -437,11 +440,23 @@
 .select,
 .textarea {
   width: 100%;
-  border: 1px solid rgba(107, 35, 35, 0.16);
+  border: 1px solid rgba(107, 35, 35, 0.24);
   border-radius: 14px;
   padding: 14px 16px;
-  background: #fff;
-  color: var(--color-text-primary);
+  background: #ffffff;
+  color: #261414;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.select option {
+  color: #261414;
+  background: #ffffff;
 }
 
 .textarea {
@@ -488,8 +503,15 @@
 .eventRow {
   border-radius: 18px;
   padding: 16px;
-  background: #fff;
-  border: 1px solid rgba(107, 35, 35, 0.08);
+  background: #fdf7f5;
+  border: 1px solid rgba(107, 35, 35, 0.16);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.eventRow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(23, 32, 51, 0.12);
+  background: #fffaf7;
 }
 
 .listItem {
@@ -497,8 +519,15 @@
   gap: 12px;
   border-radius: 18px;
   padding: 16px;
-  background: #fff;
-  border: 1px solid rgba(107, 35, 35, 0.08);
+  background: #fbf2ef;
+  border: 1px solid rgba(107, 35, 35, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.listItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(23, 32, 51, 0.12);
+  background: #fff5f0;
 }
 
 .listItemLabel {

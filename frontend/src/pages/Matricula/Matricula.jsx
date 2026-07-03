@@ -158,7 +158,6 @@ export default function Matricula() {
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>
-            <p className={styles.eyebrow}>MS-GestionMatricula</p>
             <h1 className={styles.title}>Registro de Matrículas</h1>
             <p className={styles.subtitle}>
               {stats.total} matrículas registradas · {stats.activas} activas — Año académico {new Date().getFullYear()}

@@ -203,7 +203,6 @@ export default function Academico() {
         <main className={styles.shell}>
           <header className={styles.pageHeader}>
             <div>
-              <p className={styles.eyebrow}>MS-GestionAcademica</p>
               <h1 className={styles.title}>Mi Libreta de Notas</h1>
               <p className={styles.subtitle}>Calificaciones registradas en el año académico</p>
             </div>

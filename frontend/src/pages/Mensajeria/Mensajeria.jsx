@@ -141,9 +141,9 @@ export default function Mensajeria() {
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>
-            <p className={styles.eyebrow}>MS-Mensajería</p>
+          
             <h1 className={styles.title}>Mensajería interna</h1>
-            <p className={styles.subtitle}>Comunicación directa entre miembros de la comunidad escolar</p>
+
           </div>
           <Button className={styles.btnGranate} onClick={() => setShowCompose(true)} disabled={!userRut}>
             + Redactar
