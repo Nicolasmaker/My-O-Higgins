@@ -1,10 +1,12 @@
 .navbar {
-  background-color: var(--color-bg-hero);
+  /* Fondo semitransparente blanco para destacar del fondo general */
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px); /* Efecto cristalino moderno */
   padding: var(--spacing-md) 0;
   position: sticky;
   top: 0;
   z-index: 100;
- box-shadow: 0px 8px 15px rgba(85, 42, 42, 0.15); 
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05); 
   transition: box-shadow var(--transition-normal), background-color var(--transition-normal);
 }
 
