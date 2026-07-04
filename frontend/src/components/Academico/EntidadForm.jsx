@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
 import { rutRules } from '../../validators/fieldValidators'
-import styles from '../../pages/Academico/Academico.module.css'
+import styles from '../../styles/Academico.module.css'
 
 export default function EntidadForm({ show, config, item, saving, onSave, onClose }) {
   const editing = !!item
