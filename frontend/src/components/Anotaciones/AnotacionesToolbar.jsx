@@ -2,9 +2,6 @@ import Button from '../UI/Button'
 import './AnotacionesToolbar.css'
 
 export default function AnotacionesToolbar({
-  total,
-  modeLabel,
-  canSeeLabel,
   filterRut,
   setFilterRut,
   onSearch,
@@ -31,21 +28,6 @@ export default function AnotacionesToolbar({
           Refrescar
         </Button>
       </form>
-
-      <div className="anotaciones-toolbar__stats">
-        <article>
-          <span>Total</span>
-          <strong>{total}</strong>
-        </article>
-        <article>
-          <span>Modo</span>
-          <strong>{modeLabel}</strong>
-        </article>
-        <article>
-          <span>Permiso visible</span>
-          <strong>{canSeeLabel}</strong>
-        </article>
-      </div>
     </section>
   )
 }

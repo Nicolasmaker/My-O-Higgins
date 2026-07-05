@@ -1,7 +1,24 @@
 import Button from '../UI/Button'
 import './AnotacionCard.css'
 
+function formatRut(rut, dv) {
+  if (!rut) return null
+  const conPuntos = String(rut).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return dv ? `${conPuntos}-${dv}` : conPuntos
+}
+
+function labelRolFuncionario(rol) {
+  const rolNormalizado = String(rol || '').toUpperCase()
+  if (rolNormalizado.includes('INSPECTOR')) return 'Inspector'
+  if (rolNormalizado.includes('DOCENTE')) return 'Docente'
+  if (rolNormalizado.includes('DIRECTIVO')) return 'Directivo'
+  return 'Funcionario'
+}
+
 export default function AnotacionCard({ anotacion, onEdit, onDelete, formatDate, canManage }) {
+  const rutFuncionario = formatRut(anotacion.funcionarioUsuRut, anotacion.funcionarioDv)
+  const rutEstudiante = formatRut(anotacion.estudianteUsuRut, anotacion.estudianteDv)
+
   return (
     <article className="anotacion-card">
       <div className="anotacion-card__top">
@@ -19,8 +36,34 @@ export default function AnotacionCard({ anotacion, onEdit, onDelete, formatDate,
           <dd>{anotacion.idAnot}</dd>
         </div>
         <div>
-          <dt>Funcionario</dt>
-          <dd>{anotacion.funcionarioUsuRut}</dd>
+          <dt>{labelRolFuncionario(anotacion.funcionarioRol)}</dt>
+          <dd>
+            {anotacion.funcionarioNombre
+              ? `${anotacion.funcionarioNombre} ${anotacion.funcionarioApellido || ''}`.trim()
+              : '—'}
+            {rutFuncionario && (
+              <span className="anotacion-card__rut">
+                <small>Rut</small> {rutFuncionario}
+              </span>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Estudiante</dt>
+          <dd>
+            {anotacion.estudianteNombre
+              ? `${anotacion.estudianteNombre} ${anotacion.estudianteApellido || ''}`.trim()
+              : '—'}
+            {rutEstudiante && (
+              <span className="anotacion-card__rut">
+                <small>Rut</small> {rutEstudiante}
+              </span>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Curso</dt>
+          <dd>{anotacion.curso || '—'}</dd>
         </div>
       </dl>
 
