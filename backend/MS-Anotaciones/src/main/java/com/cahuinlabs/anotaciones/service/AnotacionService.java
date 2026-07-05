@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.cahuinlabs.anotaciones.dto.AnotacionResponseDTO;
+import com.cahuinlabs.anotaciones.dto.CursoDTO;
+import com.cahuinlabs.anotaciones.dto.EstudianteDTO;
 import com.cahuinlabs.anotaciones.dto.FuncionarioDTO;
 import com.cahuinlabs.anotaciones.dto.HojaVidaDTO;
 import com.cahuinlabs.anotaciones.models.entities.Anotacion;
@@ -29,10 +32,15 @@ public class AnotacionService {
     // RestClient para comunicarse con el microservicio de HojaDeVida
     private final RestClient hojaVidaRestClient;
 
+    // RestClient para comunicarse con el microservicio de GestionAcademica
+    private final RestClient gestionAcademicaRestClient;
+
     public AnotacionService(@Qualifier("autenticacionRestClient") RestClient autenticacionRestClient,
-                            @Qualifier("hojaVidaRestClient") RestClient hojaVidaRestClient) {
+                            @Qualifier("hojaVidaRestClient") RestClient hojaVidaRestClient,
+                            @Qualifier("gestionAcademicaRestClient") RestClient gestionAcademicaRestClient) {
         this.autenticacionRestClient = autenticacionRestClient;
         this.hojaVidaRestClient = hojaVidaRestClient;
+        this.gestionAcademicaRestClient = gestionAcademicaRestClient;
     }
 
     // crea una nueva anotacion asignando tipo, descripcion, fecha actual y relacionandola con la hoja de vida
@@ -56,19 +64,19 @@ public class AnotacionService {
     }
 
     // consulta todas las anotaciones de un estudiante filtrando por su hoja de vida
-    public List<Anotacion> obtenerPorHojaVida(Long idHojaVida) {
-        return anotacionRepository.findByIdHojaVida(idHojaVida);
+    public List<AnotacionResponseDTO> obtenerPorHojaVida(Long idHojaVida) {
+        return enriquecerTodas(anotacionRepository.findByIdHojaVida(idHojaVida));
     }
 
     // consulta las anotaciones de un estudiante a partir de su RUT: resuelve la hoja de
     // vida en MS-HojaDeVida y luego filtra por su id. Si el estudiante no tiene hoja de
     // vida registrada, se devuelve una lista vacia en vez de un error.
-    public List<Anotacion> obtenerPorEstudianteRut(Long estudianteUsuRut) {
+    public List<AnotacionResponseDTO> obtenerPorEstudianteRut(Long estudianteUsuRut) {
         Long idHojaVida = resolverIdHojaVidaPorRut(estudianteUsuRut);
         if (idHojaVida == null) {
             return List.of();
         }
-        return anotacionRepository.findByIdHojaVida(idHojaVida);
+        return enriquecerTodas(anotacionRepository.findByIdHojaVida(idHojaVida));
     }
 
     // edita tipo y descripcion de una anotacion existente, preservando fecha y autor
@@ -88,8 +96,8 @@ public class AnotacionService {
         anotacionRepository.deleteById(idAnot);
     }
     // obtiene todas las anotaciones del sistema sin filtros
-    public List<Anotacion> obtenerTodas() {
-        return anotacionRepository.findAll();
+    public List<AnotacionResponseDTO> obtenerTodas() {
+        return enriquecerTodas(anotacionRepository.findAll());
     }
 
     // Verifica si el funcionario (docente o inspector) existe en el microservicio de Autenticacion
@@ -137,6 +145,98 @@ public class AnotacionService {
             return null;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de HojaDeVida: " + e.getMessage());
+        }
+    }
+
+    // Mapea una lista de anotaciones crudas a su version enriquecida con datos de
+    // funcionario, estudiante y curso.
+    private List<AnotacionResponseDTO> enriquecerTodas(List<Anotacion> anotaciones) {
+        return anotaciones.stream().map(this::enriquecer).toList();
+    }
+
+    // Enriquece una anotacion con nombre/apellido del funcionario que la creo y con
+    // rut/nombre/apellido/curso del estudiante dueno de la hoja de vida asociada.
+    // Si algun microservicio externo falla o no encuentra el dato, se omite ese dato
+    // (queda null) en vez de romper el listado completo.
+    private AnotacionResponseDTO enriquecer(Anotacion anotacion) {
+        FuncionarioDTO funcionario = obtenerFuncionario(anotacion.getFuncionarioUsuRut());
+        Long estudianteUsuRut = resolverEstudianteRutPorIdHojaVida(anotacion.getIdHojaVida());
+        EstudianteDTO estudiante = estudianteUsuRut != null ? obtenerEstudiante(estudianteUsuRut) : null;
+        String curso = estudiante != null && estudiante.cursoId() != null ? obtenerNombreCurso(estudiante.cursoId()) : null;
+
+        return new AnotacionResponseDTO(
+                anotacion.getIdAnot(),
+                anotacion.getAnotTip(),
+                anotacion.getAnotDes(),
+                anotacion.getAnotFec(),
+                anotacion.getFuncionarioUsuRut(),
+                funcionario != null ? funcionario.dv() : null,
+                funcionario != null ? funcionario.nombre() : null,
+                funcionario != null ? funcionario.apellido() : null,
+                funcionario != null && funcionario.rol() != null ? funcionario.rol().rolNombre() : null,
+                anotacion.getIdHojaVida(),
+                estudianteUsuRut,
+                estudiante != null ? estudiante.dv() : null,
+                estudiante != null ? estudiante.nombre() : null,
+                estudiante != null ? estudiante.apellido() : null,
+                curso
+        );
+    }
+
+    // Obtiene los datos del funcionario en Autenticacion. Devuelve null si no existe
+    // o si el microservicio no responde.
+    private FuncionarioDTO obtenerFuncionario(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/funcionarios/{rut}", rut)
+                    .retrieve()
+                    .body(FuncionarioDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Obtiene los datos del estudiante en Autenticacion. Devuelve null si no existe
+    // o si el microservicio no responde.
+    private EstudianteDTO obtenerEstudiante(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/estudiantes/{rut}", rut)
+                    .retrieve()
+                    .body(EstudianteDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Resuelve el RUT del estudiante a partir del ID de una hoja de vida consultando
+    // MS-HojaDeVida. Devuelve null si la hoja de vida no existe o si falla la llamada.
+    private Long resolverEstudianteRutPorIdHojaVida(Long idHojaVida) {
+        try {
+            HojaVidaDTO hojaVida = hojaVidaRestClient.get()
+                    .uri("/api/hojas-vida/{id}", idHojaVida)
+                    .retrieve()
+                    .body(HojaVidaDTO.class);
+            return hojaVida != null ? hojaVida.estudianteUsuRut() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Obtiene el nombre legible del curso (ej. "3°A") en GestionAcademica. Devuelve
+    // null si no existe o si el microservicio no responde.
+    private String obtenerNombreCurso(Integer cursoId) {
+        try {
+            CursoDTO curso = gestionAcademicaRestClient.get()
+                    .uri("/curso/{id}", cursoId)
+                    .retrieve()
+                    .body(CursoDTO.class);
+            if (curso == null || curso.nivel() == null) {
+                return null;
+            }
+            return curso.nivel().nivNum() + "°" + curso.curLetraSeccion();
+        } catch (Exception e) {
+            return null;
         }
     }
 }
