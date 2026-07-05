@@ -7,17 +7,40 @@ export default function AnotacionesToolbar({
   onSearch,
   onReset,
   onRefresh,
+  filterTipo,
+  setFilterTipo,
+  filterCurso,
+  setFilterCurso,
 }) {
   return (
     <section className="anotaciones-toolbar">
       <form className="anotaciones-toolbar__filter" onSubmit={onSearch}>
         <label>
-          Buscar por RUT del estudiante
+          Tipo
+          <select value={filterTipo} onChange={(event) => setFilterTipo(event.target.value)}>
+            <option value="todas">Todas</option>
+            <option value="positiva">Positivas</option>
+            <option value="negativa">Negativas</option>
+          </select>
+        </label>
+        <label>
+          Curso
           <input
             type="text"
+            className="anotaciones-toolbar__input--curso"
+            value={filterCurso}
+            onChange={(event) => setFilterCurso(event.target.value)}
+            placeholder="8°B"
+          />
+        </label>
+        <label>
+          Estudiante (RUT o nombre)
+          <input
+            type="text"
+            className="anotaciones-toolbar__input--estudiante"
             value={filterRut}
             onChange={(event) => setFilterRut(event.target.value)}
-            placeholder="12345678-5"
+            placeholder="Juan Pérez o 12345678-5"
           />
         </label>
         <Button type="submit">Buscar</Button>
