@@ -28,7 +28,7 @@ function formatDate(value) {
 }
 
 export default function Anotaciones() {
-  const { usuario, hasRole, logout } = useAuth()
+  const { usuario, hasRole } = useAuth()
   const [anotaciones, setAnotaciones] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -45,10 +45,6 @@ export default function Anotaciones() {
   } = useForm({ defaultValues: initialForm })
 
   const userRut = useMemo(() => usuario?.usuRut ?? usuario?.rut ?? usuario?.rutUsuario ?? '', [usuario])
-  const roleLabel = useMemo(
-    () => usuario?.rol?.rolNombre || usuario?.rolNombre || usuario?.rol || 'Sin rol asignado',
-    [usuario]
-  )
 
   const dashboardStats = useMemo(() => {
     const positivas = anotaciones.filter((item) => String(item.anotTip || '').toLowerCase() === 'positiva').length
@@ -188,17 +184,6 @@ export default function Anotaciones() {
               </Button>
             </div>
           </div>
-
-          <aside className="session-card">
-            <span className="session-label">Sesión activa</span>
-            <strong>{usuario?.usuPNombre ? `${usuario.usuPNombre} ${usuario.usuApePat || ''}`.trim() : 'Sesión no identificada'}</strong>
-            <span>RUT: {userRut || 'sin dato'}</span>
-            <span>Rol: {roleLabel}</span>
-            <span>Acceso: {hasRole(['ADMIN', 'DIRECTIVO', 'DOCENTE', 'INSPECTOR']) ? 'Habilitado' : 'General'}</span>
-            <Button type="button" variant="ghost" onClick={logout}>
-              Cerrar sesión
-            </Button>
-          </aside>
         </section>
 
         <section className="metrics-grid" aria-label="Resumen de anotaciones">

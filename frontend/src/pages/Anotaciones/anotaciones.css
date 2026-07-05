@@ -28,7 +28,7 @@
 
 .hero-card {
   display: grid;
-  grid-template-columns: 1.6fr minmax(280px, 0.85fr);
+  grid-template-columns: 1fr;
   gap: 24px;
   padding: 32px;
   border-radius: 28px;
@@ -73,22 +73,6 @@
   margin-top: 24px;
 }
 
-.session-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 22px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, var(--color-footer) 0%, #1c2740 100%);
-  color: var(--color-footer-text);
-}
-
-.session-label {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: #f3d7d7;
-}
 
 .metrics-grid {
   display: grid;
