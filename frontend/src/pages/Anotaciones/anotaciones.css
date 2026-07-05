@@ -4,10 +4,8 @@
 
 .anotaciones-page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(107, 35, 35, 0.12), transparent 24%),
-    radial-gradient(circle at top right, rgba(243, 249, 241, 0.9), transparent 30%),
-    linear-gradient(180deg, #fffaf8 0%, #f4f7f2 100%);
+  /* Fondo crema cálido uniforme con el resto del sistema */
+  background-color: var(--color-bg-hero);
   color: var(--color-text-primary);
 }
 
@@ -35,7 +33,7 @@
   padding: 32px;
   border-radius: 28px;
   align-items: stretch;
-  background: linear-gradient(135deg, rgba(243, 249, 241, 0.92) 0%, rgba(255, 255, 255, 0.9) 100%);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .hero-copy-block {
@@ -122,7 +120,8 @@
 }
 
 .metric-card--accent {
-  background: linear-gradient(135deg, rgba(107, 35, 35, 0.1) 0%, rgba(243, 249, 241, 0.95) 100%);
+  /* Tono sutil granate sobre fondo blanco, sin verde */
+  background: rgba(107, 35, 35, 0.07);
 }
 
 .content-grid {
