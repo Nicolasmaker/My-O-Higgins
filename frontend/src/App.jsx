@@ -38,15 +38,15 @@ import Academico   from './pages/Academico/Academico'
 // import Registro    from './pages/Registro/Registro'
 
 // ── Layout con Navbar + Footer ────────────────────────────────
-// function Layout({ children }) {
-//   return (
-//     <>
-//       <Navbar />
-//       {children}
-//       <Footer />
-//     </>
-//   )
-// }
+function Layout({ children }) {
+  return (
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
+  )
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation()
