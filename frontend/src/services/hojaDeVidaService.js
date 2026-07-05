@@ -11,6 +11,7 @@ import hojaDeVidaHttp from './http/hojaDeVidaHttp'
 // --- Hoja de Vida ---
 export const getTodasHojasDeVida = () => hojaDeVidaHttp.get('/hojas-vida')
 export const getHojaDeVida = (idHojaVida) => hojaDeVidaHttp.get(`/hojas-vida/${idHojaVida}`)
+export const getHojaDeVidaPorRut = (rut) => hojaDeVidaHttp.get(`/hojas-vida/estudiante/${rut}`)
 export const crearHojaDeVida = (data) => hojaDeVidaHttp.post('/hojas-vida', data)
 export const actualizarHojaDeVida = (idHojaVida, data) => hojaDeVidaHttp.put(`/hojas-vida/${idHojaVida}`, data)
 export const eliminarHojaDeVida = (idHojaVida) => hojaDeVidaHttp.delete(`/hojas-vida/${idHojaVida}`)
