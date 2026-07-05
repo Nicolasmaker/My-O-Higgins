@@ -68,10 +68,10 @@ export default function Login() {
       <div className="login-bg" style={{ backgroundImage: `url(${colegioFachada})` }} />
       <div className="login-overlay" />
       <section className="login-card">
-        <p className="login-eyebrow">My O'Higgins</p>
+        <p className="login-eyebrow">Inicio de sesion</p>
         <h1>Ingreso a My Ohiggins</h1>
         <p className="login-subtitle">
-          Ingresa con tu correo institucional para acceder a tus módulos.
+          Ingresa con tu correo institucional para acceder al portal digital.
         </p>
 
         {!showRecovery ? (
