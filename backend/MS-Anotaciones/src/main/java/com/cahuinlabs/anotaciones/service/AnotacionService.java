@@ -60,6 +60,17 @@ public class AnotacionService {
         return anotacionRepository.findByIdHojaVida(idHojaVida);
     }
 
+    // consulta las anotaciones de un estudiante a partir de su RUT: resuelve la hoja de
+    // vida en MS-HojaDeVida y luego filtra por su id. Si el estudiante no tiene hoja de
+    // vida registrada, se devuelve una lista vacia en vez de un error.
+    public List<Anotacion> obtenerPorEstudianteRut(Long estudianteUsuRut) {
+        Long idHojaVida = resolverIdHojaVidaPorRut(estudianteUsuRut);
+        if (idHojaVida == null) {
+            return List.of();
+        }
+        return anotacionRepository.findByIdHojaVida(idHojaVida);
+    }
+
     // edita tipo y descripcion de una anotacion existente, preservando fecha y autor
     public Anotacion modificarAnotacion(Long idAnot, AnotacionDTO dto) {
         Anotacion anotacion = anotacionRepository.findById(idAnot)
@@ -108,6 +119,22 @@ public class AnotacionService {
         } catch (HttpClientErrorException.NotFound e) {
             // El microservicio de HojaDeVida respondio 404, la hoja de vida no existe
             return false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al comunicarse con el microservicio de HojaDeVida: " + e.getMessage());
+        }
+    }
+
+    // Resuelve el idHojaVida de un estudiante a partir de su RUT consultando MS-HojaDeVida.
+    // Devuelve null si el estudiante no tiene hoja de vida registrada.
+    private Long resolverIdHojaVidaPorRut(Long estudianteUsuRut) {
+        try {
+            HojaVidaDTO hojaVida = hojaVidaRestClient.get()
+                    .uri("/api/hojas-vida/estudiante/{rut}", estudianteUsuRut)
+                    .retrieve()
+                    .body(HojaVidaDTO.class);
+            return hojaVida != null ? hojaVida.idHojaVida() : null;
+        } catch (HttpClientErrorException.NotFound e) {
+            return null;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de HojaDeVida: " + e.getMessage());
         }

@@ -40,6 +40,13 @@ public class AnotacionController {
         return new ResponseEntity<>(anotaciones, HttpStatus.OK);
     }
 
+    // GET: Consultar por RUT del estudiante. Permiso: Todos segun su perfil
+    @GetMapping("/estudiante/{rut}")
+    public ResponseEntity<List<Anotacion>> consultarAnotacionesPorRutEstudiante(@PathVariable Long rut) {
+        List<Anotacion> anotaciones = anotacionService.obtenerPorEstudianteRut(rut);
+        return new ResponseEntity<>(anotaciones, HttpStatus.OK);
+    }
+
     // GET: Obtener todas las anotaciones. Permiso: Todos segun su perfil
     @GetMapping
     public ResponseEntity<List<Anotacion>> obtenerTodasAnotaciones() {
