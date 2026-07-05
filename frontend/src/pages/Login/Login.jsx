@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import Button from '../../components/UI/Button/Button'
 import Input from '../../components/UI/Input/Input'
 import { emailRules, passwordRules } from '../../validators/fieldValidators'
+import colegioFachada from '../../assets/colegioFachada.webp'
 import './login.css'
 
 export default function Login() {
@@ -64,6 +65,8 @@ export default function Login() {
 
   return (
     <main className="login-page">
+      <div className="login-bg" style={{ backgroundImage: `url(${colegioFachada})` }} />
+      <div className="login-overlay" />
       <section className="login-card">
         <p className="login-eyebrow">My O'Higgins</p>
         <h1>Ingreso a My Ohiggins</h1>
