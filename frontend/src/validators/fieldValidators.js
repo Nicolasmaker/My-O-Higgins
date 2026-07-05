@@ -79,12 +79,5 @@ export const anotacionRules = {
       message: 'El RUT debe ser mayor a 0',
     },
   },
-  idHojaVida: {
-    required: 'El ID de hoja de vida es obligatorio',
-    valueAsNumber: true,
-    min: {
-      value: 1,
-      message: 'El ID debe ser mayor a 0',
-    },
-  },
+  rutEstudiante: rutRules,
 }
