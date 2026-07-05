@@ -24,6 +24,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { useEffect } from 'react'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import MainLayout from './components/Layout/MainLayout'
 
 // ── Páginas (se importan a medida que se crean) ──────────────
 import Home        from './pages/Home/Home'
@@ -36,17 +37,6 @@ import Matricula   from './pages/Matricula/Matricula'
 import HojaDeVida  from './pages/HojaDeVida/HojaDeVida'
 import Academico   from './pages/Academico/Academico'
 // import Registro    from './pages/Registro/Registro'
-
-// ── Layout con Navbar + Footer ────────────────────────────────
-function Layout({ children }) {
-  return (
-    <>
-      <Navbar />
-      {children}
-      <Footer />
-    </>
-  )
-}
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -64,17 +54,20 @@ export default function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          {/* Home - Landing Page Principal */}
-          <Route path="/" element={<Home />} />
-          
           <Route path="/login" element={<Login />} />
-          <Route path="/anotaciones" element={<ProtectedRoute><Anotaciones /></ProtectedRoute>} />
-          <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
-          <Route path="/reuniones" element={<ProtectedRoute><Reuniones /></ProtectedRoute>} />
-          <Route path="/mensajeria" element={<ProtectedRoute><Mensajeria /></ProtectedRoute>} />
-          <Route path="/matriculas" element={<ProtectedRoute><Matricula /></ProtectedRoute>} />
-          <Route path="/hoja-de-vida" element={<ProtectedRoute><HojaDeVida /></ProtectedRoute>} />
-          <Route path="/academico" element={<ProtectedRoute><Academico /></ProtectedRoute>} />
+
+          {/* Rutas con Navbar + Footer (MainLayout) */}
+          <Route element={<MainLayout />}>
+            {/* Home - Landing Page Principal */}
+            <Route path="/" element={<Home />} />
+            <Route path="/anotaciones" element={<ProtectedRoute><Anotaciones /></ProtectedRoute>} />
+            <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
+            <Route path="/reuniones" element={<ProtectedRoute><Reuniones /></ProtectedRoute>} />
+            <Route path="/mensajeria" element={<ProtectedRoute><Mensajeria /></ProtectedRoute>} />
+            <Route path="/matriculas" element={<ProtectedRoute><Matricula /></ProtectedRoute>} />
+            <Route path="/hoja-de-vida" element={<ProtectedRoute><HojaDeVida /></ProtectedRoute>} />
+            <Route path="/academico" element={<ProtectedRoute><Academico /></ProtectedRoute>} />
+          </Route>
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
           <Route path="*" element={<Navigate to="/" replace />} />
