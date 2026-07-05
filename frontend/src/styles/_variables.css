@@ -10,9 +10,9 @@
   --color-primary-light: #8b3a3a;
 
   /* Colores de Fondo */
-  --color-bg-hero: #F3F9F1; /* Verde Claro/Beige pastel */
+  --color-bg-hero: #fffaf8; /* Crema cálido — tomado del fondo de Anotaciones */
   --color-bg-white: #FFFFFF;
-  --color-bg-news: #F3F9F1;
+  --color-bg-news: #fffaf8;
 
   /* Color Footer */
   --color-footer: #172033; /* Azul Marino Oscuro */
@@ -73,18 +73,4 @@
   --transition-slow: 500ms ease-in-out;
 }
 
-/* Tema Claro (Default) */
-@media (prefers-color-scheme: light) {
-  :root {
-    --color-text-primary: #1a1a1a;
-    --color-text-secondary: #666666;
-  }
-}
 
-/* Tema Oscuro (Opcional) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-text-primary: #f0f0f0;
-    --color-text-secondary: #b0b0b0;
-  }
-}
