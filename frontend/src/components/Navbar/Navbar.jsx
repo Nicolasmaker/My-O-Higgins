@@ -10,7 +10,9 @@
 //
 // NavLink marca automáticamente el link activo según la ruta.
 // =============================================================
+import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { Modal } from 'react-bootstrap';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../UI/Button';
 import styles from './Navbar.module.css';
@@ -36,8 +38,10 @@ const PUBLICOS = [
 export default function Navbar() {
   const { usuario, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
+    setShowLogoutModal(false);
     logout();
     navigate('/');
   };
@@ -79,8 +83,8 @@ export default function Navbar() {
               <span className={styles.userName}>
                 {`${usuario?.usuPNombre || ''} ${usuario?.usuApePat || ''}`.trim() || 'Usuario'}
               </span>
-              <Button variant="primary" onClick={handleLogout}>
-                Salir
+              <Button variant="primary" onClick={() => setShowLogoutModal(true)}>
+                Cerrar sesión
               </Button>
             </div>
           ) : (
@@ -90,6 +94,21 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Cerrar sesión</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>¿Seguro que quieres cerrar sesión?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline" onClick={() => setShowLogoutModal(false)}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={handleLogout}>
+            Cerrar sesión
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </nav>
   );
 }
