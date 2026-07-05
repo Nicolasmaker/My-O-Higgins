@@ -16,9 +16,8 @@
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  width: 100%;
+  padding: 0 var(--spacing-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;
