@@ -18,6 +18,11 @@ public class RestClientConfig {
     @Value("${app.services.hojadevida-url:http://localhost:8084}")
     private String hojaDeVidaUrl;
 
+    // Lee la URL del microservicio de GestionAcademica desde application.properties
+    // Si no está definida, usa localhost:8087 por defecto
+    @Value("${app.services.gestionacademica-url:http://localhost:8087}")
+    private String gestionAcademicaUrl;
+
     @Bean
     public RestClient autenticacionRestClient() {
         return RestClient.builder()
@@ -29,6 +34,13 @@ public class RestClientConfig {
     public RestClient hojaVidaRestClient() {
         return RestClient.builder()
                 .baseUrl(hojaDeVidaUrl)
+                .build();
+    }
+
+    @Bean
+    public RestClient gestionAcademicaRestClient() {
+        return RestClient.builder()
+                .baseUrl(gestionAcademicaUrl)
                 .build();
     }
 }
