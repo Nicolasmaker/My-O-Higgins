@@ -15,6 +15,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Modal } from 'react-bootstrap';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../UI/Button';
+import logoColegio from '../../assets/logoColegio.png';
 import styles from './Navbar.module.css';
 
 const MODULOS = [
@@ -51,6 +52,7 @@ export default function Navbar() {
       <div className={styles.container}>
         {/* Logo */}
         <Link to="/" className={styles.logo}>
+          <img src={logoColegio} alt="Colegio Bernardo O'Higgins" className={styles.logoImg} />
           <span className={styles.logoText}>My O'Higgins</span>
         </Link>
 

@@ -26,7 +26,15 @@
 
 .logo {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
   text-decoration: none;
+}
+
+.logoImg {
+  height: 40px;
+  width: auto;
 }
 
 .logoText {
