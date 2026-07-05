@@ -15,6 +15,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Modal } from 'react-bootstrap';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../UI/Button';
+import UserPanel from '../UserPanel/UserPanel';
 import logoColegio from '../../assets/logoColegio.png';
 import styles from './Navbar.module.css';
 
@@ -40,6 +41,7 @@ export default function Navbar() {
   const { usuario, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showUserPanel, setShowUserPanel] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
@@ -82,9 +84,13 @@ export default function Navbar() {
         <div className={styles.navActions}>
           {isAuthenticated ? (
             <div className={styles.sessionBox}>
-              <span className={styles.userName}>
+              <button
+                type="button"
+                className={styles.userName}
+                onClick={() => setShowUserPanel(true)}
+              >
                 {`${usuario?.usuPNombre || ''} ${usuario?.usuApePat || ''}`.trim() || 'Usuario'}
-              </span>
+              </button>
               <Button variant="primary" onClick={() => setShowLogoutModal(true)}>
                 Cerrar sesión
               </Button>
@@ -111,6 +117,8 @@ export default function Navbar() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <UserPanel show={showUserPanel} usuario={usuario} onClose={() => setShowUserPanel(false)} />
     </nav>
   );
 }

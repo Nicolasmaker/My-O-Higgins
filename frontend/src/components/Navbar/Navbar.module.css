@@ -85,10 +85,20 @@
 }
 
 .userName {
+  border: none;
+  background: none;
+  padding: 0;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   white-space: nowrap;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.userName:hover {
+  color: var(--color-primary);
 }
 
 /* Responsive */
