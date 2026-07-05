@@ -270,6 +270,18 @@ export default function Anotaciones() {
           </div>
         </section>
 
+        {isEstudiante ? (
+          <p className="anotaciones-estudiante-aviso">Estás viendo únicamente tus propias anotaciones.</p>
+        ) : (
+          <AnotacionesToolbar
+            filterRut={filterRut}
+            setFilterRut={setFilterRut}
+            onSearch={handleSearch}
+            onReset={handleResetFiltros}
+            onRefresh={handleRefresh}
+          />
+        )}
+
         <section className="metrics-grid" aria-label="Resumen de anotaciones">
           <article className="metric-card">
             <span>Total</span>
@@ -284,21 +296,6 @@ export default function Anotaciones() {
             <strong>{dashboardStats.negativas}</strong>
           </article>
         </section>
-
-        {isEstudiante ? (
-          <p className="anotaciones-estudiante-aviso">Estás viendo únicamente tus propias anotaciones.</p>
-        ) : (
-          <AnotacionesToolbar
-            total={dashboardStats.total}
-            modeLabel={editingId ? 'Edición activa' : activeFilterRut ? `Historial de RUT ${activeFilterRut}` : 'Todas las anotaciones'}
-            canSeeLabel={canManage ? 'Directivo (gestión completa)' : canCreate ? 'Docente/Inspector (crea)' : 'Perfil de solo lectura'}
-            filterRut={filterRut}
-            setFilterRut={setFilterRut}
-            onSearch={handleSearch}
-            onReset={handleResetFiltros}
-            onRefresh={handleRefresh}
-          />
-        )}
 
         <section className={`content-grid ${mostrarFormulario ? '' : 'content-grid--single'}`}>
           {mostrarFormulario && (
