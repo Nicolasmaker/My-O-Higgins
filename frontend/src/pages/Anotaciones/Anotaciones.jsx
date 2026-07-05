@@ -7,19 +7,27 @@ import {
   crearAnotacion,
   eliminarAnotacion,
   getAllAnotaciones,
-  getAnotacionesByHojaVida,
+  getAnotacionesByRut,
 } from '../../services/anotacionesService'
-import Button from '../../components/UI/Button'
+import { getHojaDeVidaPorRut } from '../../services/hojaDeVidaService'
+import { limpiarRut, rutValido } from '../../validators/fieldValidators'
 import AnotacionCard from '../../components/Anotaciones/AnotacionCard'
 import AnotacionesToolbar from '../../components/Anotaciones/AnotacionesToolbar'
 import AnotacionForm from '../../components/Anotaciones/AnotacionForm'
 import './anotaciones.css'
 
+// Segun los comentarios de permiso en MS-Anotaciones (AnotacionController.java):
+// crear -> Docentes e Inspectores | editar/eliminar -> solo Directivos
+// El backend aun no valida esto (ver SecurityConfig sin reglas por rol), asi que
+// aqui solo se oculta la UI segun el rol; no reemplaza una autorizacion real.
+const ROLES_CREAN = ['ROLE_DOCENTE', 'ROLE_INSPECTOR']
+const ROLES_GESTIONAN = ['ROLE_DIRECTIVO']
+const ROL_ESTUDIANTE = 'ROLE_ESTUDIANTE'
+
 const initialForm = {
   anotTip: 'Positiva',
   anotDes: '',
-  funcionarioUsuRut: '',
-  idHojaVida: '',
+  rutEstudiante: '',
 }
 
 function formatDate(value) {
@@ -33,18 +41,25 @@ export default function Anotaciones() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [saving, setSaving] = useState(false)
-  const [filterHojaVida, setFilterHojaVida] = useState('')
+  const [filterRut, setFilterRut] = useState('')
+  const [activeFilterRut, setActiveFilterRut] = useState('')
   const [editingId, setEditingId] = useState(null)
+  const [hojaVidaStatus, setHojaVidaStatus] = useState('idle')
+  const [idHojaVidaResuelto, setIdHojaVidaResuelto] = useState(null)
 
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
+    watch,
     formState: { errors },
   } = useForm({ defaultValues: initialForm })
 
   const userRut = useMemo(() => usuario?.usuRut ?? usuario?.rut ?? usuario?.rutUsuario ?? '', [usuario])
+  const canCreate = hasRole(ROLES_CREAN)
+  const canManage = hasRole(ROLES_GESTIONAN)
+  const isEstudiante = hasRole(ROL_ESTUDIANTE)
+  const rutEstudianteTyped = watch('rutEstudiante')
 
   const dashboardStats = useMemo(() => {
     const positivas = anotaciones.filter((item) => String(item.anotTip || '').toLowerCase() === 'positiva').length
@@ -54,19 +69,49 @@ export default function Anotaciones() {
       total: anotaciones.length,
       positivas,
       negativas,
-      filtro: filterHojaVida.trim() ? `Hoja ${filterHojaVida.trim()}` : 'Sin filtro',
     }
-  }, [anotaciones, filterHojaVida])
+  }, [anotaciones])
 
-  const loadAnotaciones = async (hojaVidaId = '') => {
+  // Resuelve automáticamente el idHojaVida a partir del RUT tipeado en el formulario
+  // de creación (RF11: la anotación se relaciona con la hoja de vida del estudiante).
+  useEffect(() => {
+    if (editingId) return
+    const valor = (rutEstudianteTyped || '').trim()
+    if (!valor || !rutValido(valor)) {
+      setHojaVidaStatus('idle')
+      setIdHojaVidaResuelto(null)
+      return
+    }
+
+    let cancelado = false
+    setHojaVidaStatus('buscando')
+    const timeout = setTimeout(() => {
+      getHojaDeVidaPorRut(limpiarRut(valor))
+        .then((res) => {
+          if (cancelado) return
+          setIdHojaVidaResuelto(res.data?.idHojaVida ?? null)
+          setHojaVidaStatus('encontrada')
+        })
+        .catch(() => {
+          if (cancelado) return
+          setIdHojaVidaResuelto(null)
+          setHojaVidaStatus('no-encontrada')
+        })
+    }, 500)
+
+    return () => {
+      cancelado = true
+      clearTimeout(timeout)
+    }
+  }, [rutEstudianteTyped, editingId])
+
+  const loadAll = async () => {
     setLoading(true)
     setLoadError('')
+    setActiveFilterRut('')
 
     try {
-      const response = hojaVidaId
-        ? await getAnotacionesByHojaVida(hojaVidaId)
-        : await getAllAnotaciones()
-
+      const response = await getAllAnotaciones()
       setAnotaciones(Array.isArray(response.data) ? response.data : [])
     } catch (error) {
       console.error(error)
@@ -79,41 +124,100 @@ export default function Anotaciones() {
     }
   }
 
-  useEffect(() => {
-    loadAnotaciones()
-  }, [])
+  const loadByRut = async (rut) => {
+    setLoading(true)
+    setLoadError('')
+
+    try {
+      const response = await getAnotacionesByRut(limpiarRut(rut))
+      setAnotaciones(Array.isArray(response.data) ? response.data : [])
+      setActiveFilterRut(rut)
+    } catch (error) {
+      console.error(error)
+      const message = error.response?.data?.message || 'No se pudieron cargar las anotaciones del estudiante'
+      setLoadError(message)
+      toast.error(message)
+      setAnotaciones([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (userRut) {
-      setValue('funcionarioUsuRut', String(userRut), { shouldValidate: true })
+    // Un estudiante solo puede ver sus propias anotaciones: se carga directo con
+    // su RUT y no tiene acceso al filtro de búsqueda por RUT de otros estudiantes.
+    if (isEstudiante) {
+      if (userRut) loadByRut(userRut)
+      return
     }
-  }, [userRut, setValue])
+    loadAll()
+  }, [isEstudiante, userRut])
+
+  const handleSearch = async (event) => {
+    event.preventDefault()
+    const valor = filterRut.trim()
+    if (!valor) {
+      await loadAll()
+      return
+    }
+    if (!rutValido(valor)) {
+      toast.error('RUT inválido (7-8 dígitos, DV opcional: 12345678-5)')
+      return
+    }
+    await loadByRut(valor)
+  }
+
+  const handleResetFiltros = async () => {
+    setFilterRut('')
+    await loadAll()
+  }
+
+  const handleRefresh = async () => {
+    if (activeFilterRut) {
+      await loadByRut(activeFilterRut)
+    } else {
+      await loadAll()
+    }
+  }
+
+  const resetForm = () => {
+    setEditingId(null)
+    reset(initialForm)
+    setHojaVidaStatus('idle')
+    setIdHojaVidaResuelto(null)
+  }
 
   const onSubmit = async (data) => {
     setSaving(true)
 
-    const payload = {
-      anotTip: data.anotTip,
-      anotDes: data.anotDes,
-      funcionarioUsuRut: Number(data.funcionarioUsuRut),
-      idHojaVida: Number(data.idHojaVida),
-    }
-
     try {
       if (editingId) {
-        await actualizarAnotacion(editingId, payload)
+        await actualizarAnotacion(editingId, {
+          anotTip: data.anotTip,
+          anotDes: data.anotDes,
+        })
         toast.success('Anotación actualizada')
       } else {
-        await crearAnotacion(payload)
+        if (!idHojaVidaResuelto) {
+          toast.error('Ingresa el RUT de un estudiante con hoja de vida registrada')
+          setSaving(false)
+          return
+        }
+        await crearAnotacion({
+          anotTip: data.anotTip,
+          anotDes: data.anotDes,
+          funcionarioUsuRut: Number(userRut),
+          idHojaVida: idHojaVidaResuelto,
+        })
         toast.success('Anotación creada')
       }
 
-      reset({
-        ...initialForm,
-        funcionarioUsuRut: String(userRut || ''),
-      })
-      setEditingId(null)
-      await loadAnotaciones(filterHojaVida)
+      resetForm()
+      if (activeFilterRut) {
+        await loadByRut(activeFilterRut)
+      } else {
+        await loadAll()
+      }
     } catch (error) {
       console.error(error)
       toast.error(error.response?.data?.message || 'No se pudo guardar la anotación')
@@ -127,8 +231,7 @@ export default function Anotaciones() {
     reset({
       anotTip: anotacion.anotTip || 'Positiva',
       anotDes: anotacion.anotDes || '',
-      funcionarioUsuRut: String(anotacion.funcionarioUsuRut ?? ''),
-      idHojaVida: String(anotacion.idHojaVida ?? ''),
+      rutEstudiante: '',
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -140,49 +243,30 @@ export default function Anotaciones() {
     try {
       await eliminarAnotacion(id)
       toast.success('Anotación eliminada')
-      await loadAnotaciones(filterHojaVida)
+      if (activeFilterRut) {
+        await loadByRut(activeFilterRut)
+      } else {
+        await loadAll()
+      }
     } catch (error) {
       console.error(error)
       toast.error(error.response?.data?.message || 'No se pudo eliminar la anotación')
     }
   }
 
-  const handleFilter = async (event) => {
-    event.preventDefault()
-    await loadAnotaciones(filterHojaVida.trim())
-  }
-
-  const resetForm = () => {
-    setEditingId(null)
-    reset({
-      ...initialForm,
-      funcionarioUsuRut: String(userRut || ''),
-    })
-  }
+  const mostrarFormulario = canCreate || editingId
 
   return (
     <div className="anotaciones-page">
       <main className="anotaciones-shell">
         <section className="hero-card">
           <div className="hero-copy-block">
-
             <h1>Gestión institucional de anotaciones con trazabilidad completa</h1>
-
-            <div className="hero-actions">
-              <Button type="button" variant="outline" onClick={() => loadAnotaciones(filterHojaVida.trim())}>
-                Refrescar datos
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setFilterHojaVida('')
-                  loadAnotaciones()
-                }}
-              >
-                Limpiar filtro
-              </Button>
-            </div>
+            <p className="hero-copy">
+              {isEstudiante
+                ? 'Revisa aquí el historial completo de tus anotaciones.'
+                : 'Busca a un estudiante por su RUT para revisar su historial, o registra una nueva anotación indicando el RUT: la hoja de vida se detecta automáticamente.'}
+            </p>
           </div>
         </section>
 
@@ -199,34 +283,36 @@ export default function Anotaciones() {
             <span>Negativas</span>
             <strong>{dashboardStats.negativas}</strong>
           </article>
-          <article className="metric-card metric-card--accent">
-            <span>Filtro actual</span>
-            <strong>{dashboardStats.filtro}</strong>
-          </article>
         </section>
 
-        <AnotacionesToolbar
-          total={dashboardStats.total}
-          modeLabel={editingId ? 'Edición activa' : 'Creación disponible'}
-          canSeeLabel={hasRole(['ADMIN', 'DIRECTIVO', 'DOCENTE', 'INSPECTOR']) ? 'Perfil autorizado' : 'Perfil general'}
-          filterHojaVida={filterHojaVida}
-          setFilterHojaVida={setFilterHojaVida}
-          onSearch={handleFilter}
-          onReset={() => {
-            setFilterHojaVida('')
-            loadAnotaciones()
-          }}
-        />
-
-        <section className="content-grid">
-          <AnotacionForm
-            register={register}
-            errors={errors}
-            isSaving={saving}
-            editingId={editingId}
-            onSubmit={handleSubmit(onSubmit)}
-            onCancel={resetForm}
+        {isEstudiante ? (
+          <p className="anotaciones-estudiante-aviso">Estás viendo únicamente tus propias anotaciones.</p>
+        ) : (
+          <AnotacionesToolbar
+            total={dashboardStats.total}
+            modeLabel={editingId ? 'Edición activa' : activeFilterRut ? `Historial de RUT ${activeFilterRut}` : 'Todas las anotaciones'}
+            canSeeLabel={canManage ? 'Directivo (gestión completa)' : canCreate ? 'Docente/Inspector (crea)' : 'Perfil de solo lectura'}
+            filterRut={filterRut}
+            setFilterRut={setFilterRut}
+            onSearch={handleSearch}
+            onReset={handleResetFiltros}
+            onRefresh={handleRefresh}
           />
+        )}
+
+        <section className={`content-grid ${mostrarFormulario ? '' : 'content-grid--single'}`}>
+          {mostrarFormulario && (
+            <AnotacionForm
+              register={register}
+              errors={errors}
+              isSaving={saving}
+              editingId={editingId}
+              onSubmit={handleSubmit(onSubmit)}
+              onCancel={resetForm}
+              hojaVidaStatus={hojaVidaStatus}
+              idHojaVidaResuelto={idHojaVidaResuelto}
+            />
+          )}
 
           <section className="list-card">
             <div className="list-header">
@@ -242,7 +328,11 @@ export default function Anotaciones() {
             ) : loadError ? (
               <div className="empty-state empty-state--error">{loadError}</div>
             ) : anotaciones.length === 0 ? (
-              <div className="empty-state">No hay anotaciones para mostrar.</div>
+              <div className="empty-state">
+                {activeFilterRut
+                  ? 'Este estudiante no tiene anotaciones registradas.'
+                  : 'No hay anotaciones para mostrar.'}
+              </div>
             ) : (
               <div className="cards-list">
                 {anotaciones.map((anotacion) => (
@@ -252,6 +342,7 @@ export default function Anotaciones() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     formatDate={formatDate}
+                    canManage={canManage}
                   />
                 ))}
               </div>
