@@ -1,7 +1,7 @@
 import Button from '../UI/Button'
 import './AnotacionCard.css'
 
-export default function AnotacionCard({ anotacion, onEdit, onDelete, formatDate }) {
+export default function AnotacionCard({ anotacion, onEdit, onDelete, formatDate, canManage }) {
   return (
     <article className="anotacion-card">
       <div className="anotacion-card__top">
@@ -22,20 +22,18 @@ export default function AnotacionCard({ anotacion, onEdit, onDelete, formatDate 
           <dt>Funcionario</dt>
           <dd>{anotacion.funcionarioUsuRut}</dd>
         </div>
-        <div>
-          <dt>Hoja de vida</dt>
-          <dd>{anotacion.idHojaVida}</dd>
-        </div>
       </dl>
 
-      <div className="anotacion-card__actions">
-        <Button type="button" variant="outline" onClick={() => onEdit(anotacion)}>
-          Editar
-        </Button>
-        <Button type="button" variant="danger" onClick={() => onDelete(anotacion.idAnot)}>
-          Eliminar
-        </Button>
-      </div>
+      {canManage && (
+        <div className="anotacion-card__actions">
+          <Button type="button" variant="outline" onClick={() => onEdit(anotacion)}>
+            Editar
+          </Button>
+          <Button type="button" variant="danger" onClick={() => onDelete(anotacion.idAnot)}>
+            Eliminar
+          </Button>
+        </div>
+      )}
     </article>
   )
 }

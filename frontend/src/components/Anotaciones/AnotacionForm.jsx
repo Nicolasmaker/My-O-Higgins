@@ -3,6 +3,13 @@ import Input from '../UI/Input'
 import { anotacionRules } from '../../validators/fieldValidators'
 import './AnotacionForm.css'
 
+const ESTADO_HOJA_VIDA = {
+  idle: null,
+  buscando: { text: 'Buscando hoja de vida...', className: 'buscando' },
+  encontrada: { text: null, className: 'encontrada' }, // el texto se arma en el componente con el id
+  'no-encontrada': { text: 'Este estudiante no tiene hoja de vida registrada.', className: 'no-encontrada' },
+}
+
 export default function AnotacionForm({
   register,
   errors,
@@ -10,7 +17,14 @@ export default function AnotacionForm({
   editingId,
   onSubmit,
   onCancel,
+  hojaVidaStatus = 'idle',
+  idHojaVidaResuelto = null,
 }) {
+  const estado = ESTADO_HOJA_VIDA[hojaVidaStatus]
+  const puedeGuardar = editingId
+    ? !isSaving
+    : !isSaving && hojaVidaStatus === 'encontrada' && idHojaVidaResuelto
+
   return (
     <form className="anotacion-form" onSubmit={onSubmit}>
       <div className="anotacion-form__header">
@@ -24,6 +38,26 @@ export default function AnotacionForm({
           </Button>
         ) : null}
       </div>
+
+      {!editingId && (
+        <>
+          <Input
+            label="RUT del estudiante"
+            type="text"
+            placeholder="12345678-5"
+            error={errors.rutEstudiante?.message}
+            {...register('rutEstudiante', anotacionRules.rutEstudiante)}
+          />
+
+          {estado && (
+            <p className={`anotacion-form__hoja-vida-status ${estado.className}`}>
+              {hojaVidaStatus === 'encontrada'
+                ? `Hoja de vida encontrada (#${idHojaVidaResuelto}). La anotación se registrará ahí.`
+                : estado.text}
+            </p>
+          )}
+        </>
+      )}
 
       <label className="ui-field">
         <span className="ui-field__label">Tipo</span>
@@ -45,25 +79,7 @@ export default function AnotacionForm({
         {errors.anotDes ? <span className="ui-field__error">{errors.anotDes.message}</span> : null}
       </label>
 
-      <div className="anotacion-form__two-cols">
-        <Input
-          label="RUT funcionario"
-          type="number"
-          placeholder="12345678"
-          error={errors.funcionarioUsuRut?.message}
-          {...register('funcionarioUsuRut', anotacionRules.funcionarioUsuRut)}
-        />
-
-        <Input
-          label="ID hoja de vida"
-          type="number"
-          placeholder="1"
-          error={errors.idHojaVida?.message}
-          {...register('idHojaVida', anotacionRules.idHojaVida)}
-        />
-      </div>
-
-      <Button type="submit" disabled={isSaving}>
+      <Button type="submit" disabled={!puedeGuardar}>
         {isSaving ? 'Guardando...' : editingId ? 'Actualizar anotación' : 'Crear anotación'}
       </Button>
     </form>

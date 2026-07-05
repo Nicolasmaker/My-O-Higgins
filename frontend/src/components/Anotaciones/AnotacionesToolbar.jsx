@@ -1,23 +1,34 @@
 import Button from '../UI/Button'
 import './AnotacionesToolbar.css'
 
-export default function AnotacionesToolbar({ total, modeLabel, canSeeLabel, filterHojaVida, setFilterHojaVida, onSearch, onReset }) {
+export default function AnotacionesToolbar({
+  total,
+  modeLabel,
+  canSeeLabel,
+  filterRut,
+  setFilterRut,
+  onSearch,
+  onReset,
+  onRefresh,
+}) {
   return (
     <section className="anotaciones-toolbar">
       <form className="anotaciones-toolbar__filter" onSubmit={onSearch}>
         <label>
-          Filtrar por hoja de vida
+          Buscar por RUT del estudiante
           <input
-            type="number"
-            min="1"
-            value={filterHojaVida}
-            onChange={(event) => setFilterHojaVida(event.target.value)}
-            placeholder="ID hoja de vida"
+            type="text"
+            value={filterRut}
+            onChange={(event) => setFilterRut(event.target.value)}
+            placeholder="12345678-5"
           />
         </label>
         <Button type="submit">Buscar</Button>
         <Button type="button" variant="outline" onClick={onReset}>
-          Ver todo
+          Limpiar filtros
+        </Button>
+        <Button type="button" variant="ghost" onClick={onRefresh}>
+          Refrescar
         </Button>
       </form>
 
