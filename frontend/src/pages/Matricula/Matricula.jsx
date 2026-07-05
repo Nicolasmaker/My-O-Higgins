@@ -17,8 +17,6 @@ import {
   actualizarMatricula,
   eliminarMatricula,
 } from '../../services/matriculaService'
-import Navbar from '../../components/Navbar/Navbar'
-import Footer from '../../components/Footer/Footer'
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
 import styles from './Matricula.module.css'
 
@@ -153,8 +151,6 @@ export default function Matricula() {
 
   return (
     <div className={styles.page}>
-      <Navbar />
-
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>
@@ -285,8 +281,6 @@ export default function Matricula() {
           setEditTarget(null)
         }}
       />
-
-      <Footer />
     </div>
   )
 }

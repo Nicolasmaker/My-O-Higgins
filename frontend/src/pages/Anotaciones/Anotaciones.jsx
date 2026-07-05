@@ -10,8 +10,6 @@ import {
   getAnotacionesByHojaVida,
 } from '../../services/anotacionesService'
 import Button from '../../components/UI/Button'
-import Navbar from '../../components/Navbar/Navbar'
-import Footer from '../../components/Footer/Footer'
 import AnotacionCard from '../../components/Anotaciones/AnotacionCard'
 import AnotacionesToolbar from '../../components/Anotaciones/AnotacionesToolbar'
 import AnotacionForm from '../../components/Anotaciones/AnotacionForm'
@@ -168,8 +166,6 @@ export default function Anotaciones() {
 
   return (
     <div className="anotaciones-page">
-      <Navbar />
-
       <main className="anotaciones-shell">
         <section className="hero-card">
           <div className="hero-copy-block">
@@ -278,8 +274,6 @@ export default function Anotaciones() {
           </section>
         </section>
       </main>
-
-      <Footer />
     </div>
   )
 }

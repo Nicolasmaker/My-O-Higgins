@@ -22,8 +22,6 @@ import {
   marcarComoLeido,
   eliminarMensaje,
 } from '../../services/mensajeriaService'
-import Navbar from '../../components/Navbar/Navbar'
-import Footer from '../../components/Footer/Footer'
 import MensajeCompose from '../../components/Mensajeria/MensajeCompose'
 import styles from './Mensajeria.module.css'
 
@@ -136,8 +134,6 @@ export default function Mensajeria() {
 
   return (
     <div className={styles.page}>
-      <Navbar />
-
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>
@@ -256,8 +252,6 @@ export default function Mensajeria() {
         onSend={handleSend}
         onClose={() => setShowCompose(false)}
       />
-
-      <Footer />
     </div>
   )
 }

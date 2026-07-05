@@ -35,8 +35,6 @@ import {
   actualizarAntecedenteMedico,
   eliminarAntecedenteMedico,
 } from '../../services/hojaDeVidaService'
-import Navbar from '../../components/Navbar/Navbar'
-import Footer from '../../components/Footer/Footer'
 import HojaVidaForm from '../../components/HojaDeVida/HojaVidaForm'
 import AntecedenteForm from '../../components/HojaDeVida/AntecedenteForm'
 import styles from './HojaDeVida.module.css'
@@ -233,8 +231,6 @@ export default function HojaDeVida() {
 
   return (
     <div className={styles.page}>
-      <Navbar />
-
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>
@@ -492,8 +488,6 @@ export default function HojaDeVida() {
           setAntEdit(null)
         }}
       />
-
-      <Footer />
     </div>
   )
 }

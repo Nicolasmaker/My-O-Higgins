@@ -27,8 +27,6 @@ import {
   getReunionesGenerales,
   crearReunionGeneral,
 } from '../../services/reunionesService'
-import Navbar from '../../components/Navbar/Navbar'
-import Footer from '../../components/Footer/Footer'
 import ReunionForm from '../../components/Reuniones/ReunionForm'
 import ReunionApoderadoCard from '../../components/Reuniones/ReunionApoderadoCard'
 import ReunionIndividualCard from '../../components/Reuniones/ReunionIndividualCard'
@@ -181,8 +179,6 @@ export default function Reuniones() {
 
   return (
     <div className={styles.page}>
-      <Navbar />
-
       <main className={styles.shell}>
         {/* ── Encabezado compacto ── */}
         <header className={styles.pageHeader}>
@@ -286,8 +282,6 @@ export default function Reuniones() {
           </Tab>
         </Tabs>
       </main>
-
-      <Footer />
     </div>
   )
 }

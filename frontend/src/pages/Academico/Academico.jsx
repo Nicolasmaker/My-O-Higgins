@@ -17,8 +17,6 @@ import { Row, Col, Nav, Table, Badge, Button, Alert, Spinner, Form } from 'react
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
 import { getNotasByEstudiante } from '../../services/academicoService'
-import Navbar from '../../components/Navbar/Navbar'
-import Footer from '../../components/Footer/Footer'
 import EntidadForm from '../../components/Academico/EntidadForm'
 import { ENTIDADES } from '../../components/Academico/entidadesConfig'
 import styles from '../../styles/Academico.module.css'
@@ -199,7 +197,6 @@ export default function Academico() {
   if (esEstudiante) {
     return (
       <div className={styles.page}>
-        <Navbar />
         <main className={styles.shell}>
           <header className={styles.pageHeader}>
             <div>
@@ -209,15 +206,12 @@ export default function Academico() {
           </header>
           <MisNotas rut={usuario?.usuRut} />
         </main>
-        <Footer />
       </div>
     )
   }
 
   return (
     <div className={styles.page}>
-      <Navbar />
-
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>

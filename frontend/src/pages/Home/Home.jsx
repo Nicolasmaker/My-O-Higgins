@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/UI/Button';
-import Navbar from '../../components/Navbar/Navbar';
-import Footer from '../../components/Footer/Footer';
 import styles from './Home.module.css';
 import fachadaColegioBO from '../../assets/fachadaColegioBO.png';
 import iconoCalendario from '../../assets/iconoCalendario.png';
@@ -108,9 +106,6 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      {/* Navbar */}
-      <Navbar />
-
       {/* SECCIÓN HERO */}
       <section className={styles.heroSection} id="inicio">
         <div className={styles.heroContainer}>
@@ -222,8 +217,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { FiCalendar, FiChevronLeft, FiChevronRight, FiClock, FiList, FiPlus, FiRefreshCw } from 'react-icons/fi'
-import Navbar from '../../components/Navbar/Navbar'
-import Footer from '../../components/Footer/Footer'
 import Button from '../../components/UI/Button'
 import Input from '../../components/UI/Input'
 import { crearEvento, actualizarEvento, eliminarEvento, getEventos } from '../../services/calendarioService'
@@ -415,8 +413,6 @@ export default function Calendario() {
 
   return (
     <div className={styles.page}>
-      <Navbar />
-
       <main className={styles.shell}>
         <section className={styles.heroCard}>
           <div>
@@ -680,8 +676,6 @@ export default function Calendario() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   )
 }
