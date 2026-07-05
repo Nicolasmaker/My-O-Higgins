@@ -42,6 +42,14 @@ public class HojaVidaService {
         return mapearADTO(entidad);
     }
 
+    // Resuelve la hoja de vida de un estudiante a partir de su RUT (usado por MS-Anotaciones
+    // para no requerir que el usuario conozca el idHojaVida al registrar una anotacion)
+    public HojaVidaEstudianteDTO obtenerHojaVidaPorRut(Long estudianteUsuRut) {
+        HojaVidaEstudiante entidad = hojaVidaRepository.findByEstudianteUsuRut(estudianteUsuRut)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe hoja de vida para el estudiante con RUT: " + estudianteUsuRut));
+        return mapearADTO(entidad);
+    }
+
     public HojaVidaEstudianteDTO crearHojaVida(HojaVidaEstudianteDTO request) {
         // Validamos que el estudiante exista en Autenticacion
         if (!existeEstudiante(request.getEstudianteUsuRut())) {

@@ -36,6 +36,12 @@ public class HojaVidaController {
         return ResponseEntity.ok(hojaVidaService.obtenerHojaVidaPorId(idHojaVida));
     }
 
+    // Busca la hoja de vida a partir del RUT del estudiante
+    @GetMapping("/estudiante/{rut}")
+    public ResponseEntity<HojaVidaEstudianteDTO> obtenerHojaVidaPorRut(@PathVariable Long rut) {
+        return ResponseEntity.ok(hojaVidaService.obtenerHojaVidaPorRut(rut));
+    }
+
     @PostMapping
     public ResponseEntity<HojaVidaEstudianteDTO> crearHojaVida(@RequestBody HojaVidaEstudianteDTO request) {
         HojaVidaEstudianteDTO hojaVidaCreada = hojaVidaService.crearHojaVida(request);
