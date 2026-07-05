@@ -29,24 +29,6 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF porque se esta usando jwt
             .authorizeHttpRequests(auth -> auth
-                 // MODO DESARROLLO: Permitir todo el tráfico temporalmente para facilitar pruebas de integración
-                .anyRequest().permitAll()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //Esto es para q no use cookies pq la peticion sera validada por el token
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); //Se cambia el filtro por defecto por el que se creo 
-        return http.build();
-    }
-}
-
- /* ESTE CODIGO TIENE RESTRICCIONES Y ESTA DESAHBILITADO PARA PODER HACER CUALQUIER PETICION ENTRE MICROSERVICIOS PARA 
- QUE NO TENGAN BLOQUEOS DE SEGURIDAD DEL TIPO 403 (EL @BEAN DE ARRIBA PERMITE TODO Y ES EL CODIGO QUE SE ESTA USANDO AHORA)
-
-  @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF porque se esta usando jwt
-            .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/login").permitAll() //Ruta del login publica
                 .requestMatchers(
                     "/v3/api-docs/**",
@@ -54,31 +36,32 @@ public class SecurityConfig {
                     "/swagger-ui.html"
                 ).permitAll() // Rutas de Swagger públicas
 
-             //Solo los usuarios con ROLE_DOCENTE pueden acceder a /funcionarios/docente y sus subrutas
-                .requestMatchers("/funcionarios/docente/**").hasAuthority("ROLE_DOCENTE")
-            
+                // Lecturas abiertas: MS-Anotaciones, MS-GestionMatricula, MS-Mensajeria,
+                // MS-GestionAcademica y MS-GestionReuniones llaman estos GET por RUT
+                // de servidor a servidor (via RestClient) para validar existencia de
+                // funcionarios/estudiantes/apoderados/usuarios, sin propagar el JWT del
+                // usuario final. Si se restringen, esas validaciones responden 401 y
+                // se rompe crear anotacion, matricula, mensaje, evaluacion y reunion.
+                .requestMatchers(HttpMethod.GET, "/estudiantes/**", "/funcionarios/**", "/apoderados/**", "/usuarios/**").permitAll()
+
              //Solo los administradores (o directores) pueden registrar a otros funcionarios
                 .requestMatchers(HttpMethod.POST, "/funcionarios/**").hasAuthority("ROLE_DIRECTIVO")
-            
-             //Solo los apoderados pueden ver las rutas de apoderados
-                .requestMatchers("/apoderados/**").hasAuthority("ROLE_APODERADO")
 
-             //Solo los inspectores pueden ver las rutas de inspectores
+             //Solo los usuarios con ROLE_DOCENTE pueden editar su propia ficha de docente
+                .requestMatchers("/funcionarios/docente/**").hasAuthority("ROLE_DOCENTE")
+
+             //Solo los inspectores pueden editar su propia ficha de inspector
                 .requestMatchers("/funcionarios/inspector/**").hasAuthority("ROLE_INSPECTOR")
 
-             //Solo los estudiantes pueden ver las rutas de estudiantes
-                .requestMatchers(HttpMethod.GET, "/estudiantes/**").permitAll()
-                .requestMatchers("/estudiantes/**").hasAuthority("ROLE_ESTUDIANTE")
+             //Solo los directivos pueden editar su propia ficha de directivo
+                .requestMatchers("/funcionarios/directivo/**").hasAuthority("ROLE_DIRECTIVO")
 
-                .anyRequest().authenticated() //Todas las demas rutas requerien un toekn valido
+                .anyRequest().authenticated() //Todas las demas rutas requieren un token valido
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //Esto es para q no use cookies pq la peticion sera validada por el token
             .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); //Se cambia el filtro por defecto por el que se creo 
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); //Se cambia el filtro por defecto por el que se creo
         return http.build();
     }
 }
- 
- 
-*/
 
