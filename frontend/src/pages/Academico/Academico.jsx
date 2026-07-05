@@ -21,7 +21,7 @@ import Navbar from '../../components/Navbar/Navbar'
 import Footer from '../../components/Footer/Footer'
 import EntidadForm from '../../components/Academico/EntidadForm'
 import { ENTIDADES } from '../../components/Academico/entidadesConfig'
-import styles from './Academico.module.css'
+import styles from '../../styles/Academico.module.css'
 
 const ROLES_GESTION = ['ROLE_DOCENTE', 'ROLE_INSPECTOR', 'ROLE_DIRECTIVO']
 const SECCIONES = Object.keys(ENTIDADES)
@@ -229,6 +229,7 @@ export default function Academico() {
           </div>
           {canManage && (
             <Button
+              size="lg"
               className={styles.btnGranate}
               onClick={() => {
                 setEditItem(null)
@@ -300,7 +301,6 @@ export default function Academico() {
                         {canManage && (
                           <td className="text-end">
                             <Button
-                              size="sm"
                               variant="outline-secondary"
                               className="me-2"
                               onClick={() => {
@@ -310,7 +310,7 @@ export default function Academico() {
                             >
                               Editar
                             </Button>
-                            <Button size="sm" variant="outline-danger" onClick={() => handleDelete(item)}>
+                            <Button variant="outline-danger" onClick={() => handleDelete(item)}>
                               Eliminar
                             </Button>
                           </td>
@@ -337,7 +337,6 @@ export default function Academico() {
         }}
       />
 
-      <Footer />
     </div>
   )
 }
