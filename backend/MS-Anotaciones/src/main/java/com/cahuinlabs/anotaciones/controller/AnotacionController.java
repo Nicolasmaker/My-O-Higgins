@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cahuinlabs.anotaciones.dto.AnotacionResponseDTO;
 import com.cahuinlabs.anotaciones.models.entities.Anotacion;
 import com.cahuinlabs.anotaciones.models.request.AnotacionDTO;
 import com.cahuinlabs.anotaciones.service.AnotacionService;
@@ -35,22 +36,22 @@ public class AnotacionController {
 
     // GET: Consultar por Hoja de vida. Permiso: Todos segun su perfil
     @GetMapping("/hojavida/{idHojaVida}")
-    public ResponseEntity<List<Anotacion>> consultarAnotacionesEstudiante(@PathVariable Long idHojaVida) {
-        List<Anotacion> anotaciones = anotacionService.obtenerPorHojaVida(idHojaVida);
+    public ResponseEntity<List<AnotacionResponseDTO>> consultarAnotacionesEstudiante(@PathVariable Long idHojaVida) {
+        List<AnotacionResponseDTO> anotaciones = anotacionService.obtenerPorHojaVida(idHojaVida);
         return new ResponseEntity<>(anotaciones, HttpStatus.OK);
     }
 
     // GET: Consultar por RUT del estudiante. Permiso: Todos segun su perfil
     @GetMapping("/estudiante/{rut}")
-    public ResponseEntity<List<Anotacion>> consultarAnotacionesPorRutEstudiante(@PathVariable Long rut) {
-        List<Anotacion> anotaciones = anotacionService.obtenerPorEstudianteRut(rut);
+    public ResponseEntity<List<AnotacionResponseDTO>> consultarAnotacionesPorRutEstudiante(@PathVariable Long rut) {
+        List<AnotacionResponseDTO> anotaciones = anotacionService.obtenerPorEstudianteRut(rut);
         return new ResponseEntity<>(anotaciones, HttpStatus.OK);
     }
 
     // GET: Obtener todas las anotaciones. Permiso: Todos segun su perfil
     @GetMapping
-    public ResponseEntity<List<Anotacion>> obtenerTodasAnotaciones() {
-        List<Anotacion> anotaciones = anotacionService.obtenerTodas();
+    public ResponseEntity<List<AnotacionResponseDTO>> obtenerTodasAnotaciones() {
+        List<AnotacionResponseDTO> anotaciones = anotacionService.obtenerTodas();
         return new ResponseEntity<>(anotaciones, HttpStatus.OK);
     }
 
