@@ -43,6 +43,8 @@ export default function Anotaciones() {
   const [saving, setSaving] = useState(false)
   const [filterRut, setFilterRut] = useState('')
   const [activeFilterRut, setActiveFilterRut] = useState('')
+  const [filterTipo, setFilterTipo] = useState('todas')
+  const [filterCurso, setFilterCurso] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [hojaVidaStatus, setHojaVidaStatus] = useState('idle')
   const [idHojaVidaResuelto, setIdHojaVidaResuelto] = useState(null)
@@ -61,16 +63,45 @@ export default function Anotaciones() {
   const isEstudiante = hasRole(ROL_ESTUDIANTE)
   const rutEstudianteTyped = watch('rutEstudiante')
 
+  // Normaliza texto para comparar sin importar tildes, mayúsculas ni símbolos (ej. "8°B" vs "8b").
+  const normalizar = (valor) =>
+    String(valor || '')
+      .normalize('NFD')
+      .replace(/[^a-z0-9]/gi, '')
+      .toLowerCase()
+
+  const anotacionesFiltradas = useMemo(() => {
+    const cursoBuscado = normalizar(filterCurso)
+    const textoBuscado = normalizar(filterRut)
+
+    return anotaciones.filter((item) => {
+      if (filterTipo !== 'todas' && String(item.anotTip || '').toLowerCase() !== filterTipo) {
+        return false
+      }
+      if (cursoBuscado && !normalizar(item.curso).includes(cursoBuscado)) {
+        return false
+      }
+      if (textoBuscado) {
+        const nombreCompleto = normalizar(`${item.estudianteNombre || ''} ${item.estudianteApellido || ''}`)
+        const rutEstudiante = normalizar(item.estudianteUsuRut)
+        if (!nombreCompleto.includes(textoBuscado) && !rutEstudiante.includes(textoBuscado)) {
+          return false
+        }
+      }
+      return true
+    })
+  }, [anotaciones, filterTipo, filterCurso, filterRut])
+
   const dashboardStats = useMemo(() => {
-    const positivas = anotaciones.filter((item) => String(item.anotTip || '').toLowerCase() === 'positiva').length
-    const negativas = anotaciones.filter((item) => String(item.anotTip || '').toLowerCase() === 'negativa').length
+    const positivas = anotacionesFiltradas.filter((item) => String(item.anotTip || '').toLowerCase() === 'positiva').length
+    const negativas = anotacionesFiltradas.filter((item) => String(item.anotTip || '').toLowerCase() === 'negativa').length
 
     return {
-      total: anotaciones.length,
+      total: anotacionesFiltradas.length,
       positivas,
       negativas,
     }
-  }, [anotaciones])
+  }, [anotacionesFiltradas])
 
   // Resuelve automáticamente el idHojaVida a partir del RUT tipeado en el formulario
   // de creación (RF11: la anotación se relaciona con la hoja de vida del estudiante).
@@ -153,6 +184,9 @@ export default function Anotaciones() {
     loadAll()
   }, [isEstudiante, userRut])
 
+  // El filtro por tipo/curso/nombre ya se aplica en vivo sobre lo cargado (anotacionesFiltradas).
+  // Este submit solo se usa cuando lo tipeado es un RUT valido: en ese caso ademas trae del
+  // backend el historial completo de ese estudiante (no solo lo que ya estaba cargado).
   const handleSearch = async (event) => {
     event.preventDefault()
     const valor = filterRut.trim()
@@ -161,7 +195,6 @@ export default function Anotaciones() {
       return
     }
     if (!rutValido(valor)) {
-      toast.error('RUT inválido (7-8 dígitos, DV opcional: 12345678-5)')
       return
     }
     await loadByRut(valor)
@@ -169,6 +202,8 @@ export default function Anotaciones() {
 
   const handleResetFiltros = async () => {
     setFilterRut('')
+    setFilterTipo('todas')
+    setFilterCurso('')
     await loadAll()
   }
 
@@ -279,6 +314,10 @@ export default function Anotaciones() {
             onSearch={handleSearch}
             onReset={handleResetFiltros}
             onRefresh={handleRefresh}
+            filterTipo={filterTipo}
+            setFilterTipo={setFilterTipo}
+            filterCurso={filterCurso}
+            setFilterCurso={setFilterCurso}
           />
         )}
 
@@ -317,7 +356,7 @@ export default function Anotaciones() {
                 <p className="eyebrow">Listado institucional</p>
                 <h2>Anotaciones registradas</h2>
               </div>
-              <span className="list-header__counter">{anotaciones.length} registros</span>
+              <span className="list-header__counter">{anotacionesFiltradas.length} registros</span>
             </div>
 
             {loading ? (
@@ -330,9 +369,11 @@ export default function Anotaciones() {
                   ? 'Este estudiante no tiene anotaciones registradas.'
                   : 'No hay anotaciones para mostrar.'}
               </div>
+            ) : anotacionesFiltradas.length === 0 ? (
+              <div className="empty-state">Ninguna anotación coincide con los filtros aplicados.</div>
             ) : (
               <div className="cards-list">
-                {anotaciones.map((anotacion) => (
+                {anotacionesFiltradas.map((anotacion) => (
                   <AnotacionCard
                     key={anotacion.idAnot}
                     anotacion={anotacion}

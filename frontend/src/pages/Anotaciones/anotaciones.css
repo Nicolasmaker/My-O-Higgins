@@ -101,7 +101,6 @@
 .empty-state,
 .anotacion-card__date,
 .anotacion-card__description,
-.anotacion-card__meta dt,
 .anotacion-card__meta dd {
   color: var(--color-text-secondary);
 }
@@ -121,7 +120,7 @@
 .content-grid {
   margin-top: 18px;
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1.6fr;
   gap: 20px;
   align-items: start;
 }
@@ -179,7 +178,6 @@
   }
 
   .metrics-grid,
-  .anotacion-card__meta,
   .anotaciones-toolbar__stats {
     grid-template-columns: 1fr;
   }
