@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { login } from '../../services/authService'
@@ -14,6 +15,15 @@ export default function Login() {
     formState: { errors },
   } = useForm()
   const { login: loginContext } = useAuth()
+
+  const [showRecovery, setShowRecovery] = useState(false)
+  const [recoverySent, setRecoverySent] = useState(false)
+  const {
+    register: registerRecovery,
+    handleSubmit: handleRecoverySubmit,
+    formState: { errors: recoveryErrors },
+    reset: resetRecoveryForm,
+  } = useForm()
 
   const onSubmit = async (data) => {
     try {
@@ -40,34 +50,75 @@ export default function Login() {
     }
   }
 
+  // Recuperación de contraseña: solo maqueta de front, sin llamada al backend
+  const onRecoverySubmit = (data) => {
+    setRecoverySent(true)
+    toast.success(`Si el correo ${data.recoveryEmail} está registrado, te enviaremos un enlace de recuperación`)
+  }
+
+  const toggleRecovery = () => {
+    setShowRecovery((v) => !v)
+    setRecoverySent(false)
+    resetRecoveryForm()
+  }
+
   return (
     <main className="login-page">
       <section className="login-card">
-        <p className="eyebrow">MS-Autenticación</p>
-        <h1>Ingresar al panel</h1>
-        <p>
-          Usa tus credenciales para guardar el token en el contexto y entrar al módulo de anotaciones.
+        <p className="login-eyebrow">My O'Higgins</p>
+        <h1>Ingreso a My Ohiggins</h1>
+        <p className="login-subtitle">
+          Ingresa con tu correo institucional para acceder a tus módulos.
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="login-form">
-          <Input
-            label="Usuario o RUT"
-            type="text"
-            placeholder="rut o usuario"
-            error={errors.email?.message}
-            {...register('email', emailRules)}
-          />
+        {!showRecovery ? (
+          <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+            <Input
+              label="Correo electrónico"
+              type="email"
+              placeholder="nombre@myohiggins.cl"
+              error={errors.email?.message}
+              {...register('email', emailRules)}
+            />
 
-          <Input
-            label="Contraseña"
-            type="password"
-            placeholder="••••••••"
-            error={errors.password?.message}
-            {...register('password', passwordRules)}
-          />
+            <Input
+              label="Contraseña"
+              type="password"
+              placeholder="••••••••"
+              error={errors.password?.message}
+              {...register('password', passwordRules)}
+            />
 
-          <Button type="submit">Entrar</Button>
-        </form>
+            <button type="button" className="login-forgot-link" onClick={toggleRecovery}>
+              ¿Olvidaste tu contraseña?
+            </button>
+
+            <Button type="submit">Entrar</Button>
+          </form>
+        ) : (
+          <div className="login-recovery">
+            {recoverySent ? (
+              <p className="login-recovery__success">
+                Revisa tu correo: si la dirección está registrada, llegará un enlace para restablecer tu contraseña.
+              </p>
+            ) : (
+              <form onSubmit={handleRecoverySubmit(onRecoverySubmit)} className="login-form">
+                <Input
+                  label="Correo electrónico"
+                  type="email"
+                  placeholder="nombre@myohiggins.cl"
+                  error={recoveryErrors.recoveryEmail?.message}
+                  {...registerRecovery('recoveryEmail', emailRules)}
+                />
+                <Button type="submit">Enviar enlace de recuperación</Button>
+              </form>
+            )}
+
+            <button type="button" className="login-forgot-link" onClick={toggleRecovery}>
+              Volver a iniciar sesión
+            </button>
+          </div>
+        )}
       </section>
     </main>
   )
