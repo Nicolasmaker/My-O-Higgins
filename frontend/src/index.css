@@ -6,8 +6,7 @@ html {
 }
 
 :root {
-  /* Forzamos a Bootstrap a usar nuestros colores de _variables.css */
-  --bs-body-bg: var(--color-bg-hero); 
+  /* Forzamos a Bootstrap a usar nuestros colores de _variables.css */ 
   --bs-body-color: var(--color-text-secondary); 
   --bs-heading-color: var(--color-text-primary); 
   --bs-link-color: var(--color-primary); 
@@ -42,7 +41,7 @@ body {
 /* REGLA DE SEGURIDAD PARA TÍTULOS */
 /* Esto garantiza que cualquier título de Bootstrap obedezca a tu color oscuro */
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-  color: var(--color-text-primary) !important;
+  color: var(--color-text-primary);
 }
 
 /* =========================================
@@ -75,33 +74,4 @@ table th,
 /* Fuerza el color en celdas que puedan estar usando variables locales de opacidad */
 [class*="calendar"], [class*="fc-"] {
   --bs-text-opacity: 1;
-}
-/* =========================================
-   ESTILOS EXCLUSIVOS: HOMEPAGE (ACCESOS RÁPIDOS)
-   ========================================= */
-
-/* Fondo Rojo Borgoña */
-.tarjeta-borgona {
-  background-color: #800020 !important; 
-}
-
-/* Forzamos a que TODO sea blanco, ganándole a la regla global oscura */
-.tarjeta-borgona,
-.tarjeta-borgona *,
-.tarjeta-borgona h1,
-.tarjeta-borgona h2,
-.tarjeta-borgona h3,
-.tarjeta-borgona h4,
-.tarjeta-borgona h5,
-.tarjeta-borgona h6,
-.tarjeta-borgona p,
-.tarjeta-borgona span,
-.tarjeta-borgona svg,
-.tarjeta-borgona i {
-  color: #ffffff !important;
-}
-
-.tarjeta-borgona:hover {
-  background-color: #660019 !important;
-  transition: background-color 0.3s ease;
 }
