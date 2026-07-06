@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/UI/Button';
+import ProcesoMatriculaModal from '../../components/Home/ProcesoMatriculaModal';
 import styles from './Home.module.css';
 import fachadaColegioBO from '../../assets/fachadaColegioBO.png';
 import iconoCalendario from '../../assets/iconoCalendario.png';
@@ -59,6 +60,7 @@ export default function Home() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [quickAccess, setQuickAccess] = useState(() => initializeQuickAccessItems(baseQuickAccess));
+  const [showProceso, setShowProceso] = useState(false);
 
   const recommendedQuickAccess = useMemo(() => getRecommendedQuickAccess(quickAccess), [quickAccess]);
 
@@ -124,9 +126,14 @@ export default function Home() {
                   Ir a Mi Portal →
                 </Button>
               ) : (
-                <Button variant="primary" onClick={() => navigate('/login')}>
-                  Ingresar a My O'Higgins →
-                </Button>
+                <>
+                  <Button variant="primary" onClick={() => navigate('/login')}>
+                    Ingresar a My O'Higgins →
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowProceso(true)}>
+                    Proceso de matrícula →
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -216,6 +223,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ProcesoMatriculaModal show={showProceso} onClose={() => setShowProceso(false)} />
     </div>
   );
 }
