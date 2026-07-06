@@ -216,6 +216,34 @@
 .composeTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
+  color: #ffffff;
+}
+
+.composeLabel {
+  font-size: var(--font-size-sm);
+}
+
+/* ── Chip de destinatario resuelto ──────────────────────────── */
+.destinatarioChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: var(--color-hover);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill, 999px);
+  padding: 6px 14px;
+  font-weight: var(--font-weight-medium);
+}
+
+.destinatarioChip button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
 }
 
 /* ── Estados vacíos ─────────────────────────────────────────── */
