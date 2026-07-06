@@ -19,6 +19,7 @@ import {
   getSalas, crearSala, actualizarSala, eliminarSala,
   getEvaluaciones, crearEvaluacion, actualizarEvaluacion, eliminarEvaluacion,
   getBitacorasAsignatura, crearBitacoraAsignatura, actualizarBitacoraAsignatura, eliminarBitacoraAsignatura,
+  getImpartir, crearImpartir, eliminarImpartir,
   getNotas, registrarNota, actualizarNota, eliminarNota,
 } from '../../services/academicoService'
 
@@ -177,6 +178,32 @@ export const ENTIDADES = {
       }
       return editing ? base : { ...base, idAsignatura: Number(d.idAsignatura) }
     },
+  },
+
+  impartir: {
+    titulo: 'Asignaciones docentes',
+    singular: 'asignación',
+    nuevoLabel: '+ Nueva asignación',
+    idKey: 'idImp',
+    sinEditar: true, // el backend no tiene PUT /impartir/{id}, solo crear y eliminar
+    api: { list: getImpartir, crear: crearImpartir, eliminar: eliminarImpartir },
+    columnas: [
+      { label: '#', render: (i) => i.idImp },
+      { label: 'RUT docente', render: (i) => i.docenteUsuRut },
+      { label: 'Asignatura', render: (i) => i.asignatura?.asiNombre ?? '—' },
+      { label: 'Curso', render: (i) => (i.curso ? `${i.curso.nivel?.nivNum ?? '—'}°${i.curso.curLetraSeccion ?? ''}` : '—') },
+    ],
+    campos: [
+      { name: 'docenteUsuRut', label: 'RUT docente *', type: 'rut', width: 6, getValue: (i) => i.docenteUsuRut ?? '' },
+      { name: 'idAsignatura', label: 'ID asignatura *', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.asignatura?.idAsi ?? '' },
+      { name: 'idCurso', label: 'ID curso *', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curso?.idCur ?? '' },
+    ],
+    defaults: { docenteUsuRut: '', idAsignatura: '', idCurso: '' },
+    payload: (d) => ({
+      docenteUsuRut: limpiarRut(d.docenteUsuRut),
+      idAsignatura: Number(d.idAsignatura),
+      idCurso: Number(d.idCurso),
+    }),
   },
 
   notas: {
