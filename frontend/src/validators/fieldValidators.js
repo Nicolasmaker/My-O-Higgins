@@ -32,6 +32,16 @@ export function rutValido(valor) {
   return calcularDv(cuerpo) === dv
 }
 
+// Igual que rutValido pero exige guión + DV (para el RUT de estudiante en
+// Anotaciones: solo se busca la hoja de vida si el formato viene completo).
+export function rutValidoConDv(valor) {
+  const limpio = String(valor).replace(/\./g, '').replace(/\s/g, '').toUpperCase()
+  const match = limpio.match(/^(\d{7,8})-([\dK])$/)
+  if (!match) return false
+  const [, cuerpo, dv] = match
+  return calcularDv(cuerpo) === dv
+}
+
 // Extrae el cuerpo numérico del RUT (lo que espera el backend)
 export function limpiarRut(valor) {
   const limpio = String(valor).replace(/\./g, '').replace(/\s/g, '')
@@ -42,6 +52,12 @@ export function limpiarRut(valor) {
 export const rutRules = {
   required: 'El RUT es obligatorio',
   validate: (v) => rutValido(v) || 'RUT inválido (7-8 dígitos, DV opcional: 12345678-5)',
+}
+
+// Para Anotaciones: exige guión + DV (ej. "12345678-5"), no acepta el RUT sin DV.
+export const rutConDvRules = {
+  required: 'El RUT es obligatorio',
+  validate: (v) => rutValidoConDv(v) || 'RUT inválido, debe incluir el guión y el DV (ej. 12345678-5)',
 }
 
 export const emailRules = {
@@ -79,5 +95,5 @@ export const anotacionRules = {
       message: 'El RUT debe ser mayor a 0',
     },
   },
-  rutEstudiante: rutRules,
+  rutEstudiante: rutConDvRules,
 }
