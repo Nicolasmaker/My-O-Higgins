@@ -108,6 +108,17 @@
   color: var(--color-primary);
 }
 
+/* ── Selector de hijo (apoderado) ───────────────────────────── */
+.radioGranate :global(.form-check-input:checked) {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.radioGranate :global(.form-check-input:focus) {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25);
+}
+
 /* ── Toolbar de sección ─────────────────────────────────────── */
 .sectionToolbar {
   display: flex;
