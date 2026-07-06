@@ -16,14 +16,23 @@ import PropTypes from 'prop-types'
 import { Row, Col, Nav, Table, Badge, Button, Alert, Spinner, Form } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
-import { getNotasByEstudiante, getCursoById } from '../../services/academicoService'
+import { getNotasByEstudiante, getCursoById, getImpartirByDocente } from '../../services/academicoService'
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
 import EntidadForm from '../../components/Academico/EntidadForm'
 import { ENTIDADES } from '../../components/Academico/entidadesConfig'
 import styles from '../../styles/Academico.module.css'
 
-const ROLES_GESTION = ['ROLE_DOCENTE', 'ROLE_INSPECTOR', 'ROLE_DIRECTIVO']
+// Directivo: acceso completo (rw) a las 8 secciones.
+// Docente: rw solo en Notas/Bitácoras; lectura filtrada a lo suyo en
+// Asignatura/Curso/Sala (vía Impartir); sin acceso a Nivel/Evaluación/Asignaciones.
+const PERMISOS_DOCENTE = {
+  notas: 'rw',
+  bitacora: 'rw',
+  asignatura: 'ro-propio',
+  curso: 'ro-propio',
+  sala: 'ro-propio',
+}
 const SECCIONES = Object.keys(ENTIDADES)
 
 // ── Vista simplificada para estudiantes y apoderados: modo lectura ──────
@@ -214,7 +223,7 @@ function VistaEstudianteApoderado({ usuario, isApoderado }) {
                 checked={String(selectedRut) === String(hijo.rut)}
                 onChange={() => setSelectedRut(hijo.rut)}
                 inline
-                className="fs-6"
+                className={`fs-6 ${styles.radioGranate}`}
               />
             ))}
           </div>
@@ -259,9 +268,13 @@ VistaEstudianteApoderado.propTypes = {
 
 export default function Academico() {
   const { usuario, hasRole } = useAuth()
-  const canManage = hasRole(ROLES_GESTION)
   const esEstudiante = hasRole('ROLE_ESTUDIANTE')
   const esApoderado = hasRole('ROLE_APODERADO')
+  const esDocente = hasRole('ROLE_DOCENTE')
+  const esDirectivo = hasRole('ROLE_DIRECTIVO')
+
+  // Secciones visibles en el nav lateral según el rol
+  const seccionesVisibles = esDirectivo ? SECCIONES : SECCIONES.filter((key) => PERMISOS_DOCENTE[key])
 
   const [seccion, setSeccion] = useState('curso')
   const [items, setItems] = useState([])
@@ -274,6 +287,31 @@ export default function Academico() {
   const [saving, setSaving] = useState(false)
 
   const config = ENTIDADES[seccion]
+  const permisoSeccion = esDirectivo ? 'rw' : PERMISOS_DOCENTE[seccion] || 'ninguno'
+  const canManage = permisoSeccion === 'rw'
+  const soloLecturaPropio = permisoSeccion === 'ro-propio'
+
+  // Docente: carga sus asignaciones (Impartir) para filtrar Asignatura/Curso/Sala a lo suyo
+  const [impartirDocente, setImpartirDocente] = useState([])
+  useEffect(() => {
+    if (!esDocente || !usuario?.usuRut) return
+    getImpartirByDocente(usuario.usuRut)
+      .then((res) => setImpartirDocente(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setImpartirDocente([]))
+  }, [esDocente, usuario?.usuRut])
+
+  const idsAsignaturaPropias = useMemo(
+    () => new Set(impartirDocente.map((i) => i.asignatura?.idAsi).filter(Boolean)),
+    [impartirDocente]
+  )
+  const idsCursoPropios = useMemo(
+    () => new Set(impartirDocente.map((i) => i.curso?.idCur).filter(Boolean)),
+    [impartirDocente]
+  )
+  const idsSalaPropias = useMemo(
+    () => new Set(impartirDocente.map((i) => i.curso?.sala?.idSal).filter(Boolean)),
+    [impartirDocente]
+  )
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -303,18 +341,27 @@ export default function Academico() {
     setShowForm(false)
   }
 
+  // Docente en modo ro-propio: recorta la lista a lo que le corresponde por Impartir
+  const itemsVisibles = useMemo(() => {
+    if (!soloLecturaPropio) return items
+    if (seccion === 'asignatura') return items.filter((i) => idsAsignaturaPropias.has(i.idAsi))
+    if (seccion === 'curso') return items.filter((i) => idsCursoPropios.has(i.idCur))
+    if (seccion === 'sala') return items.filter((i) => idsSalaPropias.has(i.idSal))
+    return items
+  }, [items, soloLecturaPropio, seccion, idsAsignaturaPropias, idsCursoPropios, idsSalaPropias])
+
   // Filtro local: busca el texto en todas las celdas visibles de la fila
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
-    if (!q) return items
-    return items.filter((item) =>
+    if (!q) return itemsVisibles
+    return itemsVisibles.filter((item) =>
       config.columnas.some((col) => {
         const rendered = col.render(item)
         const texto = typeof rendered === 'object' ? JSON.stringify(item) : String(rendered ?? '')
         return texto.toLowerCase().includes(q)
       })
     )
-  }, [items, busqueda, config])
+  }, [itemsVisibles, busqueda, config])
 
   const handleSave = async (data) => {
     setSaving(true)
@@ -400,7 +447,7 @@ export default function Academico() {
           {/* ── Nav lateral de secciones ── */}
           <Col md={3} lg={2}>
             <Nav variant="pills" className={`flex-column ${styles.sideNav}`} activeKey={seccion} onSelect={cambiarSeccion}>
-              {SECCIONES.map((key) => (
+              {seccionesVisibles.map((key) => (
                 <Nav.Item key={key}>
                   <Nav.Link eventKey={key} className={styles.sideNavLink}>
                     {ENTIDADES[key].titulo}
@@ -432,7 +479,7 @@ export default function Academico() {
               <Alert variant="danger">{loadError}</Alert>
             ) : filtrados.length === 0 ? (
               <div className={styles.emptyState}>
-                {items.length === 0
+                {itemsVisibles.length === 0
                   ? `No hay ${config.titulo.toLowerCase()} registradas.`
                   : 'Sin coincidencias para la búsqueda.'}
               </div>
@@ -455,16 +502,18 @@ export default function Academico() {
                         ))}
                         {canManage && (
                           <td className="text-end">
-                            <Button
-                              variant="outline-secondary"
-                              className="me-2"
-                              onClick={() => {
-                                setEditItem(item)
-                                setShowForm(true)
-                              }}
-                            >
-                              Editar
-                            </Button>
+                            {!config.sinEditar && (
+                              <Button
+                                variant="outline-secondary"
+                                className="me-2"
+                                onClick={() => {
+                                  setEditItem(item)
+                                  setShowForm(true)
+                                }}
+                              >
+                                Editar
+                              </Button>
+                            )}
                             <Button variant="outline-danger" onClick={() => handleDelete(item)}>
                               Eliminar
                             </Button>
