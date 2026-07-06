@@ -50,6 +50,12 @@ export const crearBitacoraAsignatura = (data) => academicoHttp.post('/bitacora-a
 export const actualizarBitacoraAsignatura = (id, data) => academicoHttp.put(`/bitacora-asignatura/${id}`, data)
 export const eliminarBitacoraAsignatura = (id) => academicoHttp.delete(`/bitacora-asignatura/${id}`)
 
+// --- Asignaciones docentes (Impartir: docente ↔ asignatura ↔ curso) ---
+export const getImpartir = () => academicoHttp.get('/impartir')
+export const getImpartirByDocente = (rut) => academicoHttp.get(`/impartir/docente/${rut}`)
+export const crearImpartir = (data) => academicoHttp.post('/impartir', data)
+export const eliminarImpartir = (id) => academicoHttp.delete(`/impartir/${id}`)
+
 // --- Notas ---
 export const getNotas = () => academicoHttp.get('/notas')
 export const getNotaById = (id) => academicoHttp.get(`/notas/${id}`)
