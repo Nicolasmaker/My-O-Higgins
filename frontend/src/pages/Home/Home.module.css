@@ -61,16 +61,24 @@
 }
 
 .heroButtons {
-  display: flex;
+  flex: 1;
   gap: var(--spacing-md);
   flex-wrap: wrap;
   margin-top: var(--spacing-md);
 }
 
+.heroButtons > * {
+  width: 500px;   
+  justify-content: center;
+}
+
 .heroButtons button,
 .heroButtons a {
-  flex-shrink: 0;
+  flex-shrink:1;
+  min-width: 150px;
+
 }
+
 
 .fachadaColegioBO {
   max-width: 100%;    
