@@ -10,7 +10,7 @@ import {
   getAnotacionesByRut,
 } from '../../services/anotacionesService'
 import { getHojaDeVidaPorRut } from '../../services/hojaDeVidaService'
-import { limpiarRut, rutValido } from '../../validators/fieldValidators'
+import { limpiarRut, rutValido, rutValidoConDv } from '../../validators/fieldValidators'
 import AnotacionCard from '../../components/Anotaciones/AnotacionCard'
 import AnotacionesToolbar from '../../components/Anotaciones/AnotacionesToolbar'
 import AnotacionForm from '../../components/Anotaciones/AnotacionForm'
@@ -108,8 +108,13 @@ export default function Anotaciones() {
   useEffect(() => {
     if (editingId) return
     const valor = (rutEstudianteTyped || '').trim()
-    if (!valor || !rutValido(valor)) {
+    if (!valor) {
       setHojaVidaStatus('idle')
+      setIdHojaVidaResuelto(null)
+      return
+    }
+    if (!rutValidoConDv(valor)) {
+      setHojaVidaStatus('formato-invalido')
       setIdHojaVidaResuelto(null)
       return
     }
