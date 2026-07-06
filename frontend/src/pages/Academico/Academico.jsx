@@ -16,7 +16,9 @@ import PropTypes from 'prop-types'
 import { Row, Col, Nav, Table, Badge, Button, Alert, Spinner, Form } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
-import { getNotasByEstudiante } from '../../services/academicoService'
+import { getNotasByEstudiante, getCursoById } from '../../services/academicoService'
+import { getMatriculas } from '../../services/matriculaService'
+import { getEstudiante } from '../../services/authService'
 import EntidadForm from '../../components/Academico/EntidadForm'
 import { ENTIDADES } from '../../components/Academico/entidadesConfig'
 import styles from '../../styles/Academico.module.css'
@@ -24,88 +26,242 @@ import styles from '../../styles/Academico.module.css'
 const ROLES_GESTION = ['ROLE_DOCENTE', 'ROLE_INSPECTOR', 'ROLE_DIRECTIVO']
 const SECCIONES = Object.keys(ENTIDADES)
 
-// ── Vista simplificada para estudiantes: solo sus notas ──────
-// Usa GET /notas/estudiante/{rut}; sin acciones de gestión.
-function MisNotas({ rut }) {
+// ── Vista simplificada para estudiantes y apoderados: modo lectura ──────
+function VistaEstudianteApoderado({ usuario, isApoderado }) {
+  const [hijos, setHijos] = useState([])
+  const [selectedRut, setSelectedRut] = useState('')
+  const [seccion, setSeccion] = useState('notas')
+  
+  // datos del estudiante seleccionado
   const [notas, setNotas] = useState([])
+  const [evaluaciones, setEvaluaciones] = useState([])
+  const [asignaturas, setAsignaturas] = useState([])
+  const [curso, setCurso] = useState(null)
+  
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
+  // 1. Cargar hijos si es apoderado
   useEffect(() => {
-    if (!rut) return
-    getNotasByEstudiante(rut)
-      .then((res) => setNotas(Array.isArray(res.data) ? res.data : []))
-      .catch((e) => {
-        console.error(e)
-        setError(e.response?.data?.message || 'No se pudieron cargar tus notas')
+    if (isApoderado) {
+       getMatriculas().then(async res => {
+         const matriculasHijos = (res.data || []).filter(m => String(m.apoderadoRut) === String(usuario.usuRut))
+         const ruts = [...new Set(matriculasHijos.map(m => m.alumnoRut))]
+         
+         const hijosData = await Promise.all(ruts.map(async (rut) => {
+           try {
+             const estRes = await getEstudiante(rut);
+             const data = estRes.data;
+             return { rut, nombre: `${data.usuPNombre} ${data.usuApePat}` };
+           } catch (e) {
+             return { rut, nombre: `Estudiante RUT: ${rut}` };
+           }
+         }));
+         
+         setHijos(hijosData)
+         if (hijosData.length > 0) setSelectedRut(hijosData[0].rut)
+         else setLoading(false)
+       }).catch(console.error)
+    } else {
+       setSelectedRut(usuario.usuRut)
+    }
+  }, [isApoderado, usuario.usuRut])
+
+  // 2. Cargar datos del rut seleccionado
+  useEffect(() => {
+    if (!selectedRut) return
+    setLoading(true)
+    
+    Promise.all([
+      getNotasByEstudiante(selectedRut).catch(() => ({ data: [] })),
+      getEstudiante(selectedRut).catch(() => ({ data: null }))
+    ]).then(async ([resNotas, resEst]) => {
+      const notasData = resNotas.data || []
+      setNotas(notasData)
+      
+      const evsMap = new Map()
+      const asigMap = new Map()
+      notasData.forEach(n => {
+        if (n.evaluacion) {
+          evsMap.set(n.evaluacion.idEva, n.evaluacion)
+          if (n.evaluacion.asignatura) {
+             asigMap.set(n.evaluacion.asignatura.idAsi, n.evaluacion.asignatura)
+          }
+        }
       })
-      .finally(() => setLoading(false))
-  }, [rut])
+      setEvaluaciones(Array.from(evsMap.values()))
+      setAsignaturas(Array.from(asigMap.values()))
+      
+      const estudiante = resEst.data
+      if (estudiante?.cursoId) {
+         try {
+           const resCurso = await getCursoById(estudiante.cursoId)
+           setCurso(resCurso.data)
+         } catch(e) { console.error(e) }
+      } else {
+         setCurso(null)
+      }
+      setLoading(false)
+    })
+  }, [selectedRut])
 
-  const promedio = useMemo(() => {
-    if (notas.length === 0) return null
-    const suma = notas.reduce((acc, n) => acc + Number(n.notCalif || 0), 0)
-    return (suma / notas.length).toFixed(1)
-  }, [notas])
+  if (loading && !selectedRut) return <div className={styles.emptyState}><Spinner animation="border"/></div>
+  if (isApoderado && hijos.length === 0 && !loading) return <Alert variant="info">No tienes estudiantes asociados a tu RUT.</Alert>
 
-  if (loading) {
-    return (
-      <div className={styles.emptyState}>
-        <Spinner animation="border" size="sm" className="me-2" />
-        Cargando tus notas...
-      </div>
-    )
+  const renderContent = () => {
+    if (seccion === 'notas') {
+       const promedio = notas.length > 0 
+          ? (notas.reduce((acc, n) => acc + Number(n.notCalif || 0), 0) / notas.length).toFixed(1)
+          : null
+
+       return (
+         <>
+           <div className="mb-3">
+             {promedio && <strong>Promedio general: <Badge bg={promedio >= 4 ? 'success' : 'danger'}>{promedio}</Badge></strong>}
+           </div>
+           <Table hover responsive className={styles.table}>
+             <thead className={styles.tableHead}>
+               <tr><th>Evaluación</th><th>Calificación</th><th>Fecha</th></tr>
+             </thead>
+             <tbody>
+               {notas.length === 0 ? <tr><td colSpan="3">No hay notas registradas.</td></tr> : 
+                 notas.map(n => (
+                   <tr key={n.idNot}>
+                     <td>{n.evaluacion?.evaNom ?? '—'}</td>
+                     <td><Badge bg={n.notCalif >= 4 ? 'success' : 'danger'}>{Number(n.notCalif).toFixed(1)}</Badge></td>
+                     <td>{n.notFechaRegistrada ? new Date(`${n.notFechaRegistrada}T00:00:00`).toLocaleDateString('es-CL') : '—'}</td>
+                   </tr>
+                 ))
+               }
+             </tbody>
+           </Table>
+         </>
+       )
+    }
+    if (seccion === 'evaluacion') {
+       return (
+         <Table hover responsive className={styles.table}>
+           <thead className={styles.tableHead}>
+             <tr><th>Nombre</th><th>Asignatura</th><th>Tipo</th><th>Fecha</th></tr>
+           </thead>
+           <tbody>
+             {evaluaciones.length === 0 ? <tr><td colSpan="4">No hay evaluaciones vinculadas a notas.</td></tr> :
+               evaluaciones.map(e => (
+                 <tr key={e.idEva}>
+                   <td>{e.evaNom}</td>
+                   <td>{e.asignatura?.asiNombre ?? '—'}</td>
+                   <td><Badge bg="secondary">{e.evaTipo}</Badge></td>
+                   <td>{e.evaFecha ? new Date(`${e.evaFecha}T00:00:00`).toLocaleDateString('es-CL') : '—'}</td>
+                 </tr>
+               ))
+             }
+           </tbody>
+         </Table>
+       )
+    }
+    if (seccion === 'asignatura') {
+       return (
+         <Table hover responsive className={styles.table}>
+           <thead className={styles.tableHead}>
+             <tr><th>Nombre</th><th>Descripción</th></tr>
+           </thead>
+           <tbody>
+             {asignaturas.length === 0 ? <tr><td colSpan="2">No hay asignaturas vinculadas a notas.</td></tr> :
+               asignaturas.map(a => (
+                 <tr key={a.idAsi}>
+                   <td>{a.asiNombre}</td>
+                   <td>{a.asiDescripcion}</td>
+                 </tr>
+               ))
+             }
+           </tbody>
+         </Table>
+       )
+    }
+    if (seccion === 'curso') {
+       if (!curso) return <div className="mt-3">El estudiante no tiene un curso asignado o no se pudo cargar.</div>
+       return (
+         <Table hover responsive className={styles.table}>
+           <thead className={styles.tableHead}>
+             <tr><th>Nivel</th><th>Sección</th><th>Año</th><th>Sala</th><th>Capacidad</th></tr>
+           </thead>
+           <tbody>
+             <tr>
+               <td>{curso.nivel?.nivNum ?? '—'}</td>
+               <td>{curso.curLetraSeccion}</td>
+               <td>{curso.curAnioEscolar}</td>
+               <td>{curso.sala?.salLetra ?? '—'}</td>
+               <td>{curso.sala?.salaCapacidad ?? '—'}</td>
+             </tr>
+           </tbody>
+         </Table>
+       )
+    }
   }
-  if (error) return <Alert variant="danger">{error}</Alert>
-  if (notas.length === 0) return <div className={styles.emptyState}>Aún no tienes notas registradas.</div>
 
   return (
     <>
-      <div className={styles.sectionToolbar}>
-        <h2 className={styles.sectionTitle}>Mis notas</h2>
-        <span>
-          Promedio general:{' '}
-          <Badge bg={promedio >= 4 ? 'success' : 'danger'}>{promedio}</Badge>
-        </span>
-      </div>
-      <div className={styles.tableWrap}>
-        <Table hover responsive className={styles.table}>
-          <thead className={styles.tableHead}>
-            <tr>
-              <th>Evaluación</th>
-              <th>Calificación</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            {notas.map((n) => (
-              <tr key={n.idNot}>
-                <td>{n.evaluacion?.evaNom ?? '—'}</td>
-                <td>
-                  <Badge bg={n.notCalif >= 4 ? 'success' : 'danger'}>{Number(n.notCalif).toFixed(1)}</Badge>
-                </td>
-                <td>
-                  {n.notFechaRegistrada
-                    ? new Date(`${n.notFechaRegistrada}T00:00:00`).toLocaleDateString('es-CL')
-                    : '—'}
-                </td>
-              </tr>
+      {isApoderado && (
+        <div className="mb-4 p-3 bg-white rounded shadow-sm border">
+          <h5 className="mb-3">Seleccionar estudiante:</h5>
+          <div className="d-flex flex-wrap gap-4">
+            {hijos.map(hijo => (
+              <Form.Check 
+                key={hijo.rut}
+                type="radio"
+                id={`radio-${hijo.rut}`}
+                label={hijo.nombre}
+                name="hijoSelect"
+                checked={String(selectedRut) === String(hijo.rut)}
+                onChange={() => setSelectedRut(hijo.rut)}
+                inline
+                className="fs-6"
+              />
             ))}
-          </tbody>
-        </Table>
-      </div>
+          </div>
+        </div>
+      )}
+      
+      <Row className="g-4">
+        <Col md={4} lg={3}>
+          <Nav variant="pills" className={`flex-column ${styles.sideNav}`} activeKey={seccion} onSelect={setSeccion}>
+            <Nav.Item><Nav.Link eventKey="notas" className={styles.sideNavLink}>Notas</Nav.Link></Nav.Item>
+            <Nav.Item><Nav.Link eventKey="evaluacion" className={styles.sideNavLink}>Evaluaciones</Nav.Link></Nav.Item>
+            <Nav.Item><Nav.Link eventKey="asignatura" className={styles.sideNavLink}>Asignaturas</Nav.Link></Nav.Item>
+            <Nav.Item><Nav.Link eventKey="curso" className={styles.sideNavLink}>Curso y Sala</Nav.Link></Nav.Item>
+          </Nav>
+        </Col>
+        <Col md={8} lg={9}>
+          <div className="bg-white rounded shadow-sm border p-4">
+            <div className={styles.sectionToolbar}>
+              <h2 className={styles.sectionTitle}>
+                {seccion === 'notas' && 'Notas registradas'}
+                {seccion === 'evaluacion' && 'Evaluaciones evaluadas'}
+                {seccion === 'asignatura' && 'Asignaturas cursadas'}
+                {seccion === 'curso' && 'Información de Curso'}
+              </h2>
+            </div>
+            {loading ? <Spinner animation="border" size="sm"/> : (
+              <div className={styles.tableWrap}>
+                {renderContent()}
+              </div>
+            )}
+          </div>
+        </Col>
+      </Row>
     </>
   )
 }
 
-MisNotas.propTypes = {
-  rut: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+VistaEstudianteApoderado.propTypes = {
+  usuario: PropTypes.object.isRequired,
+  isApoderado: PropTypes.bool.isRequired,
 }
 
 export default function Academico() {
   const { usuario, hasRole } = useAuth()
   const canManage = hasRole(ROLES_GESTION)
   const esEstudiante = hasRole('ROLE_ESTUDIANTE')
+  const esApoderado = hasRole('ROLE_APODERADO')
 
   const [seccion, setSeccion] = useState('curso')
   const [items, setItems] = useState([])
@@ -193,18 +349,23 @@ export default function Academico() {
     }
   }
 
-  // Estudiantes ven solo su libreta de notas, sin panel de gestión
-  if (esEstudiante) {
+  // Estudiantes y apoderados ven una vista adaptada (modo lectura)
+  if (esEstudiante || esApoderado) {
     return (
       <div className={styles.page}>
         <main className={styles.shell}>
           <header className={styles.pageHeader}>
             <div>
-              <h1 className={styles.title}>Mi Libreta de Notas</h1>
-              <p className={styles.subtitle}>Calificaciones registradas en el año académico</p>
+              <p className={styles.eyebrow}>MS-GestionAcademica</p>
+              <h1 className={styles.title}>
+                {esEstudiante ? 'Mi Información Académica' : 'Información Académica del Estudiante'}
+              </h1>
+              <p className={styles.subtitle}>
+                {esEstudiante ? 'Consulta tus notas, evaluaciones, asignaturas y curso' : 'Consulta las notas, evaluaciones, asignaturas y curso de tus hijos'}
+              </p>
             </div>
           </header>
-          <MisNotas rut={usuario?.usuRut} />
+          <VistaEstudianteApoderado usuario={usuario} isApoderado={esApoderado} />
         </main>
       </div>
     )
