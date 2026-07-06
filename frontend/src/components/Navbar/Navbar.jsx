@@ -16,6 +16,7 @@ import { Modal } from 'react-bootstrap';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../UI/Button';
 import UserPanel from '../UserPanel/UserPanel';
+import { ACCESO_RUTA } from '../../constants/roles';
 import logoColegio from '../../assets/logoColegio.png';
 import styles from './Navbar.module.css';
 
@@ -38,10 +39,14 @@ const PUBLICOS = [
 ];
 
 export default function Navbar() {
-  const { usuario, isAuthenticated, logout } = useAuth();
+  const { usuario, isAuthenticated, hasRole, logout } = useAuth();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showUserPanel, setShowUserPanel] = useState(false);
+
+  const modulosVisibles = MODULOS.filter(
+    (link) => !ACCESO_RUTA[link.to] || hasRole(ACCESO_RUTA[link.to])
+  );
 
   const handleLogout = () => {
     setShowLogoutModal(false);
@@ -61,7 +66,7 @@ export default function Navbar() {
         {/* Links del Centro */}
         <div className={styles.navLinks}>
           {isAuthenticated
-            ? MODULOS.map((link) => (
+            ? modulosVisibles.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
