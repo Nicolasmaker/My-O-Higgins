@@ -5,6 +5,10 @@ import './AnotacionForm.css'
 
 const ESTADO_HOJA_VIDA = {
   idle: null,
+  'formato-invalido': {
+    text: 'Ingresa el RUT completo, con guion y dígito verificador (ej. 12345678-5).',
+    className: 'no-encontrada',
+  },
   buscando: { text: 'Buscando hoja de vida...', className: 'buscando' },
   encontrada: { text: null, className: 'encontrada' }, // el texto se arma en el componente con el id
   'no-encontrada': { text: 'Este estudiante no tiene hoja de vida registrada.', className: 'no-encontrada' },
