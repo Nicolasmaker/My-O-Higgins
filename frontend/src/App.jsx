@@ -25,6 +25,7 @@ import { useEffect } from 'react'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/Layout/MainLayout'
+import { ACCESO_RUTA } from './constants/roles'
 
 // ── Páginas (se importan a medida que se crean) ──────────────
 import Home        from './pages/Home/Home'
@@ -64,9 +65,9 @@ export default function App() {
             <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
             <Route path="/reuniones" element={<ProtectedRoute><Reuniones /></ProtectedRoute>} />
             <Route path="/mensajeria" element={<ProtectedRoute><Mensajeria /></ProtectedRoute>} />
-            <Route path="/matriculas" element={<ProtectedRoute><Matricula /></ProtectedRoute>} />
+            <Route path="/matriculas" element={<ProtectedRoute roles={ACCESO_RUTA['/matriculas']}><Matricula /></ProtectedRoute>} />
             <Route path="/hoja-de-vida" element={<ProtectedRoute><HojaDeVida /></ProtectedRoute>} />
-            <Route path="/academico" element={<ProtectedRoute><Academico /></ProtectedRoute>} />
+            <Route path="/academico" element={<ProtectedRoute roles={ACCESO_RUTA['/academico']}><Academico /></ProtectedRoute>} />
           </Route>
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
