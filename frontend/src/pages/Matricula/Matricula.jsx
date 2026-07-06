@@ -20,7 +20,7 @@ import {
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
 import styles from './Matricula.module.css'
 
-const ROLES_GESTION = ['ROLE_INSPECTOR', 'ROLE_DIRECTIVO']
+const ROLES_GESTION = ['ROLE_DIRECTIVO']
 
 const ESTADO_BADGE = {
   ACTIVA: 'success',
@@ -43,6 +43,8 @@ export default function Matricula() {
   const { usuario, hasRole } = useAuth()
   const userRut = usuario?.usuRut ?? ''
   const canManage = hasRole(ROLES_GESTION)
+  const esApoderado = hasRole('ROLE_APODERADO')
+  // TODO: flujo de solicitud de apoderado — ver plan, bloqueado por funcionarioUsuRut NOT NULL en backend
 
   const [matriculas, setMatriculas] = useState([])
   const [loading, setLoading] = useState(true)
@@ -76,23 +78,29 @@ export default function Matricula() {
     load()
   }, [load])
 
+  // Apoderado solo ve matrículas de sus propios hijos (el resto de roles ve todas)
+  const propias = useMemo(
+    () => (esApoderado ? matriculas.filter((m) => String(m.apoderadoRut ?? '') === String(userRut)) : matriculas),
+    [matriculas, esApoderado, userRut]
+  )
+
   const filtradas = useMemo(() => {
     const rutQuery = busquedaRut.trim()
-    return matriculas.filter((m) => {
+    return propias.filter((m) => {
       if (filtroEstado && (m.matriculaEstado || '') !== filtroEstado) return false
       if (filtroTipo && (m.tipoAlumno || '') !== filtroTipo) return false
       if (rutQuery && !String(m.alumnoRut ?? '').includes(rutQuery) && !String(m.apoderadoRut ?? '').includes(rutQuery))
         return false
       return true
     })
-  }, [matriculas, filtroEstado, filtroTipo, busquedaRut])
+  }, [propias, filtroEstado, filtroTipo, busquedaRut])
 
   const stats = useMemo(
     () => ({
-      total: matriculas.length,
-      activas: matriculas.filter((m) => m.matriculaEstado === 'ACTIVA').length,
+      total: propias.length,
+      activas: propias.filter((m) => m.matriculaEstado === 'ACTIVA').length,
     }),
-    [matriculas]
+    [propias]
   )
 
   const handleSave = async (data) => {
