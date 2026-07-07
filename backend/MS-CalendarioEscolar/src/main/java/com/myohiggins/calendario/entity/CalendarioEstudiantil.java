@@ -44,4 +44,18 @@ public class CalendarioEstudiantil {
 
     @Column(name = "cal_est_des_eve", length = 300)
     private String descripcionEvento;
+
+    // Campos de audiencia (todos nullable) — determinan quién puede ver el evento.
+    // Eventos Institucional/Actividad los dejan en null (visibles para todos, sin cambio).
+    @Column(name = "CURSO_id_cur")
+    private Long cursoId;
+
+    @Column(name = "docente_usu_rut")
+    private Long docenteUsuRut;
+
+    @Column(name = "apoderado_usu_rut")
+    private Long apoderadoUsuRut;
+
+    @Column(name = "alumno_rut")
+    private Long alumnoRut;
 }

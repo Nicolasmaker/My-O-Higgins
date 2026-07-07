@@ -24,4 +24,9 @@ public class CalendarioEstudiantilDTO {
     private Long idAsignatura;
     private String descripcionEvento;
 
+    private Long cursoId;
+    private Long docenteUsuRut;
+    private Long apoderadoUsuRut;
+    private Long alumnoRut;
+
 }

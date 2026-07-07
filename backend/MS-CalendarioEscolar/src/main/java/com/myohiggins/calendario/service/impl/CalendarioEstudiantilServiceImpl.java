@@ -74,6 +74,10 @@ public class CalendarioEstudiantilServiceImpl implements CalendarioEstudiantilSe
         entidad.setIdMuralDigital(dto.getIdMuralDigital());
         entidad.setIdAsignatura(dto.getIdAsignatura());
         entidad.setDescripcionEvento(dto.getDescripcionEvento());
+        entidad.setCursoId(dto.getCursoId());
+        entidad.setDocenteUsuRut(dto.getDocenteUsuRut());
+        entidad.setApoderadoUsuRut(dto.getApoderadoUsuRut());
+        entidad.setAlumnoRut(dto.getAlumnoRut());
 
         CalendarioEstudiantil actualizado = repository.save(entidad);
         return mapearADTO(actualizado);
@@ -116,6 +120,10 @@ public class CalendarioEstudiantilServiceImpl implements CalendarioEstudiantilSe
         dto.setIdMuralDigital(entidad.getIdMuralDigital());
         dto.setIdAsignatura(entidad.getIdAsignatura());
         dto.setDescripcionEvento(entidad.getDescripcionEvento());
+        dto.setCursoId(entidad.getCursoId());
+        dto.setDocenteUsuRut(entidad.getDocenteUsuRut());
+        dto.setApoderadoUsuRut(entidad.getApoderadoUsuRut());
+        dto.setAlumnoRut(entidad.getAlumnoRut());
         return dto;
     }
 
@@ -129,6 +137,10 @@ public class CalendarioEstudiantilServiceImpl implements CalendarioEstudiantilSe
         entidad.setIdMuralDigital(dto.getIdMuralDigital());
         entidad.setIdAsignatura(dto.getIdAsignatura());
         entidad.setDescripcionEvento(dto.getDescripcionEvento());
+        entidad.setCursoId(dto.getCursoId());
+        entidad.setDocenteUsuRut(dto.getDocenteUsuRut());
+        entidad.setApoderadoUsuRut(dto.getApoderadoUsuRut());
+        entidad.setAlumnoRut(dto.getAlumnoRut());
         return entidad;
     }
 }
