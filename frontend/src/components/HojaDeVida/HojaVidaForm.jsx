@@ -27,6 +27,7 @@ export default function HojaVidaForm({ show, hoja, saving, onSave, onClose }) {
     reset({
       estudianteUsuRut: editing ? String(hoja.estudianteUsuRut ?? '') : '',
       matriculaId: editing ? String(hoja.matriculaId ?? '') : '',
+      estado: editing ? hoja.estado ?? '' : '',
     })
   }, [show, editing, hoja, reset])
 
@@ -58,6 +59,16 @@ export default function HojaVidaForm({ show, hoja, saving, onSave, onClose }) {
               {...register('matriculaId', { required: 'La matrícula es obligatoria' })}
             />
             <Form.Control.Feedback type="invalid">{errors.matriculaId?.message}</Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mt-3" controlId="estado">
+            <Form.Label>Estado</Form.Label>
+            <Form.Select {...register('estado')}>
+              <option value="">Sin definir</option>
+              <option value="Incorporado">Incorporado</option>
+              <option value="Retirado">Retirado</option>
+              <option value="Suspendido">Suspendido</option>
+            </Form.Select>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
