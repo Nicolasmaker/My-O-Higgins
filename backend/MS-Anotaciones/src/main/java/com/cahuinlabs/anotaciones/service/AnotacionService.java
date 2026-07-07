@@ -57,6 +57,7 @@ public class AnotacionService {
 
         Anotacion anotacion = new Anotacion();
         anotacion.setAnotTip(nuevoDto.getAnotTip());
+        anotacion.setAnotGravedad("Negativa".equals(nuevoDto.getAnotTip()) ? nuevoDto.getAnotGravedad() : null);
         anotacion.setAnotDes(nuevoDto.getAnotDes());
         anotacion.setAnotFec(LocalDate.now());
         anotacion.setFuncionarioUsuRut(nuevoDto.getFuncionarioUsuRut());
@@ -85,6 +86,7 @@ public class AnotacionService {
         Anotacion anotacion = anotacionRepository.findById(idAnot)
                 .orElseThrow(() -> new EntityNotFoundException("Anotacion no encontrada: " + idAnot));
         anotacion.setAnotTip(dto.getAnotTip());
+        anotacion.setAnotGravedad("Negativa".equals(dto.getAnotTip()) ? dto.getAnotGravedad() : null);
         anotacion.setAnotDes(dto.getAnotDes());
         return anotacionRepository.save(anotacion);
     }
@@ -168,6 +170,7 @@ public class AnotacionService {
         return new AnotacionResponseDTO(
                 anotacion.getIdAnot(),
                 anotacion.getAnotTip(),
+                anotacion.getAnotGravedad(),
                 anotacion.getAnotDes(),
                 anotacion.getAnotFec(),
                 anotacion.getFuncionarioUsuRut(),

@@ -24,6 +24,10 @@ public class Anotacion
     @Column(name = "anot_tip", nullable = false, length = 15)
     private String anotTip;
 
+    // gravedad (Leve/Grave/Muy Grave), solo aplica cuando anotTip = Negativa
+    @Column(name = "anot_gravedad", length = 15)
+    private String anotGravedad;
+
     // descripcion de la observacion, logro, falta...
     @Column(name = "anot_des", nullable = false, length = 1000)
     private String anotDes;

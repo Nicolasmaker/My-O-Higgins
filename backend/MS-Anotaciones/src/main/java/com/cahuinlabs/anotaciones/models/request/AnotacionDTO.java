@@ -6,6 +6,7 @@ import lombok.Data;
 public class AnotacionDTO {
 
     private String anotTip;
+    private String anotGravedad;
     private String anotDes;
     private Long funcionarioUsuRut;
     private Long idHojaVida;

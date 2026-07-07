@@ -8,6 +8,7 @@ import java.time.LocalDate;
 public record AnotacionResponseDTO(
     Long idAnot,
     String anotTip,
+    String anotGravedad,
     String anotDes,
     LocalDate anotFec,
     Long funcionarioUsuRut,
