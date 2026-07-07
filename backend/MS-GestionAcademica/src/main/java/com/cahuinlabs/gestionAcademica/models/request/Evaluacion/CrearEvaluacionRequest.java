@@ -10,5 +10,6 @@ public class CrearEvaluacionRequest {
     private String    evaPerioAcad; // Ej: Primer Trimestre
     private String    evaTip;       
     private Integer   docenteUsuRut; //RUT del profe (viene del otro MS)
-    private Integer   idAsignatura;  
+    private Integer   idAsignatura;
+    private Integer   idCurso;
 }

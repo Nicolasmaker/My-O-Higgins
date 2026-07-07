@@ -39,4 +39,14 @@ public class Evaluacion {
     @ManyToOne
     @JoinColumn(name = "asignatura_id_asi", nullable = false)
     private Asignatura asignatura;
+
+    // Curso al que corresponde la evaluación — necesario para filtrar el calendario por
+    // sección exacta (un docente puede dictar la misma asignatura en 2+ cursos distintos).
+    @ManyToOne
+    @JoinColumn(name = "curso_id_cur")
+    private Curso curso;
+
+    // Id del evento sincronizado en MS-CalendarioEscolar (nullable: se completa tras el sync)
+    @Column(name = "id_cal_est")
+    private Long idCalEst;
 }

@@ -9,5 +9,6 @@ public class ActualizarEvaluacionRequest {
     private LocalDate evaFec;
     private String    evaPerioAcad; // Ej: Primer Trimestre
     private String    evaTip;       
-    private Integer   docenteUsuRut; //RUT del profe (viene del otro MS) 
+    private Integer   docenteUsuRut; //RUT del profe (viene del otro MS)
+    private Integer   idCurso;
 }
