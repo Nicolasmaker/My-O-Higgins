@@ -9,6 +9,9 @@ public class ReunionIndividualRequest {
     private String bitReuCompromisos;
     private String bitReuObs;
     private Long docenteUsuRut;
+    private Long apoderadoUsuRut;
+    private Long alumnoRut;
     private String bitReuIndMotivReu;
     private String bitReuIndTemTrat;
+    private Long idAnotacion;
 }

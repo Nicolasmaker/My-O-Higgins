@@ -9,4 +9,6 @@ public class BitReunionApoderadoRequest {
     private String bitReuCompromisos;
     private String bitReuObs;
     private Long docenteUsuRut;
+    private Long apoderadoUsuRut;
+    private Long alumnoRut;
 }

@@ -27,17 +27,23 @@ public class BitReunionGeneral {
     @Column(name = "bit_reu_gen_tipo_reunion", nullable = false, length = 30)
     private String bitReuGenTipReu;
 
-    // lo que se comunico en la reunion 
-    @Column(name = "bit_reu_gen_comunicado_emitido", nullable = false, length = 200)
+    // lo que se comunico en la reunion — parte del acta post-reunión, se llena con
+    // "Completar acta" después de agendar, no al crear.
+    @Column(name = "bit_reu_gen_comunicado_emitido", length = 200)
     private String bitReuGenComunicEmi;
 
-    // los acuerdos y decisiones que se tomaron durante la reunion
-    @Column(name = "bit_reu_gen_acuerdos_tratados", nullable = false, length = 200)
+    // los acuerdos y decisiones que se tomaron durante la reunion — idem, acta post-reunión.
+    @Column(name = "bit_reu_gen_acuerdos_tratados", length = 200)
     private String bitReuGenAcuerTrat;
 
     // campo opcional para notas adicionales o comentarios especiales
     @Column(name = "bit_reu_gen_obs", nullable = true, length = 300)
     private String bitReuGenObs;
+
+    // Curso al que está dirigida la reunión general (ej. reunión de apoderados de Profesor Jefe) —
+    // reemplaza la noción anterior de "institucional para todo el colegio".
+    @Column(name = "curso_id")
+    private Long cursoId;
 
     // conexion con el apoderado cada reunión general pertenece a un apoderado específico
     @ToString.Exclude // sirve para ocultar datos del apoderado evirando problemas de rendimiento o de privacidad

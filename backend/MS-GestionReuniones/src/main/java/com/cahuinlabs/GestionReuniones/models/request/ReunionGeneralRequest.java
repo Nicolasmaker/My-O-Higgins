@@ -9,6 +9,7 @@ public class ReunionGeneralRequest {
     private String bitReuCompromisos;
     private String bitReuObs;
     private Long docenteUsuRut;
+    private Long cursoId;
     private String bitReuGenTipReu;
     private String bitReuGenComunicEmi;
     private String bitReuGenAcuerTrat;

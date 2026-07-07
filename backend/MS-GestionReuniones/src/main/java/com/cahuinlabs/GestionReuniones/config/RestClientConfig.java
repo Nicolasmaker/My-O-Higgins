@@ -16,6 +16,9 @@ public class RestClientConfig {
     @Value("${app.services.calendario-url:http://localhost:8085}")
     private String calendarioUrl;
 
+    @Value("${app.services.mensajeria-url:http://localhost:8089}")
+    private String mensajeriaUrl;
+
     @Bean
     public RestClient autenticacionRestClient() {
         return RestClient.builder()
@@ -27,6 +30,13 @@ public class RestClientConfig {
     public RestClient calendarioRestClient() {
         return RestClient.builder()
                 .baseUrl(calendarioUrl)
+                .build();
+    }
+
+    @Bean
+    public RestClient mensajeriaRestClient() {
+        return RestClient.builder()
+                .baseUrl(mensajeriaUrl)
                 .build();
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,7 +22,10 @@ import com.cahuinlabs.GestionReuniones.models.entities.BitReunionGeneral;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionIndividual;
 import com.cahuinlabs.GestionReuniones.models.request.ActualizarApoderadoRequest;
 import com.cahuinlabs.GestionReuniones.models.request.ActualizarFirmasRequest;
+import com.cahuinlabs.GestionReuniones.models.request.ActualizarGeneralRequest;
+import com.cahuinlabs.GestionReuniones.models.request.ActualizarIndividualRequest;
 import com.cahuinlabs.GestionReuniones.models.request.BitReunionApoderadoRequest;
+import com.cahuinlabs.GestionReuniones.models.request.ConfirmarReunionRequest;
 import com.cahuinlabs.GestionReuniones.models.request.ReunionGeneralRequest;
 import com.cahuinlabs.GestionReuniones.models.request.ReunionIndividualRequest;
 import com.cahuinlabs.GestionReuniones.service.GestionReunionesService;
@@ -116,6 +120,30 @@ public class BitacoraReunionController {
             @PathVariable Long id,
             @RequestBody ActualizarApoderadoRequest request) {
         return new ResponseEntity<>(reunionesService.actualizarApoderado(id, request), HttpStatus.OK);
+    }
+
+    // PUT completar la bitácora de una entrevista individual (temas tratados) tras la reunión
+    @PutMapping("/individual/{id}")
+    public ResponseEntity<BitReunionIndividual> actualizarIndividual(
+            @PathVariable Long id,
+            @RequestBody ActualizarIndividualRequest request) {
+        return new ResponseEntity<>(reunionesService.actualizarIndividual(id, request), HttpStatus.OK);
+    }
+
+    // PUT completar el acta de una reunión general (comunicado/acuerdos/obs) tras la reunión
+    @PutMapping("/general/{id}")
+    public ResponseEntity<BitReunionGeneral> actualizarGeneral(
+            @PathVariable Long id,
+            @RequestBody ActualizarGeneralRequest request) {
+        return new ResponseEntity<>(reunionesService.actualizarGeneral(id, request), HttpStatus.OK);
+    }
+
+    // PATCH el apoderado acepta o rechaza la citación. Solo al aceptar se sincroniza con el calendario.
+    @PatchMapping("/apoderado/{id}/confirmacion")
+    public ResponseEntity<BitReunionApoderado> confirmarReunion(
+            @PathVariable Long id,
+            @RequestBody ConfirmarReunionRequest request) {
+        return new ResponseEntity<>(reunionesService.confirmarReunion(id, request), HttpStatus.OK);
     }
 
     // Manejador de excepciones, cuando no se encuentra una entidad devuelve error 404 con mensaje
