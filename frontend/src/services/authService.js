@@ -41,3 +41,8 @@ export const getFuncionario = (rut) => authHttp.get(`/funcionarios/${rut}`)
 
 // GET /apoderados/{rut} — datos completos del apoderado
 export const getApoderado = (rut) => authHttp.get(`/apoderados/${rut}`)
+
+// GET /apoderados/buscar-por-email — resuelve el RUT/nombre del apoderado a partir de su correo
+// (usado al agendar una reunión: se pide el correo, no el RUT)
+export const buscarApoderadoPorEmail = (email) =>
+  authHttp.get('/apoderados/buscar-por-email', { params: { email } })

@@ -16,6 +16,18 @@ export const crearHojaDeVida = (data) => hojaDeVidaHttp.post('/hojas-vida', data
 export const actualizarHojaDeVida = (idHojaVida, data) => hojaDeVidaHttp.put(`/hojas-vida/${idHojaVida}`, data)
 export const eliminarHojaDeVida = (idHojaVida) => hojaDeVidaHttp.delete(`/hojas-vida/${idHojaVida}`)
 
+// --- Documentos oficiales adjuntos ---
+export const getDocumentosPorHoja = (idHojaVida) => hojaDeVidaHttp.get(`/hojas-vida/${idHojaVida}/documentos`)
+// Content-Type se anula a propósito: con FormData el navegador debe fijar el
+// multipart/form-data con el boundary correcto (el default de la instancia es application/json).
+export const subirDocumentoHojaVida = (idHojaVida, formData) =>
+  hojaDeVidaHttp.post(`/hojas-vida/${idHojaVida}/documentos`, formData, {
+    headers: { 'Content-Type': undefined },
+  })
+export const descargarDocumentoHojaVida = (id) =>
+  hojaDeVidaHttp.get(`/hojas-vida/documentos/${id}/descarga`, { responseType: 'blob' })
+export const eliminarDocumentoHojaVida = (id) => hojaDeVidaHttp.delete(`/hojas-vida/documentos/${id}`)
+
 // --- Antecedentes Académicos ---
 export const getAntecedentesAcademicos = () => hojaDeVidaHttp.get('/antecedentes-academicos')
 export const getAntecedenteAcademicoById = (id) => hojaDeVidaHttp.get(`/antecedentes-academicos/${id}`)
