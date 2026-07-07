@@ -27,4 +27,8 @@ public class HojaVidaEstudiante {
 
     @Column(name = "MATRICULA_id_mat", nullable = false)
     private Long matriculaId;
+
+    // Estado general del estudiante (Incorporado/Retirado/Suspendido). Editable solo por Directivo.
+    @Column(name = "estado", length = 20)
+    private String estado;
 }

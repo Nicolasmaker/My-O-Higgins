@@ -38,4 +38,11 @@ public class GlobalExceptionHandler {
         Map<String, String> respuesta = Map.of("mensaje", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
     }
+
+    // Usado por la subida de documentos adjuntos: tipo/tamaño de archivo inválido, etc.
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> manejarArgumentoInvalido(IllegalArgumentException ex) {
+        Map<String, String> respuesta = Map.of("mensaje", ex.getMessage());
+        return ResponseEntity.badRequest().body(respuesta);
+    }
 }

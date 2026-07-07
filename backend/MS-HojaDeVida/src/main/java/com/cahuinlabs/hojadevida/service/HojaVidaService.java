@@ -63,6 +63,7 @@ public class HojaVidaService {
         HojaVidaEstudiante hojaVidaEstudiante = new HojaVidaEstudiante();
         hojaVidaEstudiante.setEstudianteUsuRut(request.getEstudianteUsuRut());
         hojaVidaEstudiante.setMatriculaId(request.getMatriculaId());
+        hojaVidaEstudiante.setEstado(request.getEstado());
 
         HojaVidaEstudiante guardado = hojaVidaRepository.save(hojaVidaEstudiante);
         return mapearADTO(guardado);
@@ -83,6 +84,7 @@ public class HojaVidaService {
 
         hojaVidaEstudiante.setEstudianteUsuRut(request.getEstudianteUsuRut());
         hojaVidaEstudiante.setMatriculaId(request.getMatriculaId());
+        hojaVidaEstudiante.setEstado(request.getEstado());
 
         HojaVidaEstudiante actualizado = hojaVidaRepository.save(hojaVidaEstudiante);
         return mapearADTO(actualizado);
@@ -134,7 +136,8 @@ public class HojaVidaService {
         return new HojaVidaEstudianteDTO(
                 entidad.getIdHojaVida(),
                 entidad.getEstudianteUsuRut(),
-                entidad.getMatriculaId()
+                entidad.getMatriculaId(),
+                entidad.getEstado()
         );
     }
 }

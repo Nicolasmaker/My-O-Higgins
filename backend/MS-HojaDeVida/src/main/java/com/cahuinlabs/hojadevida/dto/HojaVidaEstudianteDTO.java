@@ -11,4 +11,5 @@ public class HojaVidaEstudianteDTO {
     private Long idHojaVida;
     private Long estudianteUsuRut;
     private Long matriculaId;
+    private String estado;
 }
