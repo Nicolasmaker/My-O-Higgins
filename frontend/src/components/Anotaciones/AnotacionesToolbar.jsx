@@ -11,6 +11,8 @@ export default function AnotacionesToolbar({
   setFilterTipo,
   filterCurso,
   setFilterCurso,
+  filterGravedad,
+  setFilterGravedad,
 }) {
   return (
     <section className="anotaciones-toolbar">
@@ -21,6 +23,15 @@ export default function AnotacionesToolbar({
             <option value="todas">Todas</option>
             <option value="positiva">Positivas</option>
             <option value="negativa">Negativas</option>
+          </select>
+        </label>
+        <label>
+          Gravedad
+          <select value={filterGravedad} onChange={(event) => setFilterGravedad(event.target.value)}>
+            <option value="todas">Todas</option>
+            <option value="Leve">Leve</option>
+            <option value="Grave">Grave</option>
+            <option value="Muy Grave">Muy Grave</option>
           </select>
         </label>
         <label>

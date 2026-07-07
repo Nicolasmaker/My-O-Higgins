@@ -23,6 +23,7 @@ export default function AnotacionForm({
   onCancel,
   hojaVidaStatus = 'idle',
   idHojaVidaResuelto = null,
+  tipoSeleccionado = 'Positiva',
 }) {
   const estado = ESTADO_HOJA_VIDA[hojaVidaStatus]
   const puedeGuardar = editingId
@@ -71,6 +72,18 @@ export default function AnotacionForm({
         </select>
         {errors.anotTip ? <span className="ui-field__error">{errors.anotTip.message}</span> : null}
       </label>
+
+      {tipoSeleccionado === 'Negativa' && (
+        <label className="ui-field">
+          <span className="ui-field__label">Gravedad</span>
+          <select className="ui-input" {...register('anotGravedad')}>
+            <option value="">Selecciona una gravedad</option>
+            <option value="Leve">Leve</option>
+            <option value="Grave">Grave</option>
+            <option value="Muy Grave">Muy Grave</option>
+          </select>
+        </label>
+      )}
 
       <label className="ui-field">
         <span className="ui-field__label">Descripción</span>

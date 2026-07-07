@@ -35,6 +35,21 @@
   color: #b91c1c;
 }
 
+.anotacion-card__badge.gravedad-leve {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+}
+
+.anotacion-card__badge.gravedad-grave {
+  background: rgba(194, 65, 12, 0.16);
+  color: #9a3412;
+}
+
+.anotacion-card__badge.gravedad-muy-grave {
+  background: rgba(127, 29, 29, 0.2);
+  color: #7f1d1d;
+}
+
 .anotacion-card__date,
 .anotacion-card__description,
 .anotacion-card__meta dd {
