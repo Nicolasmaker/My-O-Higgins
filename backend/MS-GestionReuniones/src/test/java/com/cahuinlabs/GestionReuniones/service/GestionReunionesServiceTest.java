@@ -42,6 +42,9 @@ public class GestionReunionesServiceTest {
     @Mock
     private RestClient calendarioRestClient;
 
+    @Mock
+    private RestClient mensajeriaRestClient;
+
     private GestionReunionesService gestionReunionesService;
 
     private BitReunionApoderado base;
@@ -55,7 +58,7 @@ public class GestionReunionesServiceTest {
         base.setBitReuObs("Obs");
         base.setDocenteUsuRut(12345678L);
 
-        gestionReunionesService = new GestionReunionesService(autenticacionRestClient, calendarioRestClient);
+        gestionReunionesService = new GestionReunionesService(autenticacionRestClient, calendarioRestClient, mensajeriaRestClient);
         ReflectionTestUtils.setField(gestionReunionesService, "baseRepository", baseRepository);
         ReflectionTestUtils.setField(gestionReunionesService, "individualRepository", individualRepository);
         ReflectionTestUtils.setField(gestionReunionesService, "generalRepository", generalRepository);
