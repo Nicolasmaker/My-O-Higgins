@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cahuinlabs.autenticacion.models.entities.usuarios.Apoderado;
@@ -40,6 +41,13 @@ public class ApoderadoController {
     @GetMapping("/{rut}")
     public ResponseEntity<?> obtenerApoderadoPorRut(@PathVariable Integer rut){
         Apoderado apoderado = apoderadoService.obtenerApoderadoPorRut(rut);
+        return ResponseEntity.ok(apoderado);
+    }
+
+    // Usado al agendar una reunión: se pide el correo del apoderado en vez de su RUT
+    @GetMapping("/buscar-por-email")
+    public ResponseEntity<?> buscarApoderadoPorEmail(@RequestParam String email){
+        Apoderado apoderado = apoderadoService.obtenerApoderadoPorEmail(email);
         return ResponseEntity.ok(apoderado);
     }
 

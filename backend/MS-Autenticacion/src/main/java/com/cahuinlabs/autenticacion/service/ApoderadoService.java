@@ -89,6 +89,18 @@ public class ApoderadoService {
         return apoderadoRepository.findAll();
     }
 
+    // Usado por MS-GestionReuniones para resolver el RUT del apoderado a partir de su correo
+    // al agendar una reunión individual (no se le pide el RUT al docente, solo el email).
+    public Apoderado obtenerApoderadoPorEmail(String email) {
+        Usuario usuario = usuarioRepository.findByUsuEmail(email)
+            .orElseThrow(() -> new RuntimeException("No existe un usuario registrado con el correo: " + email));
+
+        if (!(usuario instanceof Apoderado)) {
+            throw new RuntimeException("El usuario con correo " + email + " no es un apoderado.");
+        }
+        return (Apoderado) usuario;
+    }
+
     @Transactional
     public Apoderado actualizarApoderado(Integer rut, ActualizarApoderadoRequest requestActApoderado){
 
