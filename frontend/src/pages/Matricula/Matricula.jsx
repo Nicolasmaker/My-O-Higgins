@@ -7,16 +7,22 @@
 // confirmación. Filtros locales por estado, tipo y búsqueda por RUT.
 // =============================================================
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Table, Badge, Button, Alert, Spinner, Form, Row, Col } from 'react-bootstrap'
+import { Table, Badge, Button, Alert, Spinner, Form, Row, Col, Tabs, Tab } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
-import { limpiarRut } from '../../validators/fieldValidators'
+import { limpiarRut, rutValido } from '../../validators/fieldValidators'
 import {
   getMatriculas,
   crearMatricula,
   actualizarMatricula,
   eliminarMatricula,
+  crearSolicitudMatricula,
+  getSolicitudesMatricula,
+  getSolicitudesPorApoderado,
+  aprobarSolicitudMatricula,
+  rechazarSolicitudMatricula,
 } from '../../services/matriculaService'
+import { getCursos } from '../../services/academicoService'
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
 import styles from './Matricula.module.css'
 
@@ -34,6 +40,12 @@ const TIPO_BADGE = {
   REPITENTE: 'dark',
 }
 
+const ESTADO_SOLICITUD_BADGE = {
+  PENDIENTE: 'warning',
+  APROBADA: 'success',
+  RECHAZADA: 'danger',
+}
+
 function formatDate(value) {
   if (!value) return '—'
   return new Date(`${value}T00:00:00`).toLocaleDateString('es-CL')
@@ -44,7 +56,6 @@ export default function Matricula() {
   const userRut = usuario?.usuRut ?? ''
   const canManage = hasRole(ROLES_GESTION)
   const esApoderado = hasRole('ROLE_APODERADO')
-  // TODO: flujo de solicitud de apoderado — ver plan, bloqueado por funcionarioUsuRut NOT NULL en backend
 
   const [matriculas, setMatriculas] = useState([])
   const [loading, setLoading] = useState(true)
@@ -57,6 +68,105 @@ export default function Matricula() {
   const [filtroEstado, setFiltroEstado] = useState('')
   const [filtroTipo, setFiltroTipo] = useState('')
   const [busquedaRut, setBusquedaRut] = useState('')
+
+  // ── Solicitudes de matrícula (self-service Apoderado) ───────
+  const [cursos, setCursos] = useState([])
+  const [solicitudes, setSolicitudes] = useState([])
+  const [loadingSolicitudes, setLoadingSolicitudes] = useState(true)
+  const [savingSolicitud, setSavingSolicitud] = useState(false)
+  const [procesandoId, setProcesandoId] = useState(null)
+  const [cursoElegido, setCursoElegido] = useState({})
+  const [solForm, setSolForm] = useState({ alumnoRut: '', cursoId: '', tipoAlumno: 'NUEVO', observaciones: '' })
+
+  useEffect(() => {
+    getCursos()
+      .then((r) => setCursos(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setCursos([]))
+  }, [])
+
+  const cursoLabel = (id) => {
+    const c = cursos.find((x) => x.idCur === Number(id))
+    return c ? `${c.nivel?.nivNum ?? '—'}°${c.curLetraSeccion} (${c.curAnioEscolar})` : id ?? '—'
+  }
+
+  const loadSolicitudes = useCallback(async () => {
+    if (!canManage && !esApoderado) return
+    setLoadingSolicitudes(true)
+    try {
+      const res = canManage ? await getSolicitudesMatricula() : await getSolicitudesPorApoderado(userRut)
+      setSolicitudes(Array.isArray(res.data) ? res.data : [])
+    } catch (error) {
+      console.error(error)
+      toast.error('No se pudieron cargar las solicitudes de matrícula')
+    } finally {
+      setLoadingSolicitudes(false)
+    }
+  }, [canManage, esApoderado, userRut])
+
+  useEffect(() => {
+    loadSolicitudes()
+  }, [loadSolicitudes])
+
+  const handleSolicitarMatricula = async (event) => {
+    event.preventDefault()
+    if (!rutValido(solForm.alumnoRut)) {
+      toast.error('Ingresa un RUT de alumno válido')
+      return
+    }
+    setSavingSolicitud(true)
+    try {
+      await crearSolicitudMatricula({
+        alumnoRut: limpiarRut(solForm.alumnoRut),
+        apoderadoRut: limpiarRut(userRut),
+        cursoId: solForm.cursoId ? Number(solForm.cursoId) : null,
+        tipoAlumno: solForm.tipoAlumno,
+        observaciones: solForm.observaciones || null,
+      })
+      toast.success('Solicitud enviada')
+      setSolForm({ alumnoRut: '', cursoId: '', tipoAlumno: 'NUEVO', observaciones: '' })
+      await loadSolicitudes()
+    } catch (error) {
+      console.error(error)
+      toast.error(error.response?.data || 'No se pudo enviar la solicitud')
+    } finally {
+      setSavingSolicitud(false)
+    }
+  }
+
+  const handleAprobarSolicitud = async (solicitud) => {
+    setProcesandoId(solicitud.idSolicitud)
+    try {
+      await aprobarSolicitudMatricula(solicitud.idSolicitud, {
+        funcionarioUsuRut: Number(userRut),
+        cursoId: cursoElegido[solicitud.idSolicitud]
+          ? Number(cursoElegido[solicitud.idSolicitud])
+          : solicitud.cursoId,
+      })
+      toast.success('Solicitud aprobada, matrícula creada')
+      await Promise.all([loadSolicitudes(), load()])
+    } catch (error) {
+      console.error(error)
+      toast.error(error.response?.data || 'No se pudo aprobar la solicitud')
+    } finally {
+      setProcesandoId(null)
+    }
+  }
+
+  const handleRechazarSolicitud = async (solicitud) => {
+    const motivo = window.prompt('Motivo del rechazo:')
+    if (motivo === null) return
+    setProcesandoId(solicitud.idSolicitud)
+    try {
+      await rechazarSolicitudMatricula(solicitud.idSolicitud, { motivoRechazo: motivo })
+      toast.success('Solicitud rechazada')
+      await loadSolicitudes()
+    } catch (error) {
+      console.error(error)
+      toast.error('No se pudo rechazar la solicitud')
+    } finally {
+      setProcesandoId(null)
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -174,6 +284,8 @@ export default function Matricula() {
           )}
         </header>
 
+        <Tabs defaultActiveKey="matriculas" className="mb-3">
+        <Tab eventKey="matriculas" title="Matrículas">
         {/* ── Filtros locales ── */}
         <Row className={`g-2 ${styles.filterBar}`}>
           <Col sm={4} md={3}>
@@ -276,6 +388,161 @@ export default function Matricula() {
             </Table>
           </div>
         )}
+        </Tab>
+
+        {(canManage || esApoderado) && (
+          <Tab eventKey="solicitudes" title="Solicitudes de matrícula">
+            {esApoderado && (
+              <Form onSubmit={handleSolicitarMatricula} className={`mb-4 p-3 border rounded ${styles.filterBar}`}>
+                <Row className="g-2 align-items-end">
+                  <Col sm={3}>
+                    <Form.Label className="mb-1">RUT del alumno</Form.Label>
+                    <Form.Control
+                      size="sm"
+                      placeholder="12345678-5"
+                      value={solForm.alumnoRut}
+                      onChange={(e) => setSolForm((f) => ({ ...f, alumnoRut: e.target.value }))}
+                      required
+                    />
+                  </Col>
+                  <Col sm={3}>
+                    <Form.Label className="mb-1">Curso deseado</Form.Label>
+                    <Form.Select
+                      size="sm"
+                      value={solForm.cursoId}
+                      onChange={(e) => setSolForm((f) => ({ ...f, cursoId: e.target.value }))}
+                    >
+                      <option value="">Sin preferencia</option>
+                      {cursos.map((c) => (
+                        <option key={c.idCur} value={c.idCur}>
+                          {c.nivel?.nivNum ?? '—'}°{c.curLetraSeccion} ({c.curAnioEscolar})
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Col>
+                  <Col sm={2}>
+                    <Form.Label className="mb-1">Tipo</Form.Label>
+                    <Form.Select
+                      size="sm"
+                      value={solForm.tipoAlumno}
+                      onChange={(e) => setSolForm((f) => ({ ...f, tipoAlumno: e.target.value }))}
+                    >
+                      <option value="NUEVO">Nuevo</option>
+                      <option value="ANTIGUO">Antiguo</option>
+                      <option value="REPITENTE">Repitente</option>
+                    </Form.Select>
+                  </Col>
+                  <Col sm={3}>
+                    <Form.Label className="mb-1">Observaciones</Form.Label>
+                    <Form.Control
+                      size="sm"
+                      placeholder="Opcional"
+                      value={solForm.observaciones}
+                      onChange={(e) => setSolForm((f) => ({ ...f, observaciones: e.target.value }))}
+                    />
+                  </Col>
+                  <Col sm="auto">
+                    <Button size="sm" className={styles.btnGranate} type="submit" disabled={savingSolicitud}>
+                      {savingSolicitud ? 'Enviando...' : 'Enviar solicitud'}
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+            )}
+
+            {loadingSolicitudes ? (
+              <div className={styles.emptyState}>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Cargando solicitudes...
+              </div>
+            ) : solicitudes.length === 0 ? (
+              <div className={styles.emptyState}>
+                {esApoderado ? 'No has enviado solicitudes de matrícula.' : 'No hay solicitudes de matrícula.'}
+              </div>
+            ) : (
+              <div className={styles.tableWrap}>
+                <Table hover responsive className={styles.table}>
+                  <thead className={styles.tableHead}>
+                    <tr>
+                      <th>#</th>
+                      <th>Alumno</th>
+                      {canManage && <th>Apoderado</th>}
+                      <th>Curso deseado</th>
+                      <th>Tipo</th>
+                      <th>Fecha</th>
+                      <th>Estado</th>
+                      {canManage && <th className="text-end">Acciones</th>}
+                      {esApoderado && <th>Motivo rechazo</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {solicitudes.map((s) => (
+                      <tr key={s.idSolicitud}>
+                        <td>{s.idSolicitud}</td>
+                        <td>{s.alumnoRut}</td>
+                        {canManage && <td>{s.apoderadoRut}</td>}
+                        <td>
+                          {canManage && s.estado === 'PENDIENTE' ? (
+                            <Form.Select
+                              size="sm"
+                              value={cursoElegido[s.idSolicitud] ?? s.cursoId ?? ''}
+                              onChange={(e) =>
+                                setCursoElegido((prev) => ({ ...prev, [s.idSolicitud]: e.target.value }))
+                              }
+                            >
+                              <option value="">Sin curso</option>
+                              {cursos.map((c) => (
+                                <option key={c.idCur} value={c.idCur}>
+                                  {c.nivel?.nivNum ?? '—'}°{c.curLetraSeccion} ({c.curAnioEscolar})
+                                </option>
+                              ))}
+                            </Form.Select>
+                          ) : (
+                            cursoLabel(s.cursoId)
+                          )}
+                        </td>
+                        <td>
+                          <Badge bg={TIPO_BADGE[s.tipoAlumno] || 'secondary'}>{s.tipoAlumno || 'N/D'}</Badge>
+                        </td>
+                        <td>{formatDate(s.fechaSolicitud)}</td>
+                        <td>
+                          <Badge bg={ESTADO_SOLICITUD_BADGE[s.estado] || 'secondary'}>{s.estado}</Badge>
+                        </td>
+                        {canManage && (
+                          <td className="text-end">
+                            {s.estado === 'PENDIENTE' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline-success"
+                                  className="me-2"
+                                  disabled={procesandoId === s.idSolicitud}
+                                  onClick={() => handleAprobarSolicitud(s)}
+                                >
+                                  Aprobar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline-danger"
+                                  disabled={procesandoId === s.idSolicitud}
+                                  onClick={() => handleRechazarSolicitud(s)}
+                                >
+                                  Rechazar
+                                </Button>
+                              </>
+                            )}
+                          </td>
+                        )}
+                        {esApoderado && <td>{s.motivoRechazo || '—'}</td>}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
+          </Tab>
+        )}
+        </Tabs>
       </main>
 
       <MatriculaForm

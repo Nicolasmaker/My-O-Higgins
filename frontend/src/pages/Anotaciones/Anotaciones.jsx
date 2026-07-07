@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
 import {
@@ -10,6 +11,8 @@ import {
   getAnotacionesByRut,
 } from '../../services/anotacionesService'
 import { getHojaDeVidaPorRut } from '../../services/hojaDeVidaService'
+import { getImpartirByDocente } from '../../services/academicoService'
+import { getMatriculas } from '../../services/matriculaService'
 import { limpiarRut, rutValido, rutValidoConDv } from '../../validators/fieldValidators'
 import AnotacionCard from '../../components/Anotaciones/AnotacionCard'
 import AnotacionesToolbar from '../../components/Anotaciones/AnotacionesToolbar'
@@ -26,6 +29,7 @@ const ROL_ESTUDIANTE = 'ROLE_ESTUDIANTE'
 
 const initialForm = {
   anotTip: 'Positiva',
+  anotGravedad: '',
   anotDes: '',
   rutEstudiante: '',
 }
@@ -37,6 +41,7 @@ function formatDate(value) {
 
 export default function Anotaciones() {
   const { usuario, hasRole } = useAuth()
+  const navigate = useNavigate()
   const [anotaciones, setAnotaciones] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -45,6 +50,7 @@ export default function Anotaciones() {
   const [activeFilterRut, setActiveFilterRut] = useState('')
   const [filterTipo, setFilterTipo] = useState('todas')
   const [filterCurso, setFilterCurso] = useState('')
+  const [filterGravedad, setFilterGravedad] = useState('todas')
   const [editingId, setEditingId] = useState(null)
   const [hojaVidaStatus, setHojaVidaStatus] = useState('idle')
   const [idHojaVidaResuelto, setIdHojaVidaResuelto] = useState(null)
@@ -61,7 +67,43 @@ export default function Anotaciones() {
   const canCreate = hasRole(ROLES_CREAN)
   const canManage = hasRole(ROLES_GESTIONAN)
   const isEstudiante = hasRole(ROL_ESTUDIANTE)
+  const esDocente = hasRole('ROLE_DOCENTE')
+  const esApoderado = hasRole('ROLE_APODERADO')
   const rutEstudianteTyped = watch('rutEstudiante')
+  const tipoSeleccionado = watch('anotTip')
+
+  // Docente: alcance de creación restringido a estudiantes de sus propios cursos/asignaturas
+  // (Inspector no tiene esta restricción, según el doc de permisos).
+  const [impartirDocente, setImpartirDocente] = useState([])
+  const [matriculas, setMatriculas] = useState([])
+  useEffect(() => {
+    if (!esDocente || !userRut) return
+    getImpartirByDocente(userRut)
+      .then((r) => setImpartirDocente(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setImpartirDocente([]))
+  }, [esDocente, userRut])
+  useEffect(() => {
+    if (!esDocente && !esApoderado) return
+    getMatriculas()
+      .then((r) => setMatriculas(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setMatriculas([]))
+  }, [esDocente, esApoderado])
+
+  const idsCursoDocente = useMemo(
+    () => new Set(impartirDocente.map((i) => i.curso?.idCur).filter(Boolean)),
+    [impartirDocente]
+  )
+  const rutsAlumnosDocente = useMemo(
+    () => new Set(matriculas.filter((m) => idsCursoDocente.has(m.cursoId)).map((m) => String(m.alumnoRut))),
+    [matriculas, idsCursoDocente]
+  )
+  const rutsHijosApoderado = useMemo(
+    () =>
+      new Set(
+        matriculas.filter((m) => String(m.apoderadoRut) === String(userRut)).map((m) => String(m.alumnoRut))
+      ),
+    [matriculas, userRut]
+  )
 
   // Normaliza texto para comparar sin importar tildes, mayúsculas ni símbolos (ej. "8°B" vs "8b").
   const normalizar = (valor) =>
@@ -78,6 +120,9 @@ export default function Anotaciones() {
       if (filterTipo !== 'todas' && String(item.anotTip || '').toLowerCase() !== filterTipo) {
         return false
       }
+      if (filterGravedad !== 'todas' && normalizar(item.anotGravedad) !== normalizar(filterGravedad)) {
+        return false
+      }
       if (cursoBuscado && !normalizar(item.curso).includes(cursoBuscado)) {
         return false
       }
@@ -90,7 +135,7 @@ export default function Anotaciones() {
       }
       return true
     })
-  }, [anotaciones, filterTipo, filterCurso, filterRut])
+  }, [anotaciones, filterTipo, filterGravedad, filterCurso, filterRut])
 
   const dashboardStats = useMemo(() => {
     const positivas = anotacionesFiltradas.filter((item) => String(item.anotTip || '').toLowerCase() === 'positiva').length
@@ -179,6 +224,24 @@ export default function Anotaciones() {
     }
   }
 
+  // Apoderado: ve solo las anotaciones de su(s) hijo(s), mezclando el historial de cada uno.
+  const loadByRuts = async (ruts) => {
+    setLoading(true)
+    setLoadError('')
+    try {
+      const responses = await Promise.all(
+        ruts.map((rut) => getAnotacionesByRut(limpiarRut(rut)).catch(() => ({ data: [] })))
+      )
+      setAnotaciones(responses.flatMap((r) => (Array.isArray(r.data) ? r.data : [])))
+    } catch (error) {
+      console.error(error)
+      setLoadError('No se pudieron cargar las anotaciones')
+      setAnotaciones([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     // Un estudiante solo puede ver sus propias anotaciones: se carga directo con
     // su RUT y no tiene acceso al filtro de búsqueda por RUT de otros estudiantes.
@@ -186,8 +249,17 @@ export default function Anotaciones() {
       if (userRut) loadByRut(userRut)
       return
     }
+    if (esApoderado) {
+      if (rutsHijosApoderado.size === 0) {
+        setAnotaciones([])
+        setLoading(false)
+        return
+      }
+      loadByRuts([...rutsHijosApoderado])
+      return
+    }
     loadAll()
-  }, [isEstudiante, userRut])
+  }, [isEstudiante, esApoderado, userRut, rutsHijosApoderado])
 
   // El filtro por tipo/curso/nombre ya se aplica en vivo sobre lo cargado (anotacionesFiltradas).
   // Este submit solo se usa cuando lo tipeado es un RUT valido: en ese caso ademas trae del
@@ -208,6 +280,7 @@ export default function Anotaciones() {
   const handleResetFiltros = async () => {
     setFilterRut('')
     setFilterTipo('todas')
+    setFilterGravedad('todas')
     setFilterCurso('')
     await loadAll()
   }
@@ -228,12 +301,17 @@ export default function Anotaciones() {
   }
 
   const onSubmit = async (data) => {
+    if (data.anotTip === 'Negativa' && !data.anotGravedad) {
+      toast.error('Selecciona la gravedad de la anotación negativa')
+      return
+    }
     setSaving(true)
 
     try {
       if (editingId) {
         await actualizarAnotacion(editingId, {
           anotTip: data.anotTip,
+          anotGravedad: data.anotTip === 'Negativa' ? data.anotGravedad : null,
           anotDes: data.anotDes,
         })
         toast.success('Anotación actualizada')
@@ -243,8 +321,14 @@ export default function Anotaciones() {
           setSaving(false)
           return
         }
+        if (esDocente && !rutsAlumnosDocente.has(limpiarRut(data.rutEstudiante))) {
+          toast.error('Solo puedes crear anotaciones para estudiantes de tus propios cursos')
+          setSaving(false)
+          return
+        }
         await crearAnotacion({
           anotTip: data.anotTip,
+          anotGravedad: data.anotTip === 'Negativa' ? data.anotGravedad : null,
           anotDes: data.anotDes,
           funcionarioUsuRut: Number(userRut),
           idHojaVida: idHojaVidaResuelto,
@@ -270,6 +354,7 @@ export default function Anotaciones() {
     setEditingId(anotacion.idAnot)
     reset({
       anotTip: anotacion.anotTip || 'Positiva',
+      anotGravedad: anotacion.anotGravedad || '',
       anotDes: anotacion.anotDes || '',
       rutEstudiante: '',
     })
@@ -296,6 +381,22 @@ export default function Anotaciones() {
 
   const mostrarFormulario = canCreate || editingId
 
+  // Vincular citación: crea una Reunión Individual pre-llenada a partir de esta anotación.
+  const handleVincularCitacion = (anotacion) => {
+    navigate('/reuniones', {
+      state: {
+        prefillIndividual: {
+          idAnotacion: anotacion.idAnot,
+          motivoSugerido: `Citación por anotación #${anotacion.idAnot}`,
+        },
+      },
+    })
+  }
+
+  // Directivo gestiona cualquier anotación sin restricción; Docente/Inspector solo las propias.
+  const puedeGestionar = (anotacion) =>
+    canManage || (canCreate && String(anotacion.funcionarioUsuRut) === String(userRut))
+
   return (
     <div className="anotaciones-page">
       <main className="anotaciones-shell">
@@ -312,6 +413,8 @@ export default function Anotaciones() {
 
         {isEstudiante ? (
           <p className="anotaciones-estudiante-aviso">Estás viendo únicamente tus propias anotaciones.</p>
+        ) : esApoderado ? (
+          <p className="anotaciones-estudiante-aviso">Estás viendo únicamente las anotaciones de tu(s) hijo(s).</p>
         ) : (
           <AnotacionesToolbar
             filterRut={filterRut}
@@ -323,6 +426,8 @@ export default function Anotaciones() {
             setFilterTipo={setFilterTipo}
             filterCurso={filterCurso}
             setFilterCurso={setFilterCurso}
+            filterGravedad={filterGravedad}
+            setFilterGravedad={setFilterGravedad}
           />
         )}
 
@@ -352,6 +457,7 @@ export default function Anotaciones() {
               onCancel={resetForm}
               hojaVidaStatus={hojaVidaStatus}
               idHojaVidaResuelto={idHojaVidaResuelto}
+              tipoSeleccionado={tipoSeleccionado}
             />
           )}
 
@@ -385,7 +491,8 @@ export default function Anotaciones() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     formatDate={formatDate}
-                    canManage={canManage}
+                    canManage={puedeGestionar(anotacion)}
+                    onVincularCitacion={canCreate || canManage ? handleVincularCitacion : undefined}
                   />
                 ))}
               </div>

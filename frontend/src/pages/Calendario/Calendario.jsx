@@ -4,8 +4,11 @@ import { toast } from 'react-toastify'
 import { FiCalendar, FiChevronLeft, FiChevronRight, FiClock, FiList, FiPlus, FiRefreshCw } from 'react-icons/fi'
 import Button from '../../components/UI/Button'
 import Input from '../../components/UI/Input'
+import { useAuth } from '../../hooks/useAuth'
 import { crearEvento, actualizarEvento, eliminarEvento, getEventos } from '../../services/calendarioService'
 import { getAsignaturas } from '../../services/asignaturaService'
+import { getImpartirByDocente } from '../../services/academicoService'
+import { getMatriculas } from '../../services/matriculaService'
 import styles from './Calendario.module.css'
 
 const eventTypes = ['Institucional', 'Académico', 'Actividad']
@@ -106,9 +109,90 @@ function toneLabel(tipo) {
 }
 
 export default function Calendario() {
+  const { usuario, hasRole } = useAuth()
+  const esDirectivo = hasRole('ROLE_DIRECTIVO')
+  const esDocente = hasRole('ROLE_DOCENTE')
+  const esInspector = hasRole('ROLE_INSPECTOR')
+  const esApoderado = hasRole('ROLE_APODERADO')
+  const esEstudiante = hasRole('ROLE_ESTUDIANTE')
+  const puedeGestionar = esDirectivo || esDocente
+
+  // Matrículas: para resolver "de qué curso es este usuario" (Apoderado: cursos de sus
+  // hijos; Estudiante: su propio curso) y así filtrar qué eventos puede ver en su calendario.
+  const [matriculas, setMatriculas] = useState([])
+  useEffect(() => {
+    getMatriculas()
+      .then((r) => setMatriculas(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setMatriculas([]))
+  }, [])
+  const cursosHijosApoderado = useMemo(
+    () =>
+      new Set(
+        matriculas
+          .filter((m) => String(m.apoderadoRut) === String(usuario?.usuRut))
+          .map((m) => m.cursoId)
+          .filter((id) => id != null)
+      ),
+    [matriculas, usuario?.usuRut]
+  )
+  const cursoPropioEstudiante = useMemo(() => {
+    const propia = matriculas.find((m) => String(m.alumnoRut) === String(usuario?.usuRut))
+    return propia?.cursoId ?? null
+  }, [matriculas, usuario?.usuRut])
+
+  // Docente: solo puede crear/editar/eliminar eventos "Académico" de sus propias asignaturas.
+  const [impartirDocente, setImpartirDocente] = useState([])
+  useEffect(() => {
+    if (!esDocente || !usuario?.usuRut) return
+    getImpartirByDocente(usuario.usuRut)
+      .then((r) => setImpartirDocente(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setImpartirDocente([]))
+  }, [esDocente, usuario?.usuRut])
+  const idsAsignaturaPropias = useMemo(
+    () => new Set(impartirDocente.map((i) => i.asignatura?.idAsi).filter(Boolean)),
+    [impartirDocente]
+  )
+
+  const puedeEditarEvento = (evento) => {
+    if (esDirectivo) return true
+    if (esDocente) return evento?.tipoEvento === 'Académico' && idsAsignaturaPropias.has(evento?.idAsignatura)
+    return false
+  }
+
+  // Visibilidad por audiencia: eventos sin ningún campo de audiencia (Institucional/
+  // Actividad creados directamente en Calendario) son visibles para todos, sin cambio.
+  // Evaluación/Reunión sí traen audiencia real y se filtran según el rol.
+  const eventoVisiblePorAudiencia = (evento) => {
+    if (esDirectivo || esInspector) return true
+    const sinAudiencia =
+      evento.cursoId == null &&
+      evento.docenteUsuRut == null &&
+      evento.apoderadoUsuRut == null &&
+      evento.alumnoRut == null
+    if (sinAudiencia) return true
+    if (esDocente) return String(evento.docenteUsuRut) === String(usuario?.usuRut)
+    if (esApoderado) {
+      return (
+        (evento.cursoId != null && cursosHijosApoderado.has(evento.cursoId)) ||
+        String(evento.apoderadoUsuRut) === String(usuario?.usuRut)
+      )
+    }
+    if (esEstudiante) {
+      return (
+        (evento.cursoId != null && cursoPropioEstudiante != null && Number(evento.cursoId) === Number(cursoPropioEstudiante)) ||
+        String(evento.alumnoRut) === String(usuario?.usuRut)
+      )
+    }
+    return false
+  }
+
   const today = useMemo(() => new Date(), [])
   const [eventos, setEventos] = useState([])
   const [asignaturas, setAsignaturas] = useState([])
+  const asignaturasParaForm = useMemo(() => {
+    if (!esDocente) return asignaturas
+    return asignaturas.filter((a) => idsAsignaturaPropias.has(a.idAsi))
+  }, [asignaturas, esDocente, idsAsignaturaPropias])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState('')
@@ -187,8 +271,12 @@ export default function Calendario() {
   )
 
   const visibleEvents = useMemo(
-    () => normalizedEvents.filter((evento) => filters[toneLabel(evento.tipoEvento)] !== false),
-    [filters, normalizedEvents]
+    () =>
+      normalizedEvents.filter(
+        (evento) => filters[toneLabel(evento.tipoEvento)] !== false && eventoVisiblePorAudiencia(evento)
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filters, normalizedEvents, esDirectivo, esInspector, esDocente, esApoderado, esEstudiante, cursosHijosApoderado, cursoPropioEstudiante, usuario?.usuRut]
   )
 
   const selectedDateValue = useMemo(() => fromInputDate(selectedDate) || today, [selectedDate, today])
@@ -473,9 +561,11 @@ export default function Calendario() {
             </Button>
           </div>
 
-          <Button type="button" variant="primary" onClick={() => document.getElementById('form-evento')?.scrollIntoView({ behavior: 'smooth' })}>
-            <FiPlus /> Crear evento
-          </Button>
+          {puedeGestionar && (
+            <Button type="button" variant="primary" onClick={() => document.getElementById('form-evento')?.scrollIntoView({ behavior: 'smooth' })}>
+              <FiPlus /> Crear evento
+            </Button>
+          )}
         </section>
 
         {loadError ? <div className={styles.errorBanner}>{loadError}</div> : null}
@@ -528,14 +618,16 @@ export default function Calendario() {
                         <span>Asignatura #{evento.idAsignatura}</span>
                         <span>{formatLongDate(evento.fechaInicio)}</span>
                       </div>
-                      <div className={styles.detailActions}>
-                        <Button type="button" variant="outline" onClick={() => handleEdit(evento)}>
-                          Editar
-                        </Button>
-                        <Button type="button" variant="danger" onClick={() => handleDelete(evento.idCalEst)}>
-                          Eliminar
-                        </Button>
-                      </div>
+                      {puedeEditarEvento(evento) && (
+                        <div className={styles.detailActions}>
+                          <Button type="button" variant="outline" onClick={() => handleEdit(evento)}>
+                            Editar
+                          </Button>
+                          <Button type="button" variant="danger" onClick={() => handleDelete(evento.idCalEst)}>
+                            Eliminar
+                          </Button>
+                        </div>
+                      )}
                     </article>
                   ))
                 )}
@@ -544,6 +636,7 @@ export default function Calendario() {
           </aside>
         </div>
 
+        {puedeGestionar && (
         <section className={styles.formSection} id="form-evento">
           <div className={styles.formCard}>
             <div className={styles.formHeader}>
@@ -569,8 +662,8 @@ export default function Calendario() {
 
               <label className={styles.field}>
                 <span>Tipo de evento</span>
-                <select className={styles.select} {...register('tipoEvento', { required: 'El tipo es obligatorio' })}>
-                  {eventTypes.map((type) => (
+                <select className={styles.select} disabled={esDocente} {...register('tipoEvento', { required: 'El tipo es obligatorio' })}>
+                  {(esDocente ? ['Académico'] : eventTypes).map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -605,7 +698,7 @@ export default function Calendario() {
                 <span>Asignatura</span>
                 <select className={styles.select} {...register('idAsignatura', { required: 'La asignatura es obligatoria' })}>
                   <option value="">Selecciona una asignatura</option>
-                  {asignaturas.map((asignatura) => (
+                  {asignaturasParaForm.map((asignatura) => (
                     <option key={asignatura.idAsi} value={asignatura.idAsi}>
                       {asignatura.asiNombre}
                     </option>
@@ -660,14 +753,16 @@ export default function Calendario() {
                     </div>
                     <div className={styles.rowActions}>
                       <span>{formatLongDate(evento.fechaInicio)}</span>
-                      <div className={styles.rowButtons}>
-                        <Button type="button" variant="outline" onClick={() => handleEdit(evento)}>
-                          Editar
-                        </Button>
-                        <Button type="button" variant="danger" onClick={() => handleDelete(evento.idCalEst)}>
-                          Eliminar
-                        </Button>
-                      </div>
+                      {puedeEditarEvento(evento) && (
+                        <div className={styles.rowButtons}>
+                          <Button type="button" variant="outline" onClick={() => handleEdit(evento)}>
+                            Editar
+                          </Button>
+                          <Button type="button" variant="danger" onClick={() => handleDelete(evento.idCalEst)}>
+                            Eliminar
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </article>
                 ))}
@@ -675,6 +770,7 @@ export default function Calendario() {
             )}
           </div>
         </section>
+        )}
       </main>
     </div>
   )

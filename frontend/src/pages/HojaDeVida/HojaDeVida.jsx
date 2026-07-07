@@ -13,7 +13,7 @@
 // acá se filtran client-side por el idHojaVida seleccionado.
 // =============================================================
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Row, Col, ListGroup, Accordion, Badge, Button, Alert, Spinner, Table } from 'react-bootstrap'
+import { Row, Col, ListGroup, Accordion, Badge, Button, Alert, Spinner, Table, Form } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
 import { limpiarRut } from '../../validators/fieldValidators'
@@ -34,12 +34,22 @@ import {
   crearAntecedenteMedico,
   actualizarAntecedenteMedico,
   eliminarAntecedenteMedico,
+  getDocumentosPorHoja,
+  subirDocumentoHojaVida,
+  descargarDocumentoHojaVida,
+  eliminarDocumentoHojaVida,
 } from '../../services/hojaDeVidaService'
+import { getAnotacionesByHojaVida } from '../../services/anotacionesService'
+import { getImpartirByDocente, getCursos } from '../../services/academicoService'
+import { getMatriculas } from '../../services/matriculaService'
+import { getEstudiante } from '../../services/authService'
 import HojaVidaForm from '../../components/HojaDeVida/HojaVidaForm'
 import AntecedenteForm from '../../components/HojaDeVida/AntecedenteForm'
 import styles from './HojaDeVida.module.css'
 
-const ROLES_GESTION = ['ROLE_DOCENTE', 'ROLE_INSPECTOR', 'ROLE_DIRECTIVO']
+// Solo Directivo gestiona la ficha (crear/editar/eliminar hoja + antecedentes).
+// Docente/Inspector consultan (con distinto alcance) pero registran vía Anotaciones, no acá.
+const ROLES_GESTION = ['ROLE_DIRECTIVO']
 
 // API por tipo de antecedente (crear / actualizar / eliminar)
 const ANTECEDENTE_API = {
@@ -49,8 +59,14 @@ const ANTECEDENTE_API = {
 }
 
 export default function HojaDeVida() {
-  const { hasRole } = useAuth()
+  const { usuario, hasRole } = useAuth()
   const canManage = hasRole(ROLES_GESTION)
+  const esDirectivo = hasRole('ROLE_DIRECTIVO')
+  const esInspector = hasRole('ROLE_INSPECTOR')
+  const esDocente = hasRole('ROLE_DOCENTE')
+  const esApoderado = hasRole('ROLE_APODERADO')
+  const esEstudiante = hasRole('ROLE_ESTUDIANTE')
+  const userRut = usuario?.usuRut
 
   const [hojas, setHojas] = useState([])
   const [academicos, setAcademicos] = useState([])
@@ -61,6 +77,89 @@ export default function HojaDeVida() {
 
   const [selectedId, setSelectedId] = useState(null)
   const [busqueda, setBusqueda] = useState('')
+
+  // Matrículas + cursos: para filtrar por rol y para resolver "curso" en la búsqueda de Directivo.
+  const [matriculas, setMatriculas] = useState([])
+  const [cursos, setCursos] = useState([])
+  useEffect(() => {
+    getMatriculas().then((r) => setMatriculas(Array.isArray(r.data) ? r.data : [])).catch(() => setMatriculas([]))
+    getCursos().then((r) => setCursos(Array.isArray(r.data) ? r.data : [])).catch(() => setCursos([]))
+  }, [])
+
+  // Docente: sus asignaciones (Impartir) para saber qué cursos dicta.
+  const [impartirDocente, setImpartirDocente] = useState([])
+  useEffect(() => {
+    if (!esDocente || !userRut) return
+    getImpartirByDocente(userRut)
+      .then((r) => setImpartirDocente(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setImpartirDocente([]))
+  }, [esDocente, userRut])
+  const idsCursoDocente = useMemo(
+    () => new Set(impartirDocente.map((i) => i.curso?.idCur).filter(Boolean)),
+    [impartirDocente]
+  )
+
+  const cursoLabelPorId = useMemo(() => {
+    const m = new Map()
+    cursos.forEach((c) => m.set(c.idCur, `${c.nivel?.nivNum ?? '—'}°${c.curLetraSeccion ?? ''}`))
+    return m
+  }, [cursos])
+  const cursoLabelPorRut = useMemo(() => {
+    const m = new Map()
+    matriculas.forEach((mt) => {
+      if (mt.alumnoRut != null && mt.cursoId != null) {
+        m.set(String(mt.alumnoRut), cursoLabelPorId.get(mt.cursoId) ?? '')
+      }
+    })
+    return m
+  }, [matriculas, cursoLabelPorId])
+
+  // Visibilidad de filas según rol (antes: cualquiera veía todas las hojas).
+  const hojasVisibles = useMemo(() => {
+    if (esDirectivo || esInspector) return hojas
+    if (esDocente) {
+      const rutsPermitidos = new Set(
+        matriculas.filter((m) => idsCursoDocente.has(m.cursoId)).map((m) => String(m.alumnoRut))
+      )
+      return hojas.filter((h) => rutsPermitidos.has(String(h.estudianteUsuRut)))
+    }
+    if (esApoderado) {
+      const rutsHijos = new Set(
+        matriculas.filter((m) => String(m.apoderadoRut) === String(userRut)).map((m) => String(m.alumnoRut))
+      )
+      return hojas.filter((h) => rutsHijos.has(String(h.estudianteUsuRut)))
+    }
+    if (esEstudiante) {
+      return hojas.filter((h) => String(h.estudianteUsuRut) === String(userRut))
+    }
+    return hojas
+  }, [hojas, esDirectivo, esInspector, esDocente, esApoderado, esEstudiante, matriculas, idsCursoDocente, userRut])
+
+  // Nombre del estudiante por RUT, resuelto bajo demanda para las hojas visibles (búsqueda por nombre).
+  const [nombresPorRut, setNombresPorRut] = useState({})
+  useEffect(() => {
+    const rutsFaltantes = [
+      ...new Set(
+        hojasVisibles.map((h) => String(h.estudianteUsuRut)).filter((rut) => rut && !(rut in nombresPorRut))
+      ),
+    ]
+    if (rutsFaltantes.length === 0) return
+    Promise.all(
+      rutsFaltantes.map((rut) =>
+        getEstudiante(rut)
+          .then((r) => [rut, `${r.data?.usuPNombre ?? ''} ${r.data?.usuApePat ?? ''}`.trim()])
+          .catch(() => [rut, ''])
+      )
+    ).then((pares) => {
+      setNombresPorRut((prev) => {
+        const next = { ...prev }
+        pares.forEach(([rut, nombre]) => {
+          next[rut] = nombre
+        })
+        return next
+      })
+    })
+  }, [hojasVisibles, nombresPorRut])
 
   // Modales
   const [showHojaForm, setShowHojaForm] = useState(false)
@@ -99,13 +198,31 @@ export default function HojaDeVida() {
 
   const hojasFiltradas = useMemo(() => {
     const q = busqueda.trim()
-    if (!q) return hojas
-    return hojas.filter(
-      (h) => String(h.estudianteUsuRut ?? '').includes(q) || String(h.idHojaVida ?? '').includes(q)
-    )
-  }, [hojas, busqueda])
+    if (!q) return hojasVisibles
+    const qLower = q.toLowerCase()
+    return hojasVisibles.filter((h) => {
+      const rut = String(h.estudianteUsuRut ?? '')
+      if (rut.includes(q) || String(h.idHojaVida ?? '').includes(q)) return true
+      const curso = cursoLabelPorRut.get(rut) ?? ''
+      if (curso.toLowerCase().includes(qLower)) return true
+      const nombre = nombresPorRut[rut] ?? ''
+      if (nombre.toLowerCase().includes(qLower)) return true
+      return false
+    })
+  }, [hojasVisibles, busqueda, cursoLabelPorRut, nombresPorRut])
 
   const selected = hojas.find((h) => h.idHojaVida === selectedId) || null
+
+  // Historial de matrículas del estudiante seleccionado (consulta cruzada de solo lectura,
+  // no se duplica dato — reusa `matriculas` ya cargado arriba para los filtros de rol).
+  const matriculasDelEstudianteSeleccionado = useMemo(() => {
+    if (!selected) return []
+    return matriculas
+      .filter((m) => String(m.alumnoRut) === String(selected.estudianteUsuRut))
+      .sort((a, b) => (b.matriculaAnioAcademico ?? 0) - (a.matriculaAnioAcademico ?? 0))
+  }, [matriculas, selected])
+
+  const ESTADO_BADGE = { Incorporado: 'success', Retirado: 'secondary', Suspendido: 'warning' }
 
   const antecedentesDeHoja = useMemo(
     () => ({
@@ -116,12 +233,116 @@ export default function HojaDeVida() {
     [academicos, apoderados, medicos, selectedId]
   )
 
+  // Anotaciones del estudiante, mostradas de solo lectura dentro de su hoja de vida.
+  const [anotacionesHoja, setAnotacionesHoja] = useState([])
+  const [loadingAnotaciones, setLoadingAnotaciones] = useState(false)
+  useEffect(() => {
+    if (!selectedId) {
+      setAnotacionesHoja([])
+      return
+    }
+    setLoadingAnotaciones(true)
+    getAnotacionesByHojaVida(selectedId)
+      .then((r) => setAnotacionesHoja(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setAnotacionesHoja([]))
+      .finally(() => setLoadingAnotaciones(false))
+  }, [selectedId])
+
+  // Documentos oficiales adjuntos de la hoja seleccionada.
+  const [documentosHoja, setDocumentosHoja] = useState([])
+  const [loadingDocumentos, setLoadingDocumentos] = useState(false)
+  const [subiendoDocumento, setSubiendoDocumento] = useState(false)
+
+  const cargarDocumentos = useCallback(() => {
+    if (!selectedId) {
+      setDocumentosHoja([])
+      return
+    }
+    setLoadingDocumentos(true)
+    getDocumentosPorHoja(selectedId)
+      .then((r) => setDocumentosHoja(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setDocumentosHoja([]))
+      .finally(() => setLoadingDocumentos(false))
+  }, [selectedId])
+
+  useEffect(() => {
+    cargarDocumentos()
+  }, [cargarDocumentos])
+
+  const EXTENSIONES_PERMITIDAS = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx']
+  const TAMANIO_MAXIMO_BYTES = 5 * 1024 * 1024
+
+  const formatearTamanio = (bytes) => {
+    if (bytes == null) return '—'
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  const handleSubirDocumento = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !selectedId) return
+
+    const extension = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : ''
+    if (!EXTENSIONES_PERMITIDAS.includes(extension)) {
+      toast.error(`Tipo de archivo no permitido. Solo se aceptan: ${EXTENSIONES_PERMITIDAS.join(', ')}`)
+      return
+    }
+    if (file.size > TAMANIO_MAXIMO_BYTES) {
+      toast.error('El archivo supera el tamaño máximo permitido (5MB).')
+      return
+    }
+
+    setSubiendoDocumento(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      await subirDocumentoHojaVida(selectedId, formData)
+      toast.success('Documento subido')
+      cargarDocumentos()
+    } catch (error) {
+      console.error(error)
+      toast.error(error.response?.data?.mensaje || 'No se pudo subir el documento')
+    } finally {
+      setSubiendoDocumento(false)
+    }
+  }
+
+  const handleDescargarDocumento = async (documento) => {
+    try {
+      const res = await descargarDocumentoHojaVida(documento.idDocumento)
+      const url = URL.createObjectURL(new Blob([res.data], { type: documento.tipoContenido }))
+      const a = document.createElement('a')
+      a.href = url
+      a.download = documento.nombreArchivo
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error(error)
+      toast.error('No se pudo descargar el documento')
+    }
+  }
+
+  const handleEliminarDocumento = async (documento) => {
+    if (!window.confirm(`¿Eliminar el documento "${documento.nombreArchivo}"?`)) return
+    try {
+      await eliminarDocumentoHojaVida(documento.idDocumento)
+      toast.success('Documento eliminado')
+      cargarDocumentos()
+    } catch (error) {
+      console.error(error)
+      toast.error('No se pudo eliminar el documento')
+    }
+  }
+
   // ── CRUD hoja de vida ───────────────────────────────────────
   const handleSaveHoja = async (data) => {
     setSaving(true)
     const payload = {
       estudianteUsuRut: limpiarRut(data.estudianteUsuRut),
       matriculaId: Number(data.matriculaId),
+      estado: data.estado || null,
     }
     try {
       if (hojaEdit) {
@@ -265,29 +486,38 @@ export default function HojaDeVida() {
             <Col md={4} lg={3}>
               <input
                 className={`form-control form-control-sm ${styles.searchInput}`}
-                placeholder="Buscar por RUT o N° de hoja"
+                placeholder="Buscar por RUT, nombre, curso o N° de hoja"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
               {hojasFiltradas.length === 0 ? (
                 <div className={styles.emptyState}>
-                  {hojas.length === 0 ? 'No hay hojas de vida registradas.' : 'Sin coincidencias.'}
+                  {hojasVisibles.length === 0 ? 'No hay hojas de vida registradas.' : 'Sin coincidencias.'}
                 </div>
               ) : (
                 <ListGroup className={styles.hojaList}>
-                  {hojasFiltradas.map((h) => (
-                    <ListGroup.Item
-                      key={h.idHojaVida}
-                      action
-                      active={h.idHojaVida === selectedId}
-                      onClick={() => setSelectedId(h.idHojaVida)}
-                      className={styles.hojaItem}
-                    >
-                      <strong>Hoja #{h.idHojaVida}</strong>
-                      <span className={styles.hojaItemMeta}>Estudiante: {h.estudianteUsuRut}</span>
-                      <span className={styles.hojaItemMeta}>Matrícula: {h.matriculaId}</span>
-                    </ListGroup.Item>
-                  ))}
+                  {hojasFiltradas.map((h) => {
+                    const rut = String(h.estudianteUsuRut ?? '')
+                    const nombre = nombresPorRut[rut]
+                    const curso = cursoLabelPorRut.get(rut)
+                    return (
+                      <ListGroup.Item
+                        key={h.idHojaVida}
+                        action
+                        active={h.idHojaVida === selectedId}
+                        onClick={() => setSelectedId(h.idHojaVida)}
+                        className={styles.hojaItem}
+                      >
+                        <strong>Hoja #{h.idHojaVida}</strong>
+                        <span className={styles.hojaItemMeta}>
+                          {nombre ? `${nombre} · RUT ${h.estudianteUsuRut}` : `Estudiante: ${h.estudianteUsuRut}`}
+                        </span>
+                        <span className={styles.hojaItemMeta}>
+                          {curso ? `Curso: ${curso}` : `Matrícula: ${h.matriculaId}`}
+                        </span>
+                      </ListGroup.Item>
+                    )
+                  })}
                 </ListGroup>
               )}
             </Col>
@@ -300,7 +530,12 @@ export default function HojaDeVida() {
                 <div className={styles.detailPane}>
                   <header className={styles.detailHeader}>
                     <div>
-                      <h2 className={styles.detailTitle}>Hoja de vida #{selected.idHojaVida}</h2>
+                      <h2 className={styles.detailTitle}>
+                        Hoja de vida #{selected.idHojaVida}{' '}
+                        {selected.estado && (
+                          <Badge bg={ESTADO_BADGE[selected.estado] || 'secondary'}>{selected.estado}</Badge>
+                        )}
+                      </h2>
                       <span className={styles.detailMeta}>
                         Estudiante RUT {selected.estudianteUsuRut} · Matrícula #{selected.matriculaId}
                       </span>
@@ -325,6 +560,145 @@ export default function HojaDeVida() {
                   </header>
 
                   <Accordion defaultActiveKey="academico" alwaysOpen className={styles.accordion}>
+                    {/* ── Anotaciones (solo lectura, vinculadas por idHojaVida) ── */}
+                    <Accordion.Item eventKey="anotaciones">
+                      <Accordion.Header>
+                        {sectionHeader('Anotaciones', anotacionesHoja.length)}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        {loadingAnotaciones ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : anotacionesHoja.length === 0 ? (
+                          <p className={styles.sectionEmpty}>Sin anotaciones registradas.</p>
+                        ) : (
+                          <Table size="sm" hover responsive className={styles.sectionTable}>
+                            <thead>
+                              <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {anotacionesHoja.map((a) => (
+                                <tr key={a.idAnot}>
+                                  <td>{a.anotFec ? new Date(a.anotFec).toLocaleDateString('es-CL') : '—'}</td>
+                                  <td>
+                                    <Badge bg={a.anotTip === 'Positiva' ? 'success' : 'danger'}>{a.anotTip}</Badge>
+                                  </td>
+                                  <td>{a.anotDes}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                        )}
+                      </Accordion.Body>
+                    </Accordion.Item>
+
+                    {/* ── Documentos oficiales adjuntos ── */}
+                    <Accordion.Item eventKey="documentos">
+                      <Accordion.Header>
+                        {sectionHeader('Documentos oficiales', documentosHoja.length)}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        {canManage && (
+                          <div className="d-flex justify-content-end mb-2">
+                            <Form.Label
+                              className={`btn btn-sm btn-outline-secondary mb-0 ${subiendoDocumento ? 'disabled' : ''}`}
+                            >
+                              {subiendoDocumento ? 'Subiendo...' : '+ Subir documento'}
+                              <input
+                                type="file"
+                                hidden
+                                disabled={subiendoDocumento}
+                                onChange={handleSubirDocumento}
+                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                              />
+                            </Form.Label>
+                          </div>
+                        )}
+                        {loadingDocumentos ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : documentosHoja.length === 0 ? (
+                          <p className={styles.sectionEmpty}>Sin documentos adjuntos.</p>
+                        ) : (
+                          <Table size="sm" hover responsive className={styles.sectionTable}>
+                            <thead>
+                              <tr>
+                                <th>Nombre</th>
+                                <th>Tamaño</th>
+                                <th>Fecha</th>
+                                <th />
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {documentosHoja.map((d) => (
+                                <tr key={d.idDocumento}>
+                                  <td>{d.nombreArchivo}</td>
+                                  <td>{formatearTamanio(d.tamanioBytes)}</td>
+                                  <td>
+                                    {d.fechaSubida ? new Date(d.fechaSubida).toLocaleDateString('es-CL') : '—'}
+                                  </td>
+                                  <td className="text-end">
+                                    <Button
+                                      size="sm"
+                                      variant="outline-secondary"
+                                      className="me-1"
+                                      onClick={() => handleDescargarDocumento(d)}
+                                    >
+                                      Descargar
+                                    </Button>
+                                    {canManage && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline-danger"
+                                        onClick={() => handleEliminarDocumento(d)}
+                                      >
+                                        Eliminar
+                                      </Button>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                        )}
+                      </Accordion.Body>
+                    </Accordion.Item>
+
+                    {/* ── Historial de matrículas (solo lectura, consulta cruzada a MS-GestionMatricula) ── */}
+                    <Accordion.Item eventKey="historial-matricula">
+                      <Accordion.Header>
+                        {sectionHeader('Historial de matrículas', matriculasDelEstudianteSeleccionado.length)}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        {matriculasDelEstudianteSeleccionado.length === 0 ? (
+                          <p className={styles.sectionEmpty}>Sin matrículas registradas.</p>
+                        ) : (
+                          <Table size="sm" hover responsive className={styles.sectionTable}>
+                            <thead>
+                              <tr>
+                                <th>Año</th>
+                                <th>Estado</th>
+                                <th>Tipo alumno</th>
+                                <th>Fecha</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {matriculasDelEstudianteSeleccionado.map((m) => (
+                                <tr key={m.idMatricula}>
+                                  <td>{m.matriculaAnioAcademico}</td>
+                                  <td>{m.matriculaEstado}</td>
+                                  <td>{m.tipoAlumno}</td>
+                                  <td>{m.matriculaFecha ? new Date(`${m.matriculaFecha}T00:00:00`).toLocaleDateString('es-CL') : '—'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                        )}
+                      </Accordion.Body>
+                    </Accordion.Item>
+
                     {/* ── Académicos ── */}
                     <Accordion.Item eventKey="academico">
                       <Accordion.Header>

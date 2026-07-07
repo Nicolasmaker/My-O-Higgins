@@ -1,39 +1,44 @@
 // =============================================================
 // PÁGINA DE REUNIONES — Reuniones.jsx
 // =============================================================
-// Interfaz del MS-GestionReuniones (puerto 8081). Tres tipos de
-// registro, cada uno en su pestaña:
+// Interfaz del MS-GestionReuniones (puerto 8081). Conceptualmente
+// solo hay 2 tipos de reunión (Individual y General-de-curso);
+// "BitReunionApoderado" es infraestructura interna compartida por
+// ambas, no una categoría navegable propia.
 //
-//   - Con Apoderado → bitácora base (RF29). Editable: compromisos/obs.
-//   - Individual    → entrevista confidencial + estado de firmas.
-//   - General       → acta de coordinación institucional. Solo lectura.
+//   - Individual → 1-a-1 con un apoderado. Flujo: agendar (PENDIENTE)
+//     → el apoderado acepta/rechaza → si ACEPTADA, se habilita
+//     "Rellenar bitácora" (compromisos/temas tratados/obs).
+//   - General    → reunión de un curso completo con sus apoderados.
+//     Sin flujo de aceptación (aviso, no invitación); se puede
+//     "Completar acta" (comunicado/acuerdos/obs) en cualquier momento.
 //
-// El formulario de creación aparece plegado; se abre con el botón
-// "Nueva reunión" y siempre crea sobre la pestaña activa.
+// El formulario de agendar es liviano (solo lo necesario para citar,
+// no bitácora) — se abre con "+ Nueva reunión" y crea sobre la
+// pestaña activa.
 // =============================================================
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Tabs, Tab, Row, Col, Alert, Spinner, Button, ButtonGroup } from 'react-bootstrap'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Tabs, Tab, Row, Col, Alert, Spinner, Button } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
 import { limpiarRut } from '../../validators/fieldValidators'
 import {
-  getReunionesApoderado,
-  getReunionesApoderadoPorFuncionario,
-  crearReunionApoderado,
-  actualizarReunionApoderado,
   getReunionesIndividuales,
   crearReunionIndividual,
   actualizarFirmasIndividual,
+  actualizarIndividual,
   getReunionesGenerales,
   crearReunionGeneral,
+  actualizarGeneral,
+  actualizarReunionApoderado,
+  confirmarReunionApoderado,
 } from '../../services/reunionesService'
-import ReunionForm from '../../components/Reuniones/ReunionForm'
-import ReunionApoderadoCard from '../../components/Reuniones/ReunionApoderadoCard'
+import { getCursos, getImpartirByDocente } from '../../services/academicoService'
+import AgendarReunionForm from '../../components/Reuniones/AgendarReunionForm'
 import ReunionIndividualCard from '../../components/Reuniones/ReunionIndividualCard'
 import ReunionGeneralCard from '../../components/Reuniones/ReunionGeneralCard'
 import styles from './Reuniones.module.css'
-
-const ROLES_GESTION = ['ROLE_DOCENTE', 'ROLE_INSPECTOR', 'ROLE_DIRECTIVO']
 
 function formatDate(value) {
   if (!value) return 'Sin fecha'
@@ -46,31 +51,73 @@ function formatDate(value) {
 
 export default function Reuniones() {
   const { usuario, hasRole } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  const [apoderado, setApoderado] = useState([])
   const [individuales, setIndividuales] = useState([])
   const [generales, setGenerales] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
 
-  const [activeTab, setActiveTab] = useState('apoderado')
+  const [activeTab, setActiveTab] = useState('individual')
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [soloMias, setSoloMias] = useState(false)
+  // Prefill al llegar desde "Vincular citación" en Anotaciones (crea una Reunión Individual)
+  const [prefillIndividual, setPrefillIndividual] = useState(null)
+
+  useEffect(() => {
+    const prefill = location.state?.prefillIndividual
+    if (prefill) {
+      setPrefillIndividual(prefill)
+      setActiveTab('individual')
+      setShowForm(true)
+      // Limpia el state de navegación para que un refresh o "atrás" no reabra el prefill.
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
 
   const userRut = usuario?.usuRut ?? ''
-  const canManage = hasRole(ROLES_GESTION)
+  const esDirectivo = hasRole('ROLE_DIRECTIVO')
+  const esDocente = hasRole('ROLE_DOCENTE')
+  const esInspector = hasRole('ROLE_INSPECTOR')
+  const esApoderado = hasRole('ROLE_APODERADO')
+  const esApoderadoOEstudiante = hasRole(['ROLE_APODERADO', 'ROLE_ESTUDIANTE'])
+  const puedeCrearGeneral = esDirectivo || esDocente
+  const puedeCrearIndividual = esDirectivo || esDocente || esInspector
 
-  const loadAll = useCallback(async (filtrarPorRut = false, rut = '') => {
+  // Inspector no agenda "General" (no suele tener jefatura); Docente y Directivo sí.
+  const puedeCrearEnTab = (tab) => (tab === 'general' ? puedeCrearGeneral : puedeCrearIndividual)
+
+  // Cursos: para el dropdown de "General" y para mostrar el nombre del curso en cada acta.
+  const [cursos, setCursos] = useState([])
+  useEffect(() => {
+    getCursos()
+      .then((r) => setCursos(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setCursos([]))
+  }, [])
+  const cursoLabelPorId = (id) => {
+    const c = cursos.find((x) => x.idCur === Number(id))
+    return c ? `${c.nivel?.nivNum ?? '—'}°${c.curLetraSeccion} (${c.curAnioEscolar})` : null
+  }
+
+  // Docente: acota el dropdown de curso (General) a los cursos donde dicta clases.
+  const [impartirDocente, setImpartirDocente] = useState([])
+  useEffect(() => {
+    if (!esDocente || !userRut) return
+    getImpartirByDocente(userRut)
+      .then((r) => setImpartirDocente(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setImpartirDocente([]))
+  }, [esDocente, userRut])
+  const cursosParaForm = esDocente
+    ? Array.from(new Map(impartirDocente.map((i) => i.curso).filter(Boolean).map((c) => [c.idCur, c])).values())
+    : cursos
+
+  const loadAll = useCallback(async () => {
     setLoading(true)
     setLoadError('')
     try {
-      const [apoRes, indRes, genRes] = await Promise.all([
-        filtrarPorRut && rut ? getReunionesApoderadoPorFuncionario(rut) : getReunionesApoderado(),
-        getReunionesIndividuales(),
-        getReunionesGenerales(),
-      ])
-      setApoderado(Array.isArray(apoRes.data) ? apoRes.data : [])
+      const [indRes, genRes] = await Promise.all([getReunionesIndividuales(), getReunionesGenerales()])
       setIndividuales(Array.isArray(indRes.data) ? indRes.data : [])
       setGenerales(Array.isArray(genRes.data) ? genRes.data : [])
     } catch (error) {
@@ -84,64 +131,102 @@ export default function Reuniones() {
   }, [])
 
   useEffect(() => {
-    loadAll(soloMias, userRut)
-  }, [loadAll, soloMias, userRut])
+    loadAll()
+  }, [loadAll])
 
-  const counts = useMemo(
-    () => ({ apoderado: apoderado.length, individual: individuales.length, general: generales.length }),
-    [apoderado, individuales, generales]
-  )
+  // Confidencialidad de entrevistas individuales: Directivo ve todas; Docente/Inspector
+  // solo las que ellos agendaron; Apoderado ve solo las suyas; Estudiante no accede.
+  let individualesVisibles = []
+  if (esDirectivo) {
+    individualesVisibles = individuales
+  } else if (puedeCrearIndividual) {
+    individualesVisibles = individuales.filter(
+      (r) => String(r.bitReunionApoderado?.docenteUsuRut) === String(userRut)
+    )
+  } else if (esApoderado) {
+    individualesVisibles = individuales.filter(
+      (r) => String(r.bitReunionApoderado?.apoderadoUsuRut) === String(userRut)
+    )
+  }
 
-  // ── Crear según pestaña activa ──────────────────────────────
-  const handleCreate = async (data) => {
+  const counts = {
+    individual: individualesVisibles.length,
+    general: generales.length,
+  }
+
+  // ── Agendar (crea sobre la pestaña activa) ──────────────────
+  const handleAgendar = async (data) => {
     setSaving(true)
-    const base = {
-      bitReuFec: data.bitReuFec,
-      bitReuCompromisos: data.bitReuCompromisos,
-      bitReuObs: data.bitReuObs || null,
-      docenteUsuRut: limpiarRut(data.docenteUsuRut),
-    }
-
     try {
       if (activeTab === 'individual') {
         await crearReunionIndividual({
-          ...base,
+          bitReuFec: data.bitReuFec,
+          docenteUsuRut: limpiarRut(userRut),
+          apoderadoUsuRut: data.apoderadoUsuRut,
+          alumnoRut: Number(data.alumnoRut),
           bitReuIndMotivReu: data.bitReuIndMotivReu,
-          bitReuIndTemTrat: data.bitReuIndTemTrat,
+          idAnotacion: prefillIndividual?.idAnotacion ?? null,
         })
-      } else if (activeTab === 'general') {
-        await crearReunionGeneral({
-          ...base,
-          bitReuGenTipReu: data.bitReuGenTipReu,
-          bitReuGenComunicEmi: data.bitReuGenComunicEmi,
-          bitReuGenAcuerTrat: data.bitReuGenAcuerTrat,
-          bitReuGenObs: data.bitReuGenObs || null,
-        })
+        setPrefillIndividual(null)
       } else {
-        await crearReunionApoderado(base)
+        await crearReunionGeneral({
+          bitReuFec: data.bitReuFec,
+          docenteUsuRut: limpiarRut(userRut),
+          cursoId: Number(data.cursoId),
+          bitReuGenTipReu: data.bitReuGenTipReu,
+        })
       }
-      toast.success('Reunión registrada')
+      toast.success('Reunión agendada')
       setShowForm(false)
-      await loadAll(soloMias, userRut)
+      await loadAll()
     } catch (error) {
       console.error(error)
-      toast.error(error.response?.data?.message || error.response?.data || 'No se pudo registrar la reunión')
+      toast.error(error.response?.data?.message || error.response?.data || 'No se pudo agendar la reunión')
     } finally {
       setSaving(false)
     }
   }
 
-  // ── Corregir compromisos/obs de bitácora base ───────────────
-  const handleUpdateApoderado = async (id, payload) => {
+  // ── Rellenar bitácora de una entrevista individual (solo tras aceptar) ──
+  const handleRellenarBitacora = async (reunion, { bitReuCompromisos, bitReuObs, bitReuIndTemTrat }) => {
     try {
-      await actualizarReunionApoderado(id, payload)
-      toast.success('Bitácora actualizada')
-      await loadAll(soloMias, userRut)
+      await Promise.all([
+        actualizarReunionApoderado(reunion.bitReunionApoderado.idBitReu, { bitReuCompromisos, bitReuObs }),
+        actualizarIndividual(reunion.idBitReuInd, { bitReuIndTemTrat }),
+      ])
+      toast.success('Bitácora guardada')
+      await loadAll()
       return true
     } catch (error) {
       console.error(error)
-      toast.error(error.response?.data?.message || 'No se pudo actualizar la bitácora')
+      toast.error(error.response?.data?.message || 'No se pudo guardar la bitácora')
       return false
+    }
+  }
+
+  // ── Completar acta de una reunión general ───────────────────
+  const handleCompletarActa = async (idBitReuGen, payload) => {
+    try {
+      await actualizarGeneral(idBitReuGen, payload)
+      toast.success('Acta guardada')
+      await loadAll()
+      return true
+    } catch (error) {
+      console.error(error)
+      toast.error(error.response?.data?.message || 'No se pudo guardar el acta')
+      return false
+    }
+  }
+
+  // ── Aceptar/rechazar una citación (solo el apoderado dueño) ─
+  const handleConfirmar = async (id, estadoConfirmacion) => {
+    try {
+      await confirmarReunionApoderado(id, { estadoConfirmacion })
+      toast.success(estadoConfirmacion === 'ACEPTADA' ? 'Reunión aceptada' : 'Reunión rechazada')
+      await loadAll()
+    } catch (error) {
+      console.error(error)
+      toast.error(error.response?.data?.message || 'No se pudo actualizar la confirmación')
     }
   }
 
@@ -150,7 +235,7 @@ export default function Reuniones() {
     try {
       await actualizarFirmasIndividual(id, payload)
       toast.success('Firma registrada')
-      await loadAll(soloMias, userRut)
+      await loadAll()
     } catch (error) {
       console.error(error)
       toast.error(error.response?.data?.message || 'No se pudo registrar la firma')
@@ -184,7 +269,7 @@ export default function Reuniones() {
         <header className={styles.pageHeader}>
           <div>
             <p className={styles.eyebrow}>MS-GestionReuniones</p>
-            <h1 className={styles.title}>Bitácora de Reuniones</h1>
+            <h1 className={styles.title}>Reuniones</h1>
           </div>
           <div className={styles.headerActions}>
             {usuario && (
@@ -193,7 +278,7 @@ export default function Reuniones() {
                 {usuario.rolNombre ? ` · ${usuario.rolNombre.replace('ROLE_', '')}` : ''}
               </span>
             )}
-            {canManage && (
+            {puedeCrearEnTab(activeTab) && (
               <Button className={styles.btnGranate} onClick={() => setShowForm((v) => !v)}>
                 {showForm ? 'Cerrar formulario' : '+ Nueva reunión'}
               </Button>
@@ -201,72 +286,51 @@ export default function Reuniones() {
           </div>
         </header>
 
-        {/* ── Formulario plegable (crea sobre la pestaña activa) ── */}
-        {showForm && canManage && (
-          <ReunionForm
+        {/* ── Formulario liviano de agendar (crea sobre la pestaña activa) ── */}
+        {showForm && puedeCrearEnTab(activeTab) && (
+          <AgendarReunionForm
             key={activeTab}
             tipo={activeTab}
-            defaultRut={userRut}
+            cursos={cursosParaForm}
             saving={saving}
-            onSubmit={handleCreate}
-            onCancel={() => setShowForm(false)}
+            onSubmit={handleAgendar}
+            onCancel={() => {
+              setShowForm(false)
+              setPrefillIndividual(null)
+            }}
+            prefillMotivo={activeTab === 'individual' ? prefillIndividual?.motivoSugerido ?? '' : ''}
           />
         )}
 
-        {/* ── Pestañas por tipo de reunión ── */}
+        {/* ── Pestañas: solo Individual y General ── */}
         <Tabs
           activeKey={activeTab}
           onSelect={(key) => setActiveTab(key)}
           className={styles.tabs}
           transition={false}
         >
-          <Tab eventKey="apoderado" title={`Con Apoderado (${counts.apoderado})`}>
-            <div className={styles.tabToolbar}>
-              <span className="text-muted">{counts.apoderado} bitácoras</span>
-              <ButtonGroup size="sm">
-                <Button
-                  variant={soloMias ? 'outline-secondary' : 'secondary'}
-                  onClick={() => setSoloMias(false)}
-                >
-                  Todas
-                </Button>
-                <Button
-                  variant={soloMias ? 'secondary' : 'outline-secondary'}
-                  disabled={!userRut}
-                  onClick={() => setSoloMias(true)}
-                >
-                  Mis reuniones
-                </Button>
-              </ButtonGroup>
-            </div>
-            {renderGrid(
-              apoderado,
-              (item) => item.idBitReu,
-              (item) => (
-                <ReunionApoderadoCard
-                  reunion={item}
-                  formatDate={formatDate}
-                  onUpdate={handleUpdateApoderado}
-                  canEdit={canManage}
-                />
-              ),
-              'No hay bitácoras de reuniones con apoderado.'
-            )}
-          </Tab>
-
           <Tab eventKey="individual" title={`Individual (${counts.individual})`}>
             {renderGrid(
-              individuales,
+              individualesVisibles,
               (item) => item.idBitReuInd,
               (item) => (
                 <ReunionIndividualCard
                   reunion={item}
                   formatDate={formatDate}
                   onFirmar={handleFirmar}
-                  canEdit={canManage}
+                  onConfirmar={handleConfirmar}
+                  onRellenarBitacora={handleRellenarBitacora}
+                  canEdit={esDirectivo || String(item.bitReunionApoderado?.docenteUsuRut) === String(userRut)}
+                  puedeConfirmar={
+                    esApoderado &&
+                    String(item.bitReunionApoderado?.apoderadoUsuRut) === String(userRut) &&
+                    item.bitReunionApoderado?.estadoConfirmacion === 'PENDIENTE'
+                  }
                 />
               ),
-              'No hay entrevistas individuales registradas.'
+              esApoderadoOEstudiante
+                ? 'No tienes acceso a esta información.'
+                : 'No hay entrevistas individuales registradas.'
             )}
           </Tab>
 
@@ -275,9 +339,15 @@ export default function Reuniones() {
               generales,
               (item) => item.bitReuGen,
               (item) => (
-                <ReunionGeneralCard reunion={item} formatDate={formatDate} />
+                <ReunionGeneralCard
+                  reunion={item}
+                  formatDate={formatDate}
+                  cursoLabel={cursoLabelPorId(item.cursoId)}
+                  onCompletarActa={handleCompletarActa}
+                  canManage={esDirectivo || String(item.bitReunionApoderado?.docenteUsuRut) === String(userRut)}
+                />
               ),
-              'No hay actas de reuniones generales.'
+              'No hay reuniones de curso registradas.'
             )}
           </Tab>
         </Tabs>

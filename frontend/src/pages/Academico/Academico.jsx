@@ -16,7 +16,7 @@ import PropTypes from 'prop-types'
 import { Row, Col, Nav, Table, Badge, Button, Alert, Spinner, Form } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
-import { getNotasByEstudiante, getCursoById, getImpartirByDocente } from '../../services/academicoService'
+import { getNotasByEstudiante, getCursoById, getImpartirByDocente, getAsignaturas, getCursos } from '../../services/academicoService'
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
 import EntidadForm from '../../components/Academico/EntidadForm'
@@ -29,9 +29,15 @@ import styles from '../../styles/Academico.module.css'
 const PERMISOS_DOCENTE = {
   notas: 'rw',
   bitacora: 'rw',
+  evaluacion: 'rw-propio',
   asignatura: 'ro-propio',
   curso: 'ro-propio',
   sala: 'ro-propio',
+}
+// Directivo: rw en todas las secciones, salvo Bitácora donde puede ver/editar/eliminar
+// pero no crear (las bitácoras de clase son responsabilidad del docente).
+const PERMISOS_DIRECTIVO_OVERRIDE = {
+  bitacora: 'rw-sin-crear',
 }
 const SECCIONES = Object.keys(ENTIDADES)
 
@@ -287,9 +293,13 @@ export default function Academico() {
   const [saving, setSaving] = useState(false)
 
   const config = ENTIDADES[seccion]
-  const permisoSeccion = esDirectivo ? 'rw' : PERMISOS_DOCENTE[seccion] || 'ninguno'
-  const canManage = permisoSeccion === 'rw'
+  const permisoSeccion = esDirectivo
+    ? PERMISOS_DIRECTIVO_OVERRIDE[seccion] || 'rw'
+    : PERMISOS_DOCENTE[seccion] || 'ninguno'
+  const canCreate = permisoSeccion === 'rw' || permisoSeccion === 'rw-propio'
+  const canEditDelete = permisoSeccion === 'rw' || permisoSeccion === 'rw-sin-crear' || permisoSeccion === 'rw-propio'
   const soloLecturaPropio = permisoSeccion === 'ro-propio'
+  const soloRwPropio = permisoSeccion === 'rw-propio'
 
   // Docente: carga sus asignaciones (Impartir) para filtrar Asignatura/Curso/Sala a lo suyo
   const [impartirDocente, setImpartirDocente] = useState([])
@@ -312,6 +322,54 @@ export default function Academico() {
     () => new Set(impartirDocente.map((i) => i.curso?.sala?.idSal).filter(Boolean)),
     [impartirDocente]
   )
+
+  // Bitácora y Evaluación: el dropdown de asignatura muestra solo lo que el docente dicta;
+  // Directivo (sin carga propia) ve el catálogo completo.
+  const configForForm = useMemo(() => {
+    if (seccion !== 'bitacora' && seccion !== 'evaluacion') return config
+    return {
+      ...config,
+      campos: config.campos.map((c) => {
+        if (c.name === 'idAsignatura') {
+          return {
+            ...c,
+            loadOptions: () =>
+              esDirectivo
+                ? getAsignaturas().then((r) => r.data)
+                : Promise.resolve(
+                    Array.from(
+                      new Map(
+                        impartirDocente
+                          .map((i) => i.asignatura)
+                          .filter(Boolean)
+                          .map((a) => [a.idAsi, a])
+                      ).values()
+                    )
+                  ),
+          }
+        }
+        if (c.name === 'idCurso' && seccion === 'evaluacion') {
+          return {
+            ...c,
+            loadOptions: () =>
+              esDirectivo
+                ? getCursos().then((r) => r.data)
+                : Promise.resolve(
+                    Array.from(
+                      new Map(
+                        impartirDocente
+                          .map((i) => i.curso)
+                          .filter(Boolean)
+                          .map((cur) => [cur.idCur, cur])
+                      ).values()
+                    )
+                  ),
+          }
+        }
+        return c
+      }),
+    }
+  }, [config, seccion, esDirectivo, impartirDocente])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -341,14 +399,18 @@ export default function Academico() {
     setShowForm(false)
   }
 
-  // Docente en modo ro-propio: recorta la lista a lo que le corresponde por Impartir
+  // Docente en modo ro-propio: recorta la lista a lo que le corresponde por Impartir.
+  // Docente en modo rw-propio (Evaluación): recorta a lo que él mismo registró.
   const itemsVisibles = useMemo(() => {
+    if (soloRwPropio && seccion === 'evaluacion') {
+      return items.filter((i) => String(i.docenteUsuRut) === String(usuario?.usuRut))
+    }
     if (!soloLecturaPropio) return items
     if (seccion === 'asignatura') return items.filter((i) => idsAsignaturaPropias.has(i.idAsi))
     if (seccion === 'curso') return items.filter((i) => idsCursoPropios.has(i.idCur))
     if (seccion === 'sala') return items.filter((i) => idsSalaPropias.has(i.idSal))
     return items
-  }, [items, soloLecturaPropio, seccion, idsAsignaturaPropias, idsCursoPropios, idsSalaPropias])
+  }, [items, soloLecturaPropio, soloRwPropio, seccion, idsAsignaturaPropias, idsCursoPropios, idsSalaPropias, usuario?.usuRut])
 
   // Filtro local: busca el texto en todas las celdas visibles de la fila
   const filtrados = useMemo(() => {
@@ -429,7 +491,7 @@ export default function Academico() {
               Cursos, asignaturas, evaluaciones, notas y bitácoras de clase
             </p>
           </div>
-          {canManage && (
+          {canCreate && (
             <Button
               size="lg"
               className={styles.btnGranate}
@@ -491,7 +553,7 @@ export default function Academico() {
                       {config.columnas.map((col) => (
                         <th key={col.label}>{col.label}</th>
                       ))}
-                      {canManage && <th className="text-end">Acciones</th>}
+                      {canEditDelete && <th className="text-end">Acciones</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -500,7 +562,7 @@ export default function Academico() {
                         {config.columnas.map((col) => (
                           <td key={col.label}>{col.render(item)}</td>
                         ))}
-                        {canManage && (
+                        {canEditDelete && (
                           <td className="text-end">
                             {!config.sinEditar && (
                               <Button
@@ -531,7 +593,7 @@ export default function Academico() {
 
       <EntidadForm
         show={showForm}
-        config={config}
+        config={configForForm}
         item={editItem}
         saving={saving}
         onSave={handleSave}
