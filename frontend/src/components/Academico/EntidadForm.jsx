@@ -6,7 +6,7 @@
 // Campos con `soloCrear` desaparecen al editar (el backend no
 // los acepta en el PUT).
 // =============================================================
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
@@ -23,6 +23,9 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
     formState: { errors },
   } = useForm()
 
+  const [entityOptions, setEntityOptions] = useState({})
+  const [loadingOptions, setLoadingOptions] = useState({})
+
   useEffect(() => {
     if (!show || !config) return
     if (editing) {
@@ -35,6 +38,22 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
       reset(config.defaults)
     }
   }, [show, editing, item, config, reset])
+
+  useEffect(() => {
+    if (!show || !config) return
+    const campos = config.campos.filter((c) => c.type === 'entity-select')
+    campos.forEach((campo) => {
+      setLoadingOptions((prev) => ({ ...prev, [campo.name]: true }))
+      campo
+        .loadOptions()
+        .then((options) => {
+          setEntityOptions((prev) => ({ ...prev, [campo.name]: options }))
+        })
+        .finally(() => {
+          setLoadingOptions((prev) => ({ ...prev, [campo.name]: false }))
+        })
+    })
+  }, [show, config])
 
   if (!config) return null
 
@@ -60,6 +79,19 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
             {campo.options.map((o) => (
               <option key={o} value={o}>
                 {o}
+              </option>
+            ))}
+          </Form.Select>
+        )
+      case 'entity-select':
+        return (
+          <Form.Select {...common} disabled={!!loadingOptions[campo.name]}>
+            <option value="">
+              {loadingOptions[campo.name] ? 'Cargando...' : 'Selecciona una opción'}
+            </option>
+            {(entityOptions[campo.name] ?? []).map((o) => (
+              <option key={campo.optionValue(o)} value={campo.optionValue(o)}>
+                {campo.optionLabel(o)}
               </option>
             ))}
           </Form.Select>
