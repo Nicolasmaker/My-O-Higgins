@@ -23,8 +23,7 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class AnotacionService {
 
-    @Autowired
-    private AnotacionRepository anotacionRepository;
+    private final AnotacionRepository anotacionRepository;
 
     // RestClient para comunicarse con el microservicio de Autenticacion
     private final RestClient autenticacionRestClient;
@@ -35,31 +34,33 @@ public class AnotacionService {
     // RestClient para comunicarse con el microservicio de GestionAcademica
     private final RestClient gestionAcademicaRestClient;
 
-    public AnotacionService(@Qualifier("autenticacionRestClient") RestClient autenticacionRestClient,
+    public AnotacionService(AnotacionRepository anotacionRepository,
+                            @Qualifier("autenticacionRestClient") RestClient autenticacionRestClient,
                             @Qualifier("hojaVidaRestClient") RestClient hojaVidaRestClient,
                             @Qualifier("gestionAcademicaRestClient") RestClient gestionAcademicaRestClient) {
+        this.anotacionRepository = anotacionRepository;
         this.autenticacionRestClient = autenticacionRestClient;
         this.hojaVidaRestClient = hojaVidaRestClient;
         this.gestionAcademicaRestClient = gestionAcademicaRestClient;
     }
 
     // crea una nueva anotacion asignando tipo, descripcion, fecha actual y relacionandola con la hoja de vida
-    public Anotacion crearAnotacion(AnotacionDTO dto) {
+    public Anotacion crearAnotacion(AnotacionDTO nuevoDto) {
         // Validamos que el funcionario (docente o inspector) exista en Autenticacion
-        if (!existeFuncionario(dto.getFuncionarioUsuRut())) {
-            throw new IllegalArgumentException("No se puede crear la anotacion: el funcionario con RUT " + dto.getFuncionarioUsuRut() + " no existe en el sistema.");
+        if (!existeFuncionario(nuevoDto.getFuncionarioUsuRut())) {
+            throw new IllegalArgumentException("No se puede crear la anotacion: el funcionario con RUT " + nuevoDto.getFuncionarioUsuRut() + " no existe en el sistema.");
         }
         // Validamos que la hoja de vida exista en HojaDeVida
-        if (!existeHojaVida(dto.getIdHojaVida())) {
-            throw new IllegalArgumentException("No se puede crear la anotacion: la hoja de vida con ID " + dto.getIdHojaVida() + " no existe en el sistema.");
+        if (!existeHojaVida(nuevoDto.getIdHojaVida())) {
+            throw new IllegalArgumentException("No se puede crear la anotacion: la hoja de vida con ID " + nuevoDto.getIdHojaVida() + " no existe en el sistema.");
         }
 
         Anotacion anotacion = new Anotacion();
-        anotacion.setAnotTip(dto.getAnotTip());
-        anotacion.setAnotDes(dto.getAnotDes());
+        anotacion.setAnotTip(nuevoDto.getAnotTip());
+        anotacion.setAnotDes(nuevoDto.getAnotDes());
         anotacion.setAnotFec(LocalDate.now());
-        anotacion.setFuncionarioUsuRut(dto.getFuncionarioUsuRut());
-        anotacion.setIdHojaVida(dto.getIdHojaVida());
+        anotacion.setFuncionarioUsuRut(nuevoDto.getFuncionarioUsuRut());
+        anotacion.setIdHojaVida(nuevoDto.getIdHojaVida());
         return anotacionRepository.save(anotacion);
     }
 
@@ -239,4 +240,5 @@ public class AnotacionService {
             return null;
         }
     }
+
 }
