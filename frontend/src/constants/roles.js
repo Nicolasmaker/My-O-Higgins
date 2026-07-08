@@ -10,4 +10,5 @@
 export const ACCESO_RUTA = {
   '/matriculas': ['ROLE_DIRECTIVO', 'ROLE_APODERADO'],
   '/academico': ['ROLE_ESTUDIANTE', 'ROLE_APODERADO', 'ROLE_DOCENTE', 'ROLE_DIRECTIVO'],
+  '/funcionarios': ['ROLE_DIRECTIVO'],
 }
