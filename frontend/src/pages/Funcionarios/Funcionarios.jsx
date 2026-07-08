@@ -7,6 +7,7 @@
 // seeder, sin ninguna UI.
 // =============================================================
 import { useEffect, useState } from 'react'
+import './Funcionarios.css';
 import { useForm } from 'react-hook-form'
 import { Row, Col, Form, Button, Spinner, Alert, Table, Badge } from 'react-bootstrap'
 import { toast } from 'react-toastify'
@@ -127,8 +128,9 @@ export default function Funcionarios() {
           </div>
         </header>
 
-        <div className={styles.tableWrap} style={{ padding: 24 }}>
-          <Form.Group className="mb-4">
+        {/* Aquí agregamos la clase contenedor-formulario en lugar del style inline */}
+        <div className={`${styles.tableWrap} contenedor-formulario`}>
+         <Form.Group className="mb-4">
             <Form.Label>Tipo de funcionario</Form.Label>
             <div className="d-flex gap-3">
               {Object.entries(TIPOS).map(([key, t]) => (
@@ -140,13 +142,13 @@ export default function Funcionarios() {
                   label={t.label}
                   checked={tipo === key}
                   onChange={() => setTipo(key)}
+                  className="radioGranate" /* <--- ¡Aquí agregamos la magia! */
                 />
               ))}
             </div>
           </Form.Group>
-
           <Alert variant="secondary">
-            Se crea con rol <strong>ROLE_{tipo}</strong>. La contraseña queda asignada de inmediato — comunícala al funcionario.
+            Estás creando una cuenta de <strong>{tipo}</strong>. La contraseña quedará lista de inmediato para que se la compartas al funcionario.
           </Alert>
 
           <Form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -285,7 +287,8 @@ export default function Funcionarios() {
           </Form>
         </div>
 
-        <h2 className={`${styles.title} mt-5 mb-3`} style={{ fontSize: '1.25rem' }}>
+        {/* Aquí agregamos la clase titulo-lista-funcionarios en lugar del style inline */}
+        <h2 className={`${styles.title} mt-5 mb-3 titulo-lista-funcionarios`}>
           Funcionarios registrados
         </h2>
         {loadingLista ? (

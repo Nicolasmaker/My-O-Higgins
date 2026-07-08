@@ -1,0 +1,19 @@
+/* Espaciado interno para el contenedor del formulario */
+.contenedor-formulario {
+    padding: 24px;
+}
+
+/* Tamaño de fuente específico para el título de la lista */
+.titulo-lista-funcionarios {
+    font-size: 1.25rem;
+}
+
+.radioGranate .form-check-input:checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.radioGranate .form-check-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25);
+}
