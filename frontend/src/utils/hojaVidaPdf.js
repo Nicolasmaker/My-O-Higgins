@@ -20,6 +20,7 @@ export function generarHojaVidaPdf({
   nombreEstudiante,
   rutFormateado,
   anotaciones = [],
+  asistencia = [],
   documentos = [],
   matriculas = [],
   academicos = [],
@@ -134,6 +135,33 @@ export function generarHojaVidaPdf({
       styles: { fontSize: 9 },
       headStyles: { fillColor: [107, 35, 35] },
       columnStyles: { 2: { cellWidth: 110 } },
+    })
+    despuesDeTabla()
+  }
+
+  // ── Asistencia ──
+  if (y > 260) { doc.addPage(); y = 18 }
+  seccion('Asistencia')
+  if (asistencia.length === 0) {
+    doc.setFontSize(10)
+    doc.text('Sin asistencia registrada.', margenIzq, y + 6)
+    y += 14
+  } else {
+    autoTable(doc, {
+      startY: y + 4,
+      margin: { left: margenIzq },
+      head: [['Fecha', 'Asignatura', 'Curso', 'Estado']],
+      body: asistencia
+        .slice()
+        .sort((a, b) => (a.asisFecha < b.asisFecha ? 1 : -1))
+        .map((a) => [
+          fechaCL(a.asisFecha),
+          a.impartir?.asignatura?.asiNombre ?? '—',
+          a.impartir?.curso ? `${a.impartir.curso.nivel?.nivNum ?? ''}° ${a.impartir.curso.curLetraSeccion ?? ''}` : '—',
+          a.asisEstado,
+        ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [107, 35, 35] },
     })
     despuesDeTabla()
   }
