@@ -377,7 +377,7 @@ export default function Matricula() {
                     <td>{m.idMatricula}</td>
                     <td>{formatRut(m.alumnoRut, m.alumnoDv)}</td>
                     <td>{formatRut(m.apoderadoRut, m.apoderadoDv)}</td>
-                    <td>{m.cursoId ?? '—'}</td>
+                    <td>{cursoLabel(m.cursoId)}</td>
                     <td>{m.parentesco || '—'}</td>
                     <td>
                       <Badge bg={TIPO_BADGE[m.tipoAlumno] || 'secondary'}>{m.tipoAlumno || 'N/D'}</Badge>
