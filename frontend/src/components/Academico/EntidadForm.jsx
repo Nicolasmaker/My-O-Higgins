@@ -9,9 +9,9 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
-import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
+import { Modal, Form, Row, Col, Button, Spinner, Dropdown } from 'react-bootstrap'
 import { rutRules } from '../../validators/fieldValidators'
-import styles from '../../styles/Academico.module.css'
+import styles from "../../pages/Academico/Academico.module.css";
 
 export default function EntidadForm({ show, config, item, saving, onSave, onClose }) {
   const editing = !!item
@@ -20,6 +20,8 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm()
 
@@ -64,6 +66,7 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
   const renderControl = (campo) => {
     const rules = campo.type === 'rut' ? rutRules : campo.rules
     const common = { isInvalid: !!errors[campo.name], ...register(campo.name, rules) }
+    
     switch (campo.type) {
       case 'rut':
         return <Form.Control placeholder="12345678 o 12345678-5" {...common} />
@@ -75,29 +78,74 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
         return <Form.Control type="date" {...common} />
       case 'textarea':
         return <Form.Control as="textarea" rows={3} maxLength={campo.maxLength} {...common} />
-      case 'select':
+      
+      case 'select': {
+        const currentValue = watch(campo.name);
         return (
-          <Form.Select {...common}>
-            {campo.options.map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </Form.Select>
+          <Dropdown>
+            <Dropdown.Toggle 
+              variant="" 
+              className={`w-100 text-start d-flex justify-content-between align-items-center form-control ${errors[campo.name] ? 'is-invalid' : ''}`}
+            >
+              {currentValue || 'Selecciona una opción'}
+            </Dropdown.Toggle>
+            <Dropdown.Menu className="w-100 dropdown-menu-custom">
+              {campo.options.map((o) => (
+                <Dropdown.Item 
+                  key={o} 
+                  active={currentValue === o}
+                  onClick={() => setValue(campo.name, o, { shouldValidate: true })}
+                  className="opcion-granate"
+                >
+                  {o}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+            <input type="hidden" {...register(campo.name, rules)} />
+          </Dropdown>
         )
-      case 'entity-select':
+      }
+      
+      case 'entity-select': {
+        const currentEntityValue = watch(campo.name);
+        const optionsList = entityOptions[campo.name] || [];
+        
+        // Buscamos el label de la opción seleccionada comparando como String
+        const selectedOption = optionsList.find(o => String(campo.optionValue(o)) === String(currentEntityValue));
+        const toggleLabel = selectedOption ? campo.optionLabel(selectedOption) : 'Selecciona una opción';
+
         return (
-          <Form.Select {...common} disabled={!!loadingOptions[campo.name]}>
-            <option value="">
-              {loadingOptions[campo.name] ? 'Cargando...' : 'Selecciona una opción'}
-            </option>
-            {(entityOptions[campo.name] ?? []).map((o) => (
-              <option key={campo.optionValue(o)} value={campo.optionValue(o)}>
-                {campo.optionLabel(o)}
-              </option>
-            ))}
-          </Form.Select>
+          <Dropdown>
+            <Dropdown.Toggle 
+              variant="" 
+              disabled={!!loadingOptions[campo.name]}
+              className={`w-100 text-start d-flex justify-content-between align-items-center form-control ${errors[campo.name] ? 'is-invalid' : ''}`}
+            >
+              {loadingOptions[campo.name] ? 'Cargando...' : toggleLabel}
+            </Dropdown.Toggle>
+            <Dropdown.Menu className="w-100 dropdown-menu-custom" style={{ maxHeight: '220px', overflowY: 'auto' }}>
+              <Dropdown.Item 
+                onClick={() => setValue(campo.name, '', { shouldValidate: true })}
+                className="opcion-granate"
+              >
+                Selecciona una opción
+              </Dropdown.Item>
+              {optionsList.map((o) => (
+                <Dropdown.Item 
+                  key={campo.optionValue(o)} 
+                  active={String(campo.optionValue(o)) === String(currentEntityValue)}
+                  onClick={() => setValue(campo.name, campo.optionValue(o), { shouldValidate: true })}
+                  className="opcion-granate"
+                >
+                  {campo.optionLabel(o)}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+            <input type="hidden" {...register(campo.name, rules)} />
+          </Dropdown>
         )
+      }
+
       default:
         return <Form.Control maxLength={campo.maxLength} {...common} />
     }
@@ -107,7 +155,7 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
     <Modal show={show} onHide={onClose} centered>
       <Modal.Header closeButton className={styles.modalHeader}>
         <Modal.Title className={styles.modalTitle}>
-          {editing ? `Editar ${config.singular} #${item[config.idKey]}` : `Nueva ${config.singular}`}
+          {editing ? `Editar ${config.singular} #${item[config.idKey]}` : `Nuevo ${config.singular}`}
         </Modal.Title>
       </Modal.Header>
       <Form onSubmit={handleSubmit(onSave)} noValidate>
@@ -119,7 +167,9 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
                   <Form.Label>{campo.label}</Form.Label>
                   {renderControl(campo)}
                   {errors[campo.name]?.message && (
-                    <Form.Control.Feedback type="invalid">{errors[campo.name].message}</Form.Control.Feedback>
+                    <Form.Control.Feedback type="invalid" className="d-block">
+                      {errors[campo.name].message}
+                    </Form.Control.Feedback>
                   )}
                 </Form.Group>
               </Col>

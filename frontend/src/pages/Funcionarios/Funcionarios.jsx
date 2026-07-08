@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react'
 import './Funcionarios.css';
 import { useForm } from 'react-hook-form'
-import { Row, Col, Form, Button, Spinner, Alert, Table, Badge } from 'react-bootstrap'
+import { Row, Col, Form, Button, Spinner, Alert, Table, Badge, Dropdown } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import {
   crearDocente,
@@ -63,8 +63,14 @@ export default function Funcionarios() {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm()
+  } = useForm({
+    defaultValues: {
+      tipoCasa: 'Casa', // Seteamos el valor por defecto para que funcione bien con Dropdown
+    }
+  })
 
   useEffect(() => {
     getComunas().then((r) => setComunas(Array.isArray(r.data) ? r.data : [])).catch(() => setComunas([]))
@@ -128,9 +134,8 @@ export default function Funcionarios() {
           </div>
         </header>
 
-        {/* Aquí agregamos la clase contenedor-formulario en lugar del style inline */}
         <div className={`${styles.tableWrap} contenedor-formulario`}>
-         <Form.Group className="mb-4">
+          <Form.Group className="mb-4">
             <Form.Label>Tipo de funcionario</Form.Label>
             <div className="d-flex gap-3">
               {Object.entries(TIPOS).map(([key, t]) => (
@@ -142,7 +147,7 @@ export default function Funcionarios() {
                   label={t.label}
                   checked={tipo === key}
                   onChange={() => setTipo(key)}
-                  className="radioGranate" /* <--- ¡Aquí agregamos la magia! */
+                  className="radioGranate"
                 />
               ))}
             </div>
@@ -230,28 +235,73 @@ export default function Funcionarios() {
                   <Form.Control.Feedback type="invalid">{errors.campoPropio?.message}</Form.Control.Feedback>
                 </Form.Group>
               </Col>
+
+              {/* Selector personalizado para Tipo de Vivienda */}
               <Col md={6}>
                 <Form.Group controlId="tipoCasa">
                   <Form.Label>Tipo de vivienda *</Form.Label>
-                  <Form.Select defaultValue="Casa" {...register('tipoCasa', { required: true })}>
-                    {TIPO_CASA.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </Form.Select>
+                  <Dropdown>
+                    <Dropdown.Toggle 
+                      variant="" 
+                      className={`w-100 text-start d-flex justify-content-between align-items-center form-control ${errors.tipoCasa ? 'is-invalid' : ''}`}
+                      style={{ borderRadius: '0.75rem', borderColor: '#dee2e6' }}
+                    >
+                      {watch('tipoCasa') || 'Selecciona...'}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu className="w-100 dropdown-menu-custom">
+                      {TIPO_CASA.map((t) => (
+                        <Dropdown.Item 
+                          key={t} 
+                          active={watch('tipoCasa') === t}
+                          onClick={() => setValue('tipoCasa', t, { shouldValidate: true })}
+                          className="opcion-granate"
+                        >
+                          {t}
+                        </Dropdown.Item>
+                      ))}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                  <input type="hidden" {...register('tipoCasa', { required: 'Obligatorio' })} />
+                  {errors.tipoCasa && <div className="invalid-feedback d-block">{errors.tipoCasa.message}</div>}
                 </Form.Group>
               </Col>
+
+              {/* Selector personalizado para Comuna */}
               <Col md={6}>
                 <Form.Group controlId="idComuna">
                   <Form.Label>Comuna *</Form.Label>
-                  <Form.Select isInvalid={!!errors.idComuna} {...register('idComuna', { required: 'Obligatorio' })}>
-                    <option value="">Selecciona una comuna</option>
-                    {comunas.map((c) => (
-                      <option key={c.idCom} value={c.idCom}>{c.comNom}</option>
-                    ))}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">{errors.idComuna?.message}</Form.Control.Feedback>
+                  <Dropdown>
+                    <Dropdown.Toggle 
+                      variant="" 
+                      className={`w-100 text-start d-flex justify-content-between align-items-center form-control ${errors.idComuna ? 'is-invalid' : ''}`}
+                      style={{ borderRadius: '0.75rem', borderColor: '#dee2e6' }}
+                    >
+                      {comunas.find(c => c.idCom === Number(watch('idComuna')))?.comNom || 'Selecciona una comuna'}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu className="w-100 dropdown-menu-custom" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                      <Dropdown.Item 
+                        onClick={() => setValue('idComuna', '', { shouldValidate: true })}
+                        className="opcion-granate"
+                      >
+                        Selecciona una comuna
+                      </Dropdown.Item>
+                      {comunas.map((c) => (
+                        <Dropdown.Item 
+                          key={c.idCom} 
+                          active={Number(watch('idComuna')) === c.idCom}
+                          onClick={() => setValue('idComuna', c.idCom, { shouldValidate: true })}
+                          className="opcion-granate"
+                        >
+                          {c.comNom}
+                        </Dropdown.Item>
+                      ))}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                  <input type="hidden" {...register('idComuna', { required: 'Obligatorio' })} />
+                  {errors.idComuna && <div className="invalid-feedback d-block">{errors.idComuna.message}</div>}
                 </Form.Group>
               </Col>
+
               <Col md={8}>
                 <Form.Group controlId="direccion">
                   <Form.Label>Dirección *</Form.Label>
@@ -287,7 +337,6 @@ export default function Funcionarios() {
           </Form>
         </div>
 
-        {/* Aquí agregamos la clase titulo-lista-funcionarios en lugar del style inline */}
         <h2 className={`${styles.title} mt-5 mb-3 titulo-lista-funcionarios`}>
           Funcionarios registrados
         </h2>

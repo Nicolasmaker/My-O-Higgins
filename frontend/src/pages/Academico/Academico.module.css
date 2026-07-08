@@ -181,6 +181,9 @@
 .modalHeader {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: var(--color-text-light);
+  /* Opcional: asegura que las esquinas de arriba se mantengan redonditas */
+  border-top-left-radius: calc(0.3rem - 1px);
+  border-top-right-radius: calc(0.3rem - 1px);
 }
 
 .modalHeader :global(.btn-close) {
@@ -192,6 +195,34 @@
   font-weight: var(--font-weight-semibold);
 }
 
+:global(.modal-body .form-control:focus),
+:global(.modal-body .form-select:focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+/* 2. Radio buttons color granate */
+:global(.modal-body .form-check-input:checked) {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+:global(.modal-body .form-check-input:focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+/* 3. Si usas los menús desplegables (Dropdowns personalizados) en este modal: */
+:global(.modal-body .dropdown-toggle:focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+.modalTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: #ffffff !important;
+}
 /* ── Estados vacíos ─────────────────────────────────────────── */
 .emptyState {
   padding: var(--spacing-2xl);

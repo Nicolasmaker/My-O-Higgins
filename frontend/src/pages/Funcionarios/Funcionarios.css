@@ -1,3 +1,6 @@
+/* =========================================
+   ESTILOS GENERALES
+   ========================================= */
 /* Espaciado interno para el contenedor del formulario */
 .contenedor-formulario {
     padding: 24px;
@@ -8,6 +11,9 @@
     font-size: 1.25rem;
 }
 
+/* =========================================
+   ESTILOS PARA RADIO BUTTONS
+   ========================================= */
 .radioGranate .form-check-input:checked {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
@@ -16,4 +22,50 @@
 .radioGranate .form-check-input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25);
+}
+
+/* =========================================
+   ESTILOS FOCUS PARA INPUTS DE TEXTO
+   ========================================= */
+.contenedor-formulario .form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25);
+}
+
+/* =========================================
+   ESTILOS PARA LOS MENÚS DESPLEGABLES (DROPDOWN PERSONALIADOS)
+   ========================================= */
+/* Quita el borde azul de Bootstrap al hacer clic en el selector */
+.contenedor-formulario .dropdown-toggle:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+/* Menú flotante (Evita que se trasluzcan los inputs de abajo) */
+.dropdown-menu-custom {
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  border-color: #dee2e6;
+  background-color: #ffffff; /* Color de fondo sólido */
+  z-index: 1050; /* Lo mantiene por encima del resto del formulario */
+}
+
+/* Opciones individuales dentro del menú */
+.opcion-granate {
+  border-radius: 0.5rem;
+  padding: 8px 12px;
+  color: #333;
+}
+
+/* Al pasar el mouse por encima de una opción */
+.opcion-granate:hover {
+  background-color: rgba(107, 35, 35, 0.1);
+  color: #333;
+}
+
+/* Al hacer clic o al estar la opción seleccionada */
+.opcion-granate.active, 
+.opcion-granate:active {
+  background-color: var(--color-primary);
+  color: white;
 }
