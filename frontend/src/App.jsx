@@ -37,6 +37,7 @@ import Mensajeria  from './pages/Mensajeria/Mensajeria'
 import Matricula   from './pages/Matricula/Matricula'
 import HojaDeVida  from './pages/HojaDeVida/HojaDeVida'
 import Academico   from './pages/Academico/Academico'
+import Funcionarios from './pages/Funcionarios/Funcionarios'
 // import Registro    from './pages/Registro/Registro'
 
 function ScrollToTop() {
@@ -68,6 +69,7 @@ export default function App() {
             <Route path="/matriculas" element={<ProtectedRoute roles={ACCESO_RUTA['/matriculas']}><Matricula /></ProtectedRoute>} />
             <Route path="/hoja-de-vida" element={<ProtectedRoute><HojaDeVida /></ProtectedRoute>} />
             <Route path="/academico" element={<ProtectedRoute roles={ACCESO_RUTA['/academico']}><Academico /></ProtectedRoute>} />
+            <Route path="/funcionarios" element={<ProtectedRoute roles={ACCESO_RUTA['/funcionarios']}><Funcionarios /></ProtectedRoute>} />
           </Route>
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
