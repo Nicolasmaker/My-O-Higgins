@@ -15,6 +15,10 @@ import com.cahuinlabs.hojadevida.dto.EstudianteDTO;
 import com.cahuinlabs.hojadevida.dto.HojaVidaEstudianteDTO;
 import com.cahuinlabs.hojadevida.dto.MatriculaDTO;
 import com.cahuinlabs.hojadevida.model.HojaVidaEstudiante;
+import com.cahuinlabs.hojadevida.repository.AntecedentesAcademicosRepository;
+import com.cahuinlabs.hojadevida.repository.AntecedentesApoderadoRepository;
+import com.cahuinlabs.hojadevida.repository.AntecedentesMedicosRepository;
+import com.cahuinlabs.hojadevida.repository.DocumentoHojaVidaRepository;
 import com.cahuinlabs.hojadevida.repository.HojaVidaRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,11 +33,24 @@ public class HojaVidaServiceTest {
     @Mock
     private RestClient matriculaRestClient;
 
+    @Mock
+    private AntecedentesAcademicosRepository academicosRepository;
+
+    @Mock
+    private AntecedentesApoderadoRepository apoderadoRepository;
+
+    @Mock
+    private AntecedentesMedicosRepository medicosRepository;
+
+    @Mock
+    private DocumentoHojaVidaRepository documentoRepository;
+
     private HojaVidaService hojaVidaService;
 
     @BeforeEach
     void setUp() {
-        hojaVidaService = new HojaVidaService(autenticacionRestClient, matriculaRestClient, hojaVidaRepository);
+        hojaVidaService = new HojaVidaService(autenticacionRestClient,
+            matriculaRestClient, hojaVidaRepository, academicosRepository, apoderadoRepository, medicosRepository, documentoRepository);
     }
 
     @Test

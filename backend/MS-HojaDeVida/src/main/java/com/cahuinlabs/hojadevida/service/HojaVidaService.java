@@ -8,8 +8,13 @@ import org.springframework.stereotype.Service;
 import com.cahuinlabs.hojadevida.dto.HojaVidaEstudianteDTO;
 import com.cahuinlabs.hojadevida.exception.ResourceNotFoundException;
 import com.cahuinlabs.hojadevida.model.HojaVidaEstudiante;
+import com.cahuinlabs.hojadevida.repository.AntecedentesAcademicosRepository;
+import com.cahuinlabs.hojadevida.repository.AntecedentesApoderadoRepository;
+import com.cahuinlabs.hojadevida.repository.AntecedentesMedicosRepository;
+import com.cahuinlabs.hojadevida.repository.DocumentoHojaVidaRepository;
 import com.cahuinlabs.hojadevida.repository.HojaVidaRepository;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
 import com.cahuinlabs.hojadevida.dto.EstudianteDTO;
@@ -19,13 +24,25 @@ import com.cahuinlabs.hojadevida.dto.MatriculaDTO;
 public class HojaVidaService {
 
     private final HojaVidaRepository hojaVidaRepository;
+    private final AntecedentesAcademicosRepository academicosRepository;
+    private final AntecedentesApoderadoRepository apoderadoRepository;
+    private final AntecedentesMedicosRepository medicosRepository;
+    private final DocumentoHojaVidaRepository documentoRepository;
     private final RestClient autenticacionRestClient;
     private final RestClient matriculaRestClient;
 
     public HojaVidaService(RestClient autenticacionRestClient,
                            RestClient matriculaRestClient,
-                           HojaVidaRepository hojaVidaRepository) {
+                           HojaVidaRepository hojaVidaRepository,
+                           AntecedentesAcademicosRepository academicosRepository,
+                           AntecedentesApoderadoRepository apoderadoRepository,
+                           AntecedentesMedicosRepository medicosRepository,
+                           DocumentoHojaVidaRepository documentoRepository) {
         this.hojaVidaRepository = hojaVidaRepository;
+        this.academicosRepository = academicosRepository;
+        this.apoderadoRepository = apoderadoRepository;
+        this.medicosRepository = medicosRepository;
+        this.documentoRepository = documentoRepository;
         this.autenticacionRestClient = autenticacionRestClient;
         this.matriculaRestClient = matriculaRestClient;
     }
@@ -90,10 +107,18 @@ public class HojaVidaService {
         return mapearADTO(actualizado);
     }
 
+    // Borra primero las tablas dependientes (FK hacia HOJA_VIDA_ESTUDIANTE) — si se borra el
+    // padre primero, la FK revienta con "Cannot delete or update a parent row" (mismo tipo de
+    // bug que ya se corrigió en data.sql, pero acá en el DELETE en vivo).
+    @Transactional
     public void eliminarHojaVida(Long idHojaVida) {
         if (!hojaVidaRepository.existsById(idHojaVida)) {
             throw new ResourceNotFoundException("Hoja de vida no encontrada: " + idHojaVida);
         }
+        documentoRepository.deleteAll(documentoRepository.findByHojaVida_IdHojaVida(idHojaVida));
+        academicosRepository.deleteAll(academicosRepository.findByHojaVida_IdHojaVida(idHojaVida));
+        apoderadoRepository.deleteAll(apoderadoRepository.findByHojaVida_IdHojaVida(idHojaVida));
+        medicosRepository.deleteAll(medicosRepository.findByHojaVida_IdHojaVida(idHojaVida));
         hojaVidaRepository.deleteById(idHojaVida);
     }
 

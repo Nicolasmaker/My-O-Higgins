@@ -30,7 +30,7 @@ public class AntecedentesApoderado {
     @Column(name = "ant_apo_profesion", nullable = false, length = 30)
     private String profesion;
 
-    @Column(name = "ant_apo_tel", nullable = false, length = 10)
+    @Column(name = "ant_apo_tel", nullable = false, length = 20)
     private String telefono;
 
     @Column(name = "ant_apo_dir", nullable = false, length = 100)
