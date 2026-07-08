@@ -19,8 +19,9 @@
 // El estado se inicializa leyendo localStorage al arrancar:
 // si el usuario recarga la página, la sesión se recupera sola.
 // =============================================================
-import { createContext, useState, useCallback } from 'react'
+import { createContext, useState, useCallback, useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { getMe } from '../services/authService'
 
 export const AuthContext = createContext(null)
 
@@ -64,6 +65,19 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('app_user')
     setToken(null)
     setUsuario(null)
+  }, [])
+
+  // Valida la sesión restaurada de localStorage contra el backend al montar: si el token
+  // quedó vencido o el usuario ya no existe (ej. reseed de MS-Autenticacion en dev), el
+  // interceptor 401 de authHttp limpia localStorage — acá solo forzamos esa llamada para
+  // que se dispare de inmediato, en vez de esperar a que el usuario navegue a algo protegido.
+  useEffect(() => {
+    if (!token) return
+    getMe().catch(() => {
+      setToken(null)
+      setUsuario(null)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Se considera autenticado solo si existen AMBOS: token y usuario
