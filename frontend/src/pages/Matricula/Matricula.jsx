@@ -26,6 +26,7 @@ import { getCursos } from '../../services/academicoService'
 import { formatNivel } from '../../components/Academico/entidadesConfig'
 import { formatRut } from '../../utils/formatRut'
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
+import NuevaMatriculaWizard from '../../components/Matricula/NuevaMatriculaWizard'
 import styles from './Matricula.module.css'
 
 const ROLES_GESTION = ['ROLE_DIRECTIVO']
@@ -64,6 +65,7 @@ export default function Matricula() {
   const [loadError, setLoadError] = useState('')
 
   const [showForm, setShowForm] = useState(false)
+  const [showWizard, setShowWizard] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
   const [saving, setSaving] = useState(false)
 
@@ -78,7 +80,7 @@ export default function Matricula() {
   const [savingSolicitud, setSavingSolicitud] = useState(false)
   const [procesandoId, setProcesandoId] = useState(null)
   const [cursoElegido, setCursoElegido] = useState({})
-  const [solForm, setSolForm] = useState({ alumnoRut: '', cursoId: '', tipoAlumno: 'NUEVO', observaciones: '' })
+  const [solForm, setSolForm] = useState({ alumnoRut: '', cursoId: '', tipoAlumno: 'NUEVO', parentesco: '', observaciones: '' })
 
   useEffect(() => {
     getCursos()
@@ -115,6 +117,10 @@ export default function Matricula() {
       toast.error('Ingresa un RUT de alumno válido')
       return
     }
+    if (!solForm.parentesco.trim()) {
+      toast.error('Indica tu parentesco con el alumno')
+      return
+    }
     setSavingSolicitud(true)
     try {
       await crearSolicitudMatricula({
@@ -122,10 +128,11 @@ export default function Matricula() {
         apoderadoRut: limpiarRut(userRut),
         cursoId: solForm.cursoId ? Number(solForm.cursoId) : null,
         tipoAlumno: solForm.tipoAlumno,
+        parentesco: solForm.parentesco,
         observaciones: solForm.observaciones || null,
       })
       toast.success('Solicitud enviada')
-      setSolForm({ alumnoRut: '', cursoId: '', tipoAlumno: 'NUEVO', observaciones: '' })
+      setSolForm({ alumnoRut: '', cursoId: '', tipoAlumno: 'NUEVO', parentesco: '', observaciones: '' })
       await loadSolicitudes()
     } catch (error) {
       console.error(error)
@@ -222,6 +229,7 @@ export default function Matricula() {
       apoderadoRut: limpiarRut(data.apoderadoRut),
       cursoId: data.cursoId ? Number(data.cursoId) : null,
       tipoAlumno: data.tipoAlumno,
+      parentesco: data.parentesco,
       funcionarioUsuRut: limpiarRut(data.funcionarioUsuRut),
     }
 
@@ -280,9 +288,14 @@ export default function Matricula() {
             </p>
           </div>
           {canManage && (
-            <Button className={styles.btnGranate} onClick={openCreate}>
-              + Registrar matrícula
-            </Button>
+            <div className="d-flex gap-2">
+              <Button className={styles.btnGranate} onClick={() => setShowWizard(true)}>
+                + Estudiante nuevo (sin cuenta)
+              </Button>
+              <Button variant="outline-secondary" onClick={openCreate}>
+                + Matrícula rápida (cuentas ya existentes)
+              </Button>
+            </div>
           )}
         </header>
 
@@ -350,6 +363,7 @@ export default function Matricula() {
                   <th>Alumno</th>
                   <th>Apoderado</th>
                   <th>Curso</th>
+                  <th>Parentesco</th>
                   <th>Tipo</th>
                   <th>Estado</th>
                   <th>Fecha</th>
@@ -364,6 +378,7 @@ export default function Matricula() {
                     <td>{formatRut(m.alumnoRut, m.alumnoDv)}</td>
                     <td>{formatRut(m.apoderadoRut, m.apoderadoDv)}</td>
                     <td>{m.cursoId ?? '—'}</td>
+                    <td>{m.parentesco || '—'}</td>
                     <td>
                       <Badge bg={TIPO_BADGE[m.tipoAlumno] || 'secondary'}>{m.tipoAlumno || 'N/D'}</Badge>
                     </td>
@@ -434,6 +449,16 @@ export default function Matricula() {
                       <option value="REPITENTE">Repitente</option>
                     </Form.Select>
                   </Col>
+                  <Col sm={2}>
+                    <Form.Label className="mb-1">Tu parentesco</Form.Label>
+                    <Form.Control
+                      size="sm"
+                      placeholder="Padre, Madre, Tío..."
+                      value={solForm.parentesco}
+                      onChange={(e) => setSolForm((f) => ({ ...f, parentesco: e.target.value }))}
+                      required
+                    />
+                  </Col>
                   <Col sm={3}>
                     <Form.Label className="mb-1">Observaciones</Form.Label>
                     <Form.Control
@@ -470,6 +495,7 @@ export default function Matricula() {
                       <th>Alumno</th>
                       {canManage && <th>Apoderado</th>}
                       <th>Curso deseado</th>
+                      <th>Parentesco</th>
                       <th>Tipo</th>
                       <th>Fecha</th>
                       <th>Estado</th>
@@ -503,6 +529,7 @@ export default function Matricula() {
                             cursoLabel(s.cursoId)
                           )}
                         </td>
+                        <td>{s.parentesco || '—'}</td>
                         <td>
                           <Badge bg={TIPO_BADGE[s.tipoAlumno] || 'secondary'}>{s.tipoAlumno || 'N/D'}</Badge>
                         </td>
@@ -556,6 +583,16 @@ export default function Matricula() {
         onClose={() => {
           setShowForm(false)
           setEditTarget(null)
+        }}
+      />
+
+      <NuevaMatriculaWizard
+        show={showWizard}
+        funcionarioUsuRut={userRut}
+        onClose={() => setShowWizard(false)}
+        onCompletado={async () => {
+          setShowWizard(false)
+          await load()
         }}
       />
     </div>

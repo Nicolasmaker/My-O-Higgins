@@ -3,12 +3,16 @@ package com.myohiggins.msmatricula.service;
 import com.myohiggins.msmatricula.dto.EstudianteDTO;
 import com.myohiggins.msmatricula.dto.ApoderadoDTO;
 import com.myohiggins.msmatricula.dto.FuncionarioDTO;
+import com.myohiggins.msmatricula.dto.HojaVidaDTO;
 import com.myohiggins.msmatricula.dto.SolicitudMatriculaResponseDTO;
 import com.myohiggins.msmatricula.model.entities.Matricula;
 import com.myohiggins.msmatricula.model.entities.SolicitudMatricula;
 import com.myohiggins.msmatricula.repository.MatriculaRepository;
 import com.myohiggins.msmatricula.repository.SolicitudMatriculaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
@@ -16,6 +20,8 @@ import java.util.List;
 
 @Service
 public class SolicitudMatriculaService {
+
+    private static final Logger logger = LoggerFactory.getLogger(SolicitudMatriculaService.class);
 
     @Autowired
     private SolicitudMatriculaRepository solicitudRepository;
@@ -25,9 +31,13 @@ public class SolicitudMatriculaService {
 
     // RestClient para comunicarse con el microservicio de Autenticacion
     private final RestClient autenticacionRestClient;
+    // RestClient para sincronizar la hoja de vida del estudiante en MS-HojaDeVida
+    private final RestClient hojaVidaRestClient;
 
-    public SolicitudMatriculaService(RestClient autenticacionRestClient) {
+    public SolicitudMatriculaService(@Qualifier("autenticacionRestClient") RestClient autenticacionRestClient,
+                                      @Qualifier("hojaVidaRestClient") RestClient hojaVidaRestClient) {
         this.autenticacionRestClient = autenticacionRestClient;
+        this.hojaVidaRestClient = hojaVidaRestClient;
     }
 
     // El apoderado crea la solicitud (sin funcionario: aun no hay matricula real, solo la solicitud)
@@ -71,8 +81,10 @@ public class SolicitudMatriculaService {
         matricula.setApoderadoRut(solicitud.getApoderadoRut());
         matricula.setCursoId(cursoId);
         matricula.setTipoAlumno(solicitud.getTipoAlumno());
+        matricula.setParentesco(solicitud.getParentesco());
         matricula.setFuncionarioUsuRut(funcionarioUsuRut);
         Matricula matriculaCreada = matriculaRepository.save(matricula);
+        sincronizarHojaVida(matriculaCreada);
 
         solicitud.setEstado("APROBADA");
         solicitudRepository.save(solicitud);
@@ -160,6 +172,7 @@ public class SolicitudMatriculaService {
                 apoderado != null ? apoderado.apellido() : null,
                 solicitud.getCursoId(),
                 solicitud.getTipoAlumno(),
+                solicitud.getParentesco(),
                 solicitud.getObservaciones(),
                 solicitud.getEstado(),
                 solicitud.getFechaSolicitud(),
@@ -189,6 +202,47 @@ public class SolicitudMatriculaService {
                     .retrieve()
                     .body(ApoderadoDTO.class);
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Sincroniza la hoja de vida del estudiante en MS-HojaDeVida tras aprobar la solicitud (mismo
+    // criterio que MatriculaService.sincronizarHojaVida): crea si no existe, actualiza el
+    // matriculaId si ya existe. Best-effort, no bloquea la aprobación.
+    private void sincronizarHojaVida(Matricula matricula) {
+        try {
+            HojaVidaDTO existente = buscarHojaVidaPorRut(matricula.getAlumnoRut());
+
+            HojaVidaDTO body = new HojaVidaDTO();
+            body.setEstudianteUsuRut(matricula.getAlumnoRut());
+            body.setMatriculaId(matricula.getIdMatricula());
+            body.setEstado(existente != null ? existente.getEstado() : "ACTIVA");
+
+            if (existente == null) {
+                hojaVidaRestClient.post()
+                        .uri("/api/hojas-vida")
+                        .body(body)
+                        .retrieve()
+                        .toBodilessEntity();
+            } else {
+                hojaVidaRestClient.put()
+                        .uri("/api/hojas-vida/{id}", existente.getIdHojaVida())
+                        .body(body)
+                        .retrieve()
+                        .toBodilessEntity();
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo sincronizar la hoja de vida del estudiante {}: {}", matricula.getAlumnoRut(), e.getMessage());
+        }
+    }
+
+    private HojaVidaDTO buscarHojaVidaPorRut(Long estudianteUsuRut) {
+        try {
+            return hojaVidaRestClient.get()
+                    .uri("/api/hojas-vida/estudiante/{rut}", estudianteUsuRut)
+                    .retrieve()
+                    .body(HojaVidaDTO.class);
+        } catch (HttpClientErrorException.NotFound e) {
             return null;
         }
     }

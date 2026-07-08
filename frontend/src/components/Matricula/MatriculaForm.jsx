@@ -19,6 +19,7 @@ const emptyValues = {
   apoderadoRut: '',
   cursoId: '',
   tipoAlumno: 'NUEVO',
+  parentesco: '',
   funcionarioUsuRut: '',
   matriculaEstado: 'ACTIVA',
 }
@@ -43,6 +44,7 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
             apoderadoRut: String(matricula.apoderadoRut ?? ''),
             cursoId: String(matricula.cursoId ?? ''),
             tipoAlumno: matricula.tipoAlumno || 'NUEVO',
+            parentesco: matricula.parentesco || '',
             funcionarioUsuRut: String(matricula.funcionarioUsuRut ?? ''),
             matriculaEstado: matricula.matriculaEstado || 'ACTIVA',
           }
@@ -96,6 +98,17 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
                   <option value="ANTIGUO">Antiguo</option>
                   <option value="REPITENTE">Repitente</option>
                 </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group controlId="parentesco">
+                <Form.Label>Parentesco con el alumno *</Form.Label>
+                <Form.Control
+                  placeholder="Padre, Madre, Tío, Tutor Legal..."
+                  isInvalid={!!errors.parentesco}
+                  {...register('parentesco', { required: 'Obligatorio' })}
+                />
+                <Form.Control.Feedback type="invalid">{errors.parentesco?.message}</Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col md={6}>

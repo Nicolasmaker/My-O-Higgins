@@ -13,10 +13,22 @@ public class RestClientConfig {
     @Value("${app.services.autenticacion-url:http://localhost:8080}")
     private String autenticacionUrl;
 
+    // Lee la URL del microservicio de HojaDeVida desde application.properties
+    // Si no está definida, usa localhost:8084 por defecto
+    @Value("${app.services.hojadevida-url:http://localhost:8084}")
+    private String hojaDeVidaUrl;
+
     @Bean
     public RestClient autenticacionRestClient() {
         return RestClient.builder()
                 .baseUrl(autenticacionUrl)
+                .build();
+    }
+
+    @Bean
+    public RestClient hojaVidaRestClient() {
+        return RestClient.builder()
+                .baseUrl(hojaDeVidaUrl)
                 .build();
     }
 }

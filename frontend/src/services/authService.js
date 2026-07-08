@@ -46,3 +46,11 @@ export const getApoderado = (rut) => authHttp.get(`/apoderados/${rut}`)
 // (usado al agendar una reunión: se pide el correo, no el RUT)
 export const buscarApoderadoPorEmail = (email) =>
   authHttp.get('/apoderados/buscar-por-email', { params: { email } })
+
+// POST /apoderados y /estudiantes — solo ROLE_DIRECTIVO (ver SecurityConfig). Usados por el
+// wizard de "Nueva matrícula": crean la cuenta antes de poder registrar la matrícula.
+export const crearApoderado = (data) => authHttp.post('/apoderados', data)
+export const crearEstudiante = (data) => authHttp.post('/estudiantes', data)
+
+// GET /comunas — para el <select> de dirección en los formularios de creación de cuenta.
+export const getComunas = () => authHttp.get('/comunas')

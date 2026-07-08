@@ -16,6 +16,7 @@ public record SolicitudMatriculaResponseDTO(
     String apoderadoApellido,
     Long cursoId,
     String tipoAlumno,
+    String parentesco,
     String observaciones,
     String estado,
     LocalDate fechaSolicitud,

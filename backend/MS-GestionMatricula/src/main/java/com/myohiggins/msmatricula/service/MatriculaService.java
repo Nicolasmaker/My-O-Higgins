@@ -3,10 +3,14 @@ package com.myohiggins.msmatricula.service;
 import com.myohiggins.msmatricula.dto.EstudianteDTO;
 import com.myohiggins.msmatricula.dto.ApoderadoDTO;
 import com.myohiggins.msmatricula.dto.FuncionarioDTO;
+import com.myohiggins.msmatricula.dto.HojaVidaDTO;
 import com.myohiggins.msmatricula.dto.MatriculaResponseDTO;
 import com.myohiggins.msmatricula.model.entities.Matricula;
 import com.myohiggins.msmatricula.repository.MatriculaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
@@ -15,14 +19,20 @@ import java.util.List;
 @Service
 public class MatriculaService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MatriculaService.class);
+
     @Autowired
     private MatriculaRepository matriculaRepository;
 
     // RestClient para comunicarse con el microservicio de Autenticacion
     private final RestClient autenticacionRestClient;
+    // RestClient para sincronizar la hoja de vida del estudiante en MS-HojaDeVida
+    private final RestClient hojaVidaRestClient;
 
-    public MatriculaService(RestClient autenticacionRestClient) {
+    public MatriculaService(@Qualifier("autenticacionRestClient") RestClient autenticacionRestClient,
+                             @Qualifier("hojaVidaRestClient") RestClient hojaVidaRestClient) {
         this.autenticacionRestClient = autenticacionRestClient;
+        this.hojaVidaRestClient = hojaVidaRestClient;
     }
 
     // 1. Crear una nueva matrícula
@@ -40,7 +50,9 @@ public class MatriculaService {
             throw new IllegalArgumentException("No se puede registrar la matricula: el funcionario con RUT " + matricula.getFuncionarioUsuRut() + " no existe en el sistema.");
         }
 
-        return matriculaRepository.save(matricula);
+        Matricula guardada = matriculaRepository.save(matricula);
+        sincronizarHojaVida(guardada);
+        return guardada;
     }
 
     // 2. Obtener todas las matrículas registradas, enriquecidas con RUT+DV y nombre
@@ -77,6 +89,7 @@ public class MatriculaService {
             matriculaExistente.setCursoId(detallesMatricula.getCursoId());
             matriculaExistente.setApoderadoRut(detallesMatricula.getApoderadoRut());
             matriculaExistente.setTipoAlumno(detallesMatricula.getTipoAlumno());
+            matriculaExistente.setParentesco(detallesMatricula.getParentesco());
 
             return matriculaRepository.save(matriculaExistente);
         }
@@ -150,6 +163,7 @@ public class MatriculaService {
                 matricula.getIdMatricula(),
                 matricula.getCursoId(),
                 matricula.getTipoAlumno(),
+                matricula.getParentesco(),
                 matricula.getMatriculaFecha(),
                 matricula.getMatriculaEstado(),
                 matricula.getMatriculaAnioAcademico(),
@@ -203,6 +217,51 @@ public class MatriculaService {
                     .retrieve()
                     .body(FuncionarioDTO.class);
         } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Sincroniza la hoja de vida del estudiante en MS-HojaDeVida tras registrar la matrícula:
+    // si el estudiante aún no tiene hoja de vida, la crea; si ya tiene una (de un año anterior),
+    // la actualiza para que apunte a esta matrícula nueva (la hoja de vida es única por estudiante
+    // durante toda su vida escolar, no una por año). Best-effort: si MS-HojaDeVida no responde,
+    // solo se registra en el log — no bloquea el registro de la matrícula.
+    private void sincronizarHojaVida(Matricula matricula) {
+        try {
+            HojaVidaDTO existente = buscarHojaVidaPorRut(matricula.getAlumnoRut());
+
+            HojaVidaDTO body = new HojaVidaDTO();
+            body.setEstudianteUsuRut(matricula.getAlumnoRut());
+            body.setMatriculaId(matricula.getIdMatricula());
+            body.setEstado(existente != null ? existente.getEstado() : "ACTIVA");
+
+            if (existente == null) {
+                hojaVidaRestClient.post()
+                        .uri("/api/hojas-vida")
+                        .body(body)
+                        .retrieve()
+                        .toBodilessEntity();
+            } else {
+                hojaVidaRestClient.put()
+                        .uri("/api/hojas-vida/{id}", existente.getIdHojaVida())
+                        .body(body)
+                        .retrieve()
+                        .toBodilessEntity();
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo sincronizar la hoja de vida del estudiante {}: {}", matricula.getAlumnoRut(), e.getMessage());
+        }
+    }
+
+    // Busca la hoja de vida existente de un estudiante por su RUT. Devuelve null si no tiene
+    // ninguna registrada (404) o si MS-HojaDeVida no responde.
+    private HojaVidaDTO buscarHojaVidaPorRut(Long estudianteUsuRut) {
+        try {
+            return hojaVidaRestClient.get()
+                    .uri("/api/hojas-vida/estudiante/{rut}", estudianteUsuRut)
+                    .retrieve()
+                    .body(HojaVidaDTO.class);
+        } catch (HttpClientErrorException.NotFound e) {
             return null;
         }
     }

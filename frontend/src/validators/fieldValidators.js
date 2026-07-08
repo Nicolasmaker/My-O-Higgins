@@ -48,6 +48,15 @@ export function limpiarRut(valor) {
   return Number(limpio.split('-')[0])
 }
 
+// Extrae el dígito verificador del RUT (ej. "12345678-5" -> "5"). Devuelve null si el valor
+// no trae DV — usado al crear cuentas nuevas (Estudiante/Apoderado), donde el backend guarda
+// cuerpo y DV en columnas separadas (usuRut / usuDvRut).
+export function extraerDv(valor) {
+  const limpio = String(valor).replace(/\./g, '').replace(/\s/g, '').toUpperCase()
+  const partes = limpio.split('-')
+  return partes.length > 1 ? partes[1] : null
+}
+
 // Regla lista para react-hook-form
 export const rutRules = {
   required: 'El RUT es obligatorio',

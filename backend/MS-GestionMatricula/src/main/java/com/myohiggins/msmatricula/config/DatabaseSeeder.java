@@ -22,6 +22,10 @@ public class DatabaseSeeder implements CommandLineRunner {
     // aplicada en frontend: gestión de Matrícula = solo ROLE_DIRECTIVO).
     private static final int[] DIRECTIVOS = { 10111222, 11222333, 13444555 };
 
+    // Parentesco vive en Matricula (no en Apoderado/Estudiante de Autenticacion) porque describe
+    // la relación apoderado-alumno de ESTA matrícula específica, no de la persona en general.
+    private static final String[] PARENTESCOS = { "Padre", "Madre", "Tío", "Tía", "Abuela", "Tutor Legal" };
+
     // Se guarda directo por repositorio, sin pasar por MatriculaService.crearMatricula(): ese
     // método valida estudiante/apoderado/funcionario vía REST contra MS-Autenticacion, lo que
     // obligaría a levantar Autenticacion ANTES que este MS solo para poder sembrar (mismo tipo
@@ -67,6 +71,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             matricula.setApoderadoRut((long) (APODERADO_RUT_BASE + indice));
             matricula.setFuncionarioUsuRut((long) DIRECTIVOS[indice % DIRECTIVOS.length]);
             matricula.setTipoAlumno(esUltimoDelGrupo ? "REPITENTE" : tipoAlumnoPorDefecto);
+            matricula.setParentesco(PARENTESCOS[indice % PARENTESCOS.length]);
 
             matriculaRepository.save(matricula);
         }

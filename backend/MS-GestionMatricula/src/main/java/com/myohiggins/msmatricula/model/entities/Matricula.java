@@ -23,6 +23,12 @@ public class Matricula {
     @Column(name = "tipo_alumno", length = 20)
     private String tipoAlumno; // NUEVO, ANTIGUO, REPITENTE
 
+    // Relación del apoderado con ESTE alumno específico (Padre, Tío, Tutor Legal, etc.) — vive
+    // acá y no en Apoderado/Estudiante porque un mismo apoderado puede tener varios hijos con
+    // distinto parentesco cada uno; Matricula es el vínculo real apoderado-alumno.
+    @Column(name = "parentesco", length = 40)
+    private String parentesco;
+
     @Column(name = "mat_fec", nullable = false)
     private LocalDate matriculaFecha;
 

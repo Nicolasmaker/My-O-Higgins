@@ -27,6 +27,11 @@ public class SolicitudMatricula {
     @Column(name = "tipo_alumno", length = 20)
     private String tipoAlumno; // NUEVO, ANTIGUO, REPITENTE
 
+    // Relación del apoderado con ESTE alumno específico (Padre, Tío, Tutor Legal, etc.) — se
+    // propaga a Matricula.parentesco cuando el Directivo aprueba la solicitud.
+    @Column(name = "parentesco", length = 40)
+    private String parentesco;
+
     @Column(name = "observaciones", length = 500)
     private String observaciones;
 

@@ -9,6 +9,7 @@ public record MatriculaResponseDTO(
     Long idMatricula,
     Long cursoId,
     String tipoAlumno,
+    String parentesco,
     LocalDate matriculaFecha,
     String matriculaEstado,
     Integer matriculaAnioAcademico,

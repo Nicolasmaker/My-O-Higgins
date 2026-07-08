@@ -45,6 +45,7 @@ import { formatNivel } from '../../components/Academico/entidadesConfig'
 import { formatRut } from '../../utils/formatRut'
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
+import { generarHojaVidaPdf } from '../../utils/hojaVidaPdf'
 import HojaVidaForm from '../../components/HojaDeVida/HojaVidaForm'
 import AntecedenteForm from '../../components/HojaDeVida/AntecedenteForm'
 import styles from './HojaDeVida.module.css'
@@ -425,6 +426,22 @@ export default function HojaDeVida() {
     setAntEdit(item)
   }
 
+  const handleDescargarPdf = () => {
+    if (!selected) return
+    const datosEstudiante = nombresPorRut[String(selected.estudianteUsuRut)]
+    generarHojaVidaPdf({
+      hoja: selected,
+      nombreEstudiante: datosEstudiante?.nombre,
+      rutFormateado: formatRut(selected.estudianteUsuRut, datosEstudiante?.dv),
+      anotaciones: anotacionesHoja,
+      documentos: documentosHoja,
+      matriculas: matriculasDelEstudianteSeleccionado,
+      academicos: antecedentesDeHoja.academico,
+      apoderados: antecedentesDeHoja.apoderado,
+      medicos: antecedentesDeHoja.medico,
+    })
+  }
+
   const sectionHeader = (titulo, count) => (
     <span className={styles.sectionHeader}>
       {titulo} <Badge bg="secondary">{count}</Badge>
@@ -543,23 +560,28 @@ export default function HojaDeVida() {
                         Estudiante RUT {formatRut(selected.estudianteUsuRut, nombresPorRut[String(selected.estudianteUsuRut)]?.dv)} · Matrícula #{selected.matriculaId}
                       </span>
                     </div>
-                    {canManage && (
-                      <div className="d-flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline-secondary"
-                          onClick={() => {
-                            setHojaEdit(selected)
-                            setShowHojaForm(true)
-                          }}
-                        >
-                          Editar
-                        </Button>
-                        <Button size="sm" variant="outline-danger" onClick={() => handleDeleteHoja(selected)}>
-                          Eliminar
-                        </Button>
-                      </div>
-                    )}
+                    <div className="d-flex gap-2">
+                      <Button size="sm" className={styles.btnGranate} onClick={handleDescargarPdf}>
+                        Descargar PDF
+                      </Button>
+                      {canManage && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline-secondary"
+                            onClick={() => {
+                              setHojaEdit(selected)
+                              setShowHojaForm(true)
+                            }}
+                          >
+                            Editar
+                          </Button>
+                          <Button size="sm" variant="outline-danger" onClick={() => handleDeleteHoja(selected)}>
+                            Eliminar
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </header>
 
                   <Accordion defaultActiveKey="academico" alwaysOpen className={styles.accordion}>
