@@ -24,6 +24,7 @@ import {
 } from '../../services/matriculaService'
 import { getCursos } from '../../services/academicoService'
 import { formatNivel } from '../../components/Academico/entidadesConfig'
+import { formatRut } from '../../utils/formatRut'
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
 import styles from './Matricula.module.css'
 
@@ -247,7 +248,7 @@ export default function Matricula() {
   }
 
   const handleDelete = async (m) => {
-    if (!window.confirm(`¿Eliminar la matrícula #${m.idMatricula} del alumno ${m.alumnoRut}?`)) return
+    if (!window.confirm(`¿Eliminar la matrícula #${m.idMatricula} del alumno ${formatRut(m.alumnoRut, m.alumnoDv)}?`)) return
     try {
       await eliminarMatricula(m.idMatricula)
       toast.success('Matrícula eliminada')
@@ -360,8 +361,8 @@ export default function Matricula() {
                 {filtradas.map((m) => (
                   <tr key={m.idMatricula}>
                     <td>{m.idMatricula}</td>
-                    <td>{m.alumnoRut}</td>
-                    <td>{m.apoderadoRut}</td>
+                    <td>{formatRut(m.alumnoRut, m.alumnoDv)}</td>
+                    <td>{formatRut(m.apoderadoRut, m.apoderadoDv)}</td>
                     <td>{m.cursoId ?? '—'}</td>
                     <td>
                       <Badge bg={TIPO_BADGE[m.tipoAlumno] || 'secondary'}>{m.tipoAlumno || 'N/D'}</Badge>
@@ -480,8 +481,8 @@ export default function Matricula() {
                     {solicitudes.map((s) => (
                       <tr key={s.idSolicitud}>
                         <td>{s.idSolicitud}</td>
-                        <td>{s.alumnoRut}</td>
-                        {canManage && <td>{s.apoderadoRut}</td>}
+                        <td>{formatRut(s.alumnoRut, s.alumnoDv)}</td>
+                        {canManage && <td>{formatRut(s.apoderadoRut, s.apoderadoDv)}</td>}
                         <td>
                           {canManage && s.estado === 'PENDIENTE' ? (
                             <Form.Select

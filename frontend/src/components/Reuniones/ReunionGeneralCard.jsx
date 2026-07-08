@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Card, Badge, Button, Form } from 'react-bootstrap'
+import { formatRut } from '../../utils/formatRut'
 import styles from '../../pages/Reuniones/Reuniones.module.css'
 
 export default function ReunionGeneralCard({ reunion, formatDate, cursoLabel, onCompletarActa, canManage }) {
@@ -104,7 +105,7 @@ export default function ReunionGeneralCard({ reunion, formatDate, cursoLabel, on
           </>
         )}
 
-        {base?.docenteUsuRut && <small className="text-muted d-block mt-2">Funcionario: {base.docenteUsuRut}</small>}
+        {base?.docenteUsuRut && <small className="text-muted d-block mt-2">Funcionario: {formatRut(base.docenteUsuRut, base.docenteDv)}</small>}
       </Card.Body>
     </Card>
   )

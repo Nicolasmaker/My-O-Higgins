@@ -12,6 +12,7 @@
 // =============================================================
 import { Badge } from 'react-bootstrap'
 import { limpiarRut } from '../../validators/fieldValidators'
+import { formatRut } from '../../utils/formatRut'
 import {
   getCursos, crearCurso, actualizarCurso, eliminarCurso,
   getAsignaturas, crearAsignatura, actualizarAsignatura, eliminarAsignatura,
@@ -132,7 +133,7 @@ export const ENTIDADES = {
       { label: 'Tipo', render: (i) => <Badge bg="secondary">{i.evaTipo}</Badge> },
       { label: 'Asignatura', render: (i) => i.asignatura?.asiNombre ?? '—' },
       { label: 'Curso', render: (i) => (i.curso ? `${formatNivel(i.curso.nivel)} ${i.curso.curLetraSeccion}` : '—') },
-      { label: 'Docente', render: (i) => i.docenteUsuRut },
+      { label: 'Docente', render: (i) => formatRut(i.docenteUsuRut, i.docenteDv) },
     ],
     campos: [
       { name: 'evaNom', label: 'Nombre', maxLength: 100, width: 12, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaNom ?? '' },
@@ -200,7 +201,7 @@ export const ENTIDADES = {
     api: { list: getImpartir, crear: crearImpartir, eliminar: eliminarImpartir },
     columnas: [
       { label: '#', render: (i) => i.idImp },
-      { label: 'RUT docente', render: (i) => i.docenteUsuRut },
+      { label: 'RUT docente', render: (i) => formatRut(i.docenteUsuRut, i.docenteDv) },
       { label: 'Asignatura', render: (i) => i.asignatura?.asiNombre ?? '—' },
       { label: 'Curso', render: (i) => (i.curso ? `${formatNivel(i.curso.nivel)} ${i.curso.curLetraSeccion ?? ''}` : '—') },
     ],

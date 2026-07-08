@@ -1,11 +1,6 @@
 import Button from '../UI/Button'
+import { formatRut } from '../../utils/formatRut'
 import './AnotacionCard.css'
-
-function formatRut(rut, dv) {
-  if (!rut) return null
-  const conPuntos = String(rut).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-  return dv ? `${conPuntos}-${dv}` : conPuntos
-}
 
 function labelRolFuncionario(rol) {
   const rolNormalizado = String(rol || '').toUpperCase()

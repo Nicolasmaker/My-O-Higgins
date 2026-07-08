@@ -42,6 +42,7 @@ import {
 import { getAnotacionesByHojaVida } from '../../services/anotacionesService'
 import { getImpartirByDocente, getCursos } from '../../services/academicoService'
 import { formatNivel } from '../../components/Academico/entidadesConfig'
+import { formatRut } from '../../utils/formatRut'
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
 import HojaVidaForm from '../../components/HojaDeVida/HojaVidaForm'
@@ -136,7 +137,7 @@ export default function HojaDeVida() {
     return hojas
   }, [hojas, esDirectivo, esInspector, esDocente, esApoderado, esEstudiante, matriculas, idsCursoDocente, userRut])
 
-  // Nombre del estudiante por RUT, resuelto bajo demanda para las hojas visibles (búsqueda por nombre).
+  // Nombre y DV del estudiante por RUT, resuelto bajo demanda para las hojas visibles (búsqueda por nombre).
   const [nombresPorRut, setNombresPorRut] = useState({})
   useEffect(() => {
     const rutsFaltantes = [
@@ -148,14 +149,14 @@ export default function HojaDeVida() {
     Promise.all(
       rutsFaltantes.map((rut) =>
         getEstudiante(rut)
-          .then((r) => [rut, `${r.data?.usuPNombre ?? ''} ${r.data?.usuApePat ?? ''}`.trim()])
-          .catch(() => [rut, ''])
+          .then((r) => [rut, { nombre: `${r.data?.usuPNombre ?? ''} ${r.data?.usuApePat ?? ''}`.trim(), dv: r.data?.usuDvRut ?? null }])
+          .catch(() => [rut, { nombre: '', dv: null }])
       )
     ).then((pares) => {
       setNombresPorRut((prev) => {
         const next = { ...prev }
-        pares.forEach(([rut, nombre]) => {
-          next[rut] = nombre
+        pares.forEach(([rut, datos]) => {
+          next[rut] = datos
         })
         return next
       })
@@ -206,7 +207,7 @@ export default function HojaDeVida() {
       if (rut.includes(q) || String(h.idHojaVida ?? '').includes(q)) return true
       const curso = cursoLabelPorRut.get(rut) ?? ''
       if (curso.toLowerCase().includes(qLower)) return true
-      const nombre = nombresPorRut[rut] ?? ''
+      const nombre = nombresPorRut[rut]?.nombre ?? ''
       if (nombre.toLowerCase().includes(qLower)) return true
       return false
     })
@@ -499,7 +500,8 @@ export default function HojaDeVida() {
                 <ListGroup className={styles.hojaList}>
                   {hojasFiltradas.map((h) => {
                     const rut = String(h.estudianteUsuRut ?? '')
-                    const nombre = nombresPorRut[rut]
+                    const datosEstudiante = nombresPorRut[rut]
+                    const rutFormateado = formatRut(h.estudianteUsuRut, datosEstudiante?.dv)
                     const curso = cursoLabelPorRut.get(rut)
                     return (
                       <ListGroup.Item
@@ -511,7 +513,7 @@ export default function HojaDeVida() {
                       >
                         <strong>Hoja #{h.idHojaVida}</strong>
                         <span className={styles.hojaItemMeta}>
-                          {nombre ? `${nombre} · RUT ${h.estudianteUsuRut}` : `Estudiante: ${h.estudianteUsuRut}`}
+                          {datosEstudiante?.nombre ? `${datosEstudiante.nombre} · RUT ${rutFormateado}` : `Estudiante: ${rutFormateado}`}
                         </span>
                         <span className={styles.hojaItemMeta}>
                           {curso ? `Curso: ${curso}` : `Matrícula: ${h.matriculaId}`}
@@ -538,7 +540,7 @@ export default function HojaDeVida() {
                         )}
                       </h2>
                       <span className={styles.detailMeta}>
-                        Estudiante RUT {selected.estudianteUsuRut} · Matrícula #{selected.matriculaId}
+                        Estudiante RUT {formatRut(selected.estudianteUsuRut, nombresPorRut[String(selected.estudianteUsuRut)]?.dv)} · Matrícula #{selected.matriculaId}
                       </span>
                     </div>
                     {canManage && (
