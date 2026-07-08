@@ -76,6 +76,7 @@
 .heroButtons a {
   flex-shrink:1;
   min-width: 150px;
+  margin-top: 12px;
 
 }
 
