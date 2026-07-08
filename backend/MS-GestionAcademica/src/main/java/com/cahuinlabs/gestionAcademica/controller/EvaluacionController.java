@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.cahuinlabs.gestionAcademica.dto.EvaluacionResponseDTO;
 import com.cahuinlabs.gestionAcademica.models.entities.Evaluacion;
 import com.cahuinlabs.gestionAcademica.models.request.Evaluacion.ActualizarEvaluacionRequest;
 import com.cahuinlabs.gestionAcademica.models.request.Evaluacion.CrearEvaluacionRequest;
@@ -29,12 +30,12 @@ public class EvaluacionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Evaluacion>> listar() {
+    public ResponseEntity<List<EvaluacionResponseDTO>> listar() {
         return ResponseEntity.ok(evaluacionService.listarTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Evaluacion> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<EvaluacionResponseDTO> obtenerPorId(@PathVariable Integer id) {
         return evaluacionService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

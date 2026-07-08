@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record EstudianteDTO(
     @JsonProperty("usuRut") Long rut,
+    @JsonProperty("usuDvRut") String dv,
     @JsonProperty("usuPNombre") String nombre,
     @JsonProperty("usuApePat") String apellido
 ) {}

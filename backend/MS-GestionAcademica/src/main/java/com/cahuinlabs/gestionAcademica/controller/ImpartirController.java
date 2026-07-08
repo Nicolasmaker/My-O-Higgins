@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.cahuinlabs.gestionAcademica.dto.ImpartirResponseDTO;
 import com.cahuinlabs.gestionAcademica.models.entities.Impartir;
 import com.cahuinlabs.gestionAcademica.models.request.Impartir.CrearImpartirRequest;
 import com.cahuinlabs.gestionAcademica.service.ImpartirService;
@@ -23,12 +24,12 @@ public class ImpartirController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Impartir>> listar() {
+    public ResponseEntity<List<ImpartirResponseDTO>> listar() {
         return ResponseEntity.ok(impartirService.listarTodos());
     }
 
     @GetMapping("/docente/{rut}")
-    public ResponseEntity<List<Impartir>> listarPorDocente(@PathVariable Integer rut) {
+    public ResponseEntity<List<ImpartirResponseDTO>> listarPorDocente(@PathVariable Integer rut) {
         return ResponseEntity.ok(impartirService.listarPorDocente(rut));
     }
 

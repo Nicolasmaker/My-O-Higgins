@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import com.cahuinlabs.GestionReuniones.dto.BitReunionApoderadoResponseDTO;
+import com.cahuinlabs.GestionReuniones.dto.BitReunionGeneralResponseDTO;
+import com.cahuinlabs.GestionReuniones.dto.BitReunionIndividualResponseDTO;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionApoderado;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionGeneral;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionIndividual;
@@ -64,45 +67,45 @@ public class BitacoraReunionController {
 
     // GET obtener el listado de reuniones agendadas por un funcionario en particular
     @GetMapping("/funcionario/{rut}")
-    public ResponseEntity<List<BitReunionApoderado>> listarPorFuncionario(@PathVariable Long rut) {
-        List<BitReunionApoderado> reuniones = reunionesService.listarPorFuncionario(rut);
+    public ResponseEntity<List<BitReunionApoderadoResponseDTO>> listarPorFuncionario(@PathVariable Long rut) {
+        List<BitReunionApoderadoResponseDTO> reuniones = reunionesService.listarPorFuncionario(rut);
         return new ResponseEntity<>(reuniones, HttpStatus.OK);
     }
 
     // GET obtener el detalle de una reunion individual por su propio ID
     @GetMapping("/individual/{id}")
-    public ResponseEntity<BitReunionIndividual> verDetalleIndividual(@PathVariable Long id) {
+    public ResponseEntity<BitReunionIndividualResponseDTO> verDetalleIndividual(@PathVariable Long id) {
         return new ResponseEntity<>(reunionesService.obtenerDetalleIndividual(id), HttpStatus.OK);
     }
 
     // GET obtener el detalle de una reunion general por su propio ID
     @GetMapping("/general/{id}")
-    public ResponseEntity<BitReunionGeneral> verDetalleGeneral(@PathVariable Long id) {
+    public ResponseEntity<BitReunionGeneralResponseDTO> verDetalleGeneral(@PathVariable Long id) {
         return new ResponseEntity<>(reunionesService.obtenerDetalleGeneral(id), HttpStatus.OK);
     }
 
     // GET listar todas las bitacoras base de reuniones con apoderado
     @GetMapping("/apoderado")
-    public ResponseEntity<List<BitReunionApoderado>> listarReunionesApoderado() {
-        List<BitReunionApoderado> reuniones = reunionesService.listarReunionesApoderado();
+    public ResponseEntity<List<BitReunionApoderadoResponseDTO>> listarReunionesApoderado() {
+        List<BitReunionApoderadoResponseDTO> reuniones = reunionesService.listarReunionesApoderado();
         return new ResponseEntity<>(reuniones, HttpStatus.OK);
     }
 
     // GET obtener una bitacora base por su ID
     @GetMapping("/apoderado/{id}")
-    public ResponseEntity<BitReunionApoderado> obtenerApoderado(@PathVariable Long id) {
+    public ResponseEntity<BitReunionApoderadoResponseDTO> obtenerApoderado(@PathVariable Long id) {
         return new ResponseEntity<>(reunionesService.obtenerApoderadoPorId(id), HttpStatus.OK);
     }
 
     // GET listar todas las entrevistas individuales
     @GetMapping("/individual")
-    public ResponseEntity<List<BitReunionIndividual>> listarIndividuales() {
+    public ResponseEntity<List<BitReunionIndividualResponseDTO>> listarIndividuales() {
         return new ResponseEntity<>(reunionesService.listarIndividuales(), HttpStatus.OK);
     }
 
     // GET listar todas las actas de reunion general
     @GetMapping("/general")
-    public ResponseEntity<List<BitReunionGeneral>> listarGenerales() {
+    public ResponseEntity<List<BitReunionGeneralResponseDTO>> listarGenerales() {
         return new ResponseEntity<>(reunionesService.listarGenerales(), HttpStatus.OK);
     }
 

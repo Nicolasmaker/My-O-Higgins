@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.cahuinlabs.gestionAcademica.dto.CalendarioEstudiantilDTO;
+import com.cahuinlabs.gestionAcademica.dto.EvaluacionResponseDTO;
 import com.cahuinlabs.gestionAcademica.dto.FuncionarioDTO;
 import com.cahuinlabs.gestionAcademica.models.entities.Asignatura;
 import com.cahuinlabs.gestionAcademica.models.entities.Curso;
@@ -105,12 +106,12 @@ public class EvaluacionService {
         return actualizada;
     }
 
-    public List<Evaluacion> listarTodas() {
-        return evaluacionRepository.findAll();
+    public List<EvaluacionResponseDTO> listarTodas() {
+        return enriquecerTodas(evaluacionRepository.findAll());
     }
 
-    public Optional<Evaluacion> buscarPorId(Integer id) {
-        return evaluacionRepository.findById(id);
+    public Optional<EvaluacionResponseDTO> buscarPorId(Integer id) {
+        return evaluacionRepository.findById(id).map(this::enriquecer);
     }
 
     public void eliminar(Integer id) {
@@ -182,6 +183,45 @@ public class EvaluacionService {
                     .toBodilessEntity();
         } catch (Exception e) {
             logger.warn("No se pudo eliminar el evento de calendario de la evaluacion: {}", e.getMessage());
+        }
+    }
+
+    // Mapea una lista de evaluaciones crudas a su version enriquecida con RUT+DV y nombre del docente.
+    private List<EvaluacionResponseDTO> enriquecerTodas(List<Evaluacion> evaluaciones) {
+        return evaluaciones.stream().map(this::enriquecer).toList();
+    }
+
+    // Enriquece una evaluacion con DV y nombre del docente, resueltos desde Autenticacion.
+    // Si el docente no se encuentra o el microservicio externo falla, se omite ese dato
+    // (queda null) en vez de romper el listado completo.
+    private EvaluacionResponseDTO enriquecer(Evaluacion evaluacion) {
+        FuncionarioDTO docente = obtenerDocente(evaluacion.getDocenteUsuRut());
+        return new EvaluacionResponseDTO(
+                evaluacion.getIdEva(),
+                evaluacion.getEvaNom(),
+                evaluacion.getEvaFecha(),
+                evaluacion.getEvaPeriodoAcad(),
+                evaluacion.getEvaTipo(),
+                evaluacion.getDocenteUsuRut(),
+                docente != null ? docente.dv() : null,
+                docente != null ? docente.nombre() : null,
+                docente != null ? docente.apellido() : null,
+                evaluacion.getAsignatura(),
+                evaluacion.getCurso(),
+                evaluacion.getIdCalEst()
+        );
+    }
+
+    // Obtiene los datos del docente en Autenticacion. Devuelve null si no existe o si el
+    // microservicio no responde.
+    private FuncionarioDTO obtenerDocente(Integer rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/funcionarios/{rut}", rut)
+                    .retrieve()
+                    .body(FuncionarioDTO.class);
+        } catch (Exception e) {
+            return null;
         }
     }
 

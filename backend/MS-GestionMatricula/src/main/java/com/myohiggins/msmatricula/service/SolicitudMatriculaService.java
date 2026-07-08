@@ -3,6 +3,7 @@ package com.myohiggins.msmatricula.service;
 import com.myohiggins.msmatricula.dto.EstudianteDTO;
 import com.myohiggins.msmatricula.dto.ApoderadoDTO;
 import com.myohiggins.msmatricula.dto.FuncionarioDTO;
+import com.myohiggins.msmatricula.dto.SolicitudMatriculaResponseDTO;
 import com.myohiggins.msmatricula.model.entities.Matricula;
 import com.myohiggins.msmatricula.model.entities.SolicitudMatricula;
 import com.myohiggins.msmatricula.repository.MatriculaRepository;
@@ -44,12 +45,12 @@ public class SolicitudMatriculaService {
         return solicitudRepository.save(solicitud);
     }
 
-    public List<SolicitudMatricula> listarTodas() {
-        return solicitudRepository.findAll();
+    public List<SolicitudMatriculaResponseDTO> listarTodas() {
+        return enriquecerTodas(solicitudRepository.findAll());
     }
 
-    public List<SolicitudMatricula> listarPorApoderado(Long apoderadoRut) {
-        return solicitudRepository.findByApoderadoRut(apoderadoRut);
+    public List<SolicitudMatriculaResponseDTO> listarPorApoderado(Long apoderadoRut) {
+        return enriquecerTodas(solicitudRepository.findByApoderadoRut(apoderadoRut));
     }
 
     // El Directivo aprueba: recien aqui se crea la Matricula real, con SU rut como funcionario
@@ -132,6 +133,63 @@ public class SolicitudMatriculaService {
             return false;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
+        }
+    }
+
+    // Mapea una lista de solicitudes crudas a su version enriquecida con RUT+DV y nombre.
+    private List<SolicitudMatriculaResponseDTO> enriquecerTodas(List<SolicitudMatricula> solicitudes) {
+        return solicitudes.stream().map(this::enriquecer).toList();
+    }
+
+    // Enriquece una solicitud con DV y nombre del alumno y del apoderado, resueltos desde
+    // Autenticacion. Si algun dato no se encuentra o el microservicio externo falla, se
+    // omite ese dato (queda null) en vez de romper el listado completo.
+    private SolicitudMatriculaResponseDTO enriquecer(SolicitudMatricula solicitud) {
+        EstudianteDTO alumno = obtenerEstudiante(solicitud.getAlumnoRut());
+        ApoderadoDTO apoderado = obtenerApoderado(solicitud.getApoderadoRut());
+
+        return new SolicitudMatriculaResponseDTO(
+                solicitud.getIdSolicitud(),
+                solicitud.getAlumnoRut(),
+                alumno != null ? alumno.dv() : null,
+                alumno != null ? alumno.nombre() : null,
+                alumno != null ? alumno.apellido() : null,
+                solicitud.getApoderadoRut(),
+                apoderado != null ? apoderado.dv() : null,
+                apoderado != null ? apoderado.nombre() : null,
+                apoderado != null ? apoderado.apellido() : null,
+                solicitud.getCursoId(),
+                solicitud.getTipoAlumno(),
+                solicitud.getObservaciones(),
+                solicitud.getEstado(),
+                solicitud.getFechaSolicitud(),
+                solicitud.getMotivoRechazo()
+        );
+    }
+
+    // Obtiene los datos del estudiante en Autenticacion. Devuelve null si no existe
+    // o si el microservicio no responde.
+    private EstudianteDTO obtenerEstudiante(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/estudiantes/{rut}", rut)
+                    .retrieve()
+                    .body(EstudianteDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Obtiene los datos del apoderado en Autenticacion. Devuelve null si no existe
+    // o si el microservicio no responde.
+    private ApoderadoDTO obtenerApoderado(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/apoderados/{rut}", rut)
+                    .retrieve()
+                    .body(ApoderadoDTO.class);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

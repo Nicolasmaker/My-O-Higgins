@@ -1,5 +1,6 @@
 package com.myohiggins.msmatricula.controller;
 
+import com.myohiggins.msmatricula.dto.SolicitudMatriculaResponseDTO;
 import com.myohiggins.msmatricula.model.entities.Matricula;
 import com.myohiggins.msmatricula.model.entities.SolicitudMatricula;
 import com.myohiggins.msmatricula.service.SolicitudMatriculaService;
@@ -25,12 +26,12 @@ public class SolicitudMatriculaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SolicitudMatricula>> listarTodas() {
+    public ResponseEntity<List<SolicitudMatriculaResponseDTO>> listarTodas() {
         return ResponseEntity.ok(solicitudService.listarTodas());
     }
 
     @GetMapping("/apoderado/{rut}")
-    public ResponseEntity<List<SolicitudMatricula>> listarPorApoderado(@PathVariable Long rut) {
+    public ResponseEntity<List<SolicitudMatriculaResponseDTO>> listarPorApoderado(@PathVariable Long rut) {
         return ResponseEntity.ok(solicitudService.listarPorApoderado(rut));
     }
 

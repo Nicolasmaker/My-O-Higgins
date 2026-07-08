@@ -3,6 +3,7 @@ package com.myohiggins.msmatricula.service;
 import com.myohiggins.msmatricula.dto.EstudianteDTO;
 import com.myohiggins.msmatricula.dto.ApoderadoDTO;
 import com.myohiggins.msmatricula.dto.FuncionarioDTO;
+import com.myohiggins.msmatricula.dto.MatriculaResponseDTO;
 import com.myohiggins.msmatricula.model.entities.Matricula;
 import com.myohiggins.msmatricula.repository.MatriculaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +43,15 @@ public class MatriculaService {
         return matriculaRepository.save(matricula);
     }
 
-    // 2. Obtener todas las matrículas registradas
-    public List<Matricula> listarTodas() {
-        return matriculaRepository.findAll();
+    // 2. Obtener todas las matrículas registradas, enriquecidas con RUT+DV y nombre
+    public List<MatriculaResponseDTO> listarTodas() {
+        return enriquecerTodas(matriculaRepository.findAll());
     }
 
-    // 4. Buscar matrícula por su ID
-    public Matricula buscarPorId(Long id) {
-        return matriculaRepository.findById(id).orElse(null);
+    // 4. Buscar matrícula por su ID, enriquecida con RUT+DV y nombre
+    public MatriculaResponseDTO buscarPorId(Long id) {
+        Matricula matricula = matriculaRepository.findById(id).orElse(null);
+        return matricula != null ? enriquecer(matricula) : null;
     }
     // 4. Actualizar una matrícula existente por su ID
     public Matricula actualizarMatricula(Long id, Matricula detallesMatricula) {
@@ -128,6 +130,80 @@ public class MatriculaService {
             return false;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
+        }
+    }
+
+    // Mapea una lista de matriculas crudas a su version enriquecida con RUT+DV y nombre.
+    private List<MatriculaResponseDTO> enriquecerTodas(List<Matricula> matriculas) {
+        return matriculas.stream().map(this::enriquecer).toList();
+    }
+
+    // Enriquece una matricula con DV y nombre del alumno, apoderado y funcionario,
+    // resueltos desde Autenticacion. Si algun dato no se encuentra o el microservicio
+    // externo falla, se omite ese dato (queda null) en vez de romper el listado completo.
+    private MatriculaResponseDTO enriquecer(Matricula matricula) {
+        EstudianteDTO alumno = obtenerEstudiante(matricula.getAlumnoRut());
+        ApoderadoDTO apoderado = obtenerApoderado(matricula.getApoderadoRut());
+        FuncionarioDTO funcionario = obtenerFuncionario(matricula.getFuncionarioUsuRut());
+
+        return new MatriculaResponseDTO(
+                matricula.getIdMatricula(),
+                matricula.getCursoId(),
+                matricula.getTipoAlumno(),
+                matricula.getMatriculaFecha(),
+                matricula.getMatriculaEstado(),
+                matricula.getMatriculaAnioAcademico(),
+                matricula.getAlumnoRut(),
+                alumno != null ? alumno.dv() : null,
+                alumno != null ? alumno.nombre() : null,
+                alumno != null ? alumno.apellido() : null,
+                matricula.getApoderadoRut(),
+                apoderado != null ? apoderado.dv() : null,
+                apoderado != null ? apoderado.nombre() : null,
+                apoderado != null ? apoderado.apellido() : null,
+                matricula.getFuncionarioUsuRut(),
+                funcionario != null ? funcionario.dv() : null,
+                funcionario != null ? funcionario.nombre() : null,
+                funcionario != null ? funcionario.apellido() : null
+        );
+    }
+
+    // Obtiene los datos del estudiante en Autenticacion. Devuelve null si no existe
+    // o si el microservicio no responde.
+    private EstudianteDTO obtenerEstudiante(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/estudiantes/{rut}", rut)
+                    .retrieve()
+                    .body(EstudianteDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Obtiene los datos del apoderado en Autenticacion. Devuelve null si no existe
+    // o si el microservicio no responde.
+    private ApoderadoDTO obtenerApoderado(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/apoderados/{rut}", rut)
+                    .retrieve()
+                    .body(ApoderadoDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Obtiene los datos del funcionario en Autenticacion. Devuelve null si no existe
+    // o si el microservicio no responde.
+    private FuncionarioDTO obtenerFuncionario(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/funcionarios/{rut}", rut)
+                    .retrieve()
+                    .body(FuncionarioDTO.class);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

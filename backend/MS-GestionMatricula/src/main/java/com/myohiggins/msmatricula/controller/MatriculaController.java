@@ -1,5 +1,6 @@
 package com.myohiggins.msmatricula.controller;
 
+import com.myohiggins.msmatricula.dto.MatriculaResponseDTO;
 import com.myohiggins.msmatricula.model.entities.Matricula;
 import com.myohiggins.msmatricula.service.MatriculaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +26,13 @@ public class MatriculaController {
 
     
     @GetMapping
-    public ResponseEntity<List<Matricula>> obtenerTodas() {
+    public ResponseEntity<List<MatriculaResponseDTO>> obtenerTodas() {
         return ResponseEntity.ok(matriculaService.listarTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Matricula> obtenerPorId(@PathVariable Long id) {
-        Matricula matricula = matriculaService.buscarPorId(id);
+    public ResponseEntity<MatriculaResponseDTO> obtenerPorId(@PathVariable Long id) {
+        MatriculaResponseDTO matricula = matriculaService.buscarPorId(id);
         if (matricula != null) {
             return ResponseEntity.ok(matricula);
         }

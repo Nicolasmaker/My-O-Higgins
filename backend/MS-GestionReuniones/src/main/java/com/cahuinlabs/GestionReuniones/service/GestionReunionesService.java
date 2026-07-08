@@ -8,7 +8,12 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cahuinlabs.GestionReuniones.dto.ApoderadoDTO;
+import com.cahuinlabs.GestionReuniones.dto.BitReunionApoderadoResponseDTO;
+import com.cahuinlabs.GestionReuniones.dto.BitReunionGeneralResponseDTO;
+import com.cahuinlabs.GestionReuniones.dto.BitReunionIndividualResponseDTO;
 import com.cahuinlabs.GestionReuniones.dto.CalendarioEstudiantilDTO;
+import com.cahuinlabs.GestionReuniones.dto.EstudianteDTO;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionApoderado;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionGeneral;
 import com.cahuinlabs.GestionReuniones.models.entities.BitReunionIndividual;
@@ -160,28 +165,29 @@ public class GestionReunionesService {
         return guardada;
     }
 
-    // obtiene todas las reuniones base registradas con apoderados
+    // obtiene todas las reuniones base registradas con apoderados, enriquecidas con RUT+DV y nombre
     @Transactional
-    public List<BitReunionApoderado> listarReunionesApoderado() {
-        return baseRepository.findAll();
+    public List<BitReunionApoderadoResponseDTO> listarReunionesApoderado() {
+        return enriquecerApoderados(baseRepository.findAll());
     }
 
-    // obtiene una reunion base por su identificador
-    public BitReunionApoderado obtenerApoderadoPorId(Long idBitReu) {
-        return baseRepository.findById(idBitReu)
+    // obtiene una reunion base por su identificador, enriquecida con RUT+DV y nombre
+    public BitReunionApoderadoResponseDTO obtenerApoderadoPorId(Long idBitReu) {
+        BitReunionApoderado base = baseRepository.findById(idBitReu)
                 .orElseThrow(() -> new EntityNotFoundException("Bitácora no encontrada: " + idBitReu));
+        return enriquecerApoderado(base);
     }
 
-    // obtiene todas las reuniones individuales registradas
+    // obtiene todas las reuniones individuales registradas, enriquecidas con RUT+DV y nombre
     @Transactional
-    public List<BitReunionIndividual> listarIndividuales() {
-        return individualRepository.findAll();
+    public List<BitReunionIndividualResponseDTO> listarIndividuales() {
+        return individualRepository.findAll().stream().map(this::enriquecerIndividual).toList();
     }
 
-    // obtiene todas las reuniones generales registradas
+    // obtiene todas las reuniones generales registradas, enriquecidas con RUT+DV y nombre
     @Transactional
-    public List<BitReunionGeneral> listarGenerales() {
-        return generalRepository.findAll();
+    public List<BitReunionGeneralResponseDTO> listarGenerales() {
+        return generalRepository.findAll().stream().map(this::enriquecerGeneral).toList();
     }
 
     // actualiza estado de firmas cambia de 0 (sin firmar) a 1 (firmado)
@@ -224,9 +230,10 @@ public class GestionReunionesService {
         return generalRepository.save(general);
     }
 
-    // obtiene todas las reuniones registradas por un funcionario/docente especifico por su rut
-    public List<BitReunionApoderado> listarPorFuncionario(Long funcionarioRut) {
-        return baseRepository.findByDocenteUsuRut(funcionarioRut);
+    // obtiene todas las reuniones registradas por un funcionario/docente especifico por su rut,
+    // enriquecidas con RUT+DV y nombre
+    public List<BitReunionApoderadoResponseDTO> listarPorFuncionario(Long funcionarioRut) {
+        return enriquecerApoderados(baseRepository.findByDocenteUsuRut(funcionarioRut));
     }
 
     // el apoderado acepta o rechaza la citación. Solo al ACEPTAR se sincroniza con el
@@ -260,16 +267,18 @@ public class GestionReunionesService {
         return baseRepository.save(base);
     }
 
-    // obtiene los detalles completos de una reunion individual especifica
-    public BitReunionIndividual obtenerDetalleIndividual(Long idBitReuInd) {
-        return individualRepository.findById(idBitReuInd)
+    // obtiene los detalles completos de una reunion individual especifica, enriquecida
+    public BitReunionIndividualResponseDTO obtenerDetalleIndividual(Long idBitReuInd) {
+        BitReunionIndividual individual = individualRepository.findById(idBitReuInd)
                 .orElseThrow(() -> new EntityNotFoundException("Reunión individual no encontrada: " + idBitReuInd));
+        return enriquecerIndividual(individual);
     }
 
-    // obtiene los detalles completos de una reunion general especifica
-    public BitReunionGeneral obtenerDetalleGeneral(Long idBitReuGen) {
-        return generalRepository.findById(idBitReuGen)
+    // obtiene los detalles completos de una reunion general especifica, enriquecida
+    public BitReunionGeneralResponseDTO obtenerDetalleGeneral(Long idBitReuGen) {
+        BitReunionGeneral general = generalRepository.findById(idBitReuGen)
                 .orElseThrow(() -> new EntityNotFoundException("Reunión general no encontrada: " + idBitReuGen));
+        return enriquecerGeneral(general);
     }
 
     // metodo privado que pregunta al microservicio de Autenticacion si el funcionario existe
@@ -287,6 +296,104 @@ public class GestionReunionesService {
             return false;
         } catch (Exception e) {
             throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
+        }
+    }
+
+    // Mapea una lista de bitacoras base crudas a su version enriquecida con RUT+DV y nombre.
+    private List<BitReunionApoderadoResponseDTO> enriquecerApoderados(List<BitReunionApoderado> bases) {
+        return bases.stream().map(this::enriquecerApoderado).toList();
+    }
+
+    // Enriquece una bitacora base con DV y nombre del docente, apoderado y alumno,
+    // resueltos desde Autenticacion. Si algun dato no se encuentra o el microservicio
+    // externo falla, se omite ese dato (queda null) en vez de romper el listado completo.
+    private BitReunionApoderadoResponseDTO enriquecerApoderado(BitReunionApoderado base) {
+        FuncionarioDTO docente = obtenerFuncionario(base.getDocenteUsuRut());
+        ApoderadoDTO apoderado = base.getApoderadoUsuRut() != null ? obtenerApoderado(base.getApoderadoUsuRut()) : null;
+        EstudianteDTO alumno = base.getAlumnoRut() != null ? obtenerEstudiante(base.getAlumnoRut()) : null;
+
+        return new BitReunionApoderadoResponseDTO(
+                base.getIdBitReu(),
+                base.getBitReuFec(),
+                base.getBitReuCompromisos(),
+                base.getBitReuObs(),
+                base.getDocenteUsuRut(),
+                docente != null ? docente.dv() : null,
+                docente != null ? docente.nombre() : null,
+                docente != null ? docente.apellido() : null,
+                base.getApoderadoUsuRut(),
+                apoderado != null ? apoderado.dv() : null,
+                apoderado != null ? apoderado.nombre() : null,
+                apoderado != null ? apoderado.apellido() : null,
+                base.getAlumnoRut(),
+                alumno != null ? alumno.dv() : null,
+                alumno != null ? alumno.nombre() : null,
+                alumno != null ? alumno.apellido() : null,
+                base.getEstadoConfirmacion(),
+                base.getIdCalEst()
+        );
+    }
+
+    private BitReunionIndividualResponseDTO enriquecerIndividual(BitReunionIndividual individual) {
+        return new BitReunionIndividualResponseDTO(
+                individual.getIdBitReuInd(),
+                individual.getBitReuIndMotivReu(),
+                individual.getBitReuIndTemTrat(),
+                individual.getBitReuIndFirmaDoc(),
+                individual.getBitReuIndFirmaApo(),
+                individual.getIdAnotacion(),
+                enriquecerApoderado(individual.getBitReunionApoderado())
+        );
+    }
+
+    private BitReunionGeneralResponseDTO enriquecerGeneral(BitReunionGeneral general) {
+        return new BitReunionGeneralResponseDTO(
+                general.getBitReuGen(),
+                general.getBitReuGenTipReu(),
+                general.getBitReuGenComunicEmi(),
+                general.getBitReuGenAcuerTrat(),
+                general.getBitReuGenObs(),
+                general.getCursoId(),
+                enriquecerApoderado(general.getBitReunionApoderado())
+        );
+    }
+
+    // Obtiene los datos del funcionario en Autenticacion. Devuelve null si no existe o si el
+    // microservicio no responde.
+    private FuncionarioDTO obtenerFuncionario(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/funcionarios/{rut}", rut)
+                    .retrieve()
+                    .body(FuncionarioDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Obtiene los datos del apoderado en Autenticacion. Devuelve null si no existe o si el
+    // microservicio no responde.
+    private ApoderadoDTO obtenerApoderado(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/apoderados/{rut}", rut)
+                    .retrieve()
+                    .body(ApoderadoDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // Obtiene los datos del estudiante en Autenticacion. Devuelve null si no existe o si el
+    // microservicio no responde.
+    private EstudianteDTO obtenerEstudiante(Long rut) {
+        try {
+            return autenticacionRestClient.get()
+                    .uri("/estudiantes/{rut}", rut)
+                    .retrieve()
+                    .body(EstudianteDTO.class);
+        } catch (Exception e) {
+            return null;
         }
     }
 
