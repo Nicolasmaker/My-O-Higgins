@@ -40,7 +40,7 @@ import {
   eliminarDocumentoHojaVida,
 } from '../../services/hojaDeVidaService'
 import { getAnotacionesByHojaVida } from '../../services/anotacionesService'
-import { getImpartirByDocente, getCursos } from '../../services/academicoService'
+import { getImpartirByDocente, getCursos, getAsistenciaByEstudiante } from '../../services/academicoService'
 import { formatNivel } from '../../components/Academico/entidadesConfig'
 import { formatRut } from '../../utils/formatRut'
 import { getMatriculas } from '../../services/matriculaService'
@@ -251,6 +251,23 @@ export default function HojaDeVida() {
       .finally(() => setLoadingAnotaciones(false))
   }, [selectedId])
 
+  // Asistencia del estudiante, de solo lectura (consulta cruzada a MS-GestionAcademica —
+  // no se duplica el dato en HojaDeVida, se lee directo del origen). Se registra desde
+  // Académico > "Pasar Lista" (Docente); acá solo se refleja.
+  const [asistenciaHoja, setAsistenciaHoja] = useState([])
+  const [loadingAsistencia, setLoadingAsistencia] = useState(false)
+  useEffect(() => {
+    if (!selected?.estudianteUsuRut) {
+      setAsistenciaHoja([])
+      return
+    }
+    setLoadingAsistencia(true)
+    getAsistenciaByEstudiante(selected.estudianteUsuRut)
+      .then((r) => setAsistenciaHoja(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setAsistenciaHoja([]))
+      .finally(() => setLoadingAsistencia(false))
+  }, [selected?.estudianteUsuRut])
+
   // Documentos oficiales adjuntos de la hoja seleccionada.
   const [documentosHoja, setDocumentosHoja] = useState([])
   const [loadingDocumentos, setLoadingDocumentos] = useState(false)
@@ -434,6 +451,7 @@ export default function HojaDeVida() {
       nombreEstudiante: datosEstudiante?.nombre,
       rutFormateado: formatRut(selected.estudianteUsuRut, datosEstudiante?.dv),
       anotaciones: anotacionesHoja,
+      asistencia: asistenciaHoja,
       documentos: documentosHoja,
       matriculas: matriculasDelEstudianteSeleccionado,
       academicos: antecedentesDeHoja.academico,
@@ -614,6 +632,49 @@ export default function HojaDeVida() {
                                   <td>{a.anotDes}</td>
                                 </tr>
                               ))}
+                            </tbody>
+                          </Table>
+                        )}
+                      </Accordion.Body>
+                    </Accordion.Item>
+
+                    {/* ── Asistencia (solo lectura, consulta cruzada a MS-GestionAcademica —
+                        se registra desde Académico > Pasar Lista) ── */}
+                    <Accordion.Item eventKey="asistencia">
+                      <Accordion.Header>
+                        {sectionHeader('Asistencia', asistenciaHoja.length)}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        {loadingAsistencia ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : asistenciaHoja.length === 0 ? (
+                          <p className={styles.sectionEmpty}>Sin asistencia registrada.</p>
+                        ) : (
+                          <Table size="sm" hover responsive className={styles.sectionTable}>
+                            <thead>
+                              <tr>
+                                <th>Fecha</th>
+                                <th>Asignatura</th>
+                                <th>Curso</th>
+                                <th>Estado</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {asistenciaHoja
+                                .slice()
+                                .sort((a, b) => (a.asisFecha < b.asisFecha ? 1 : -1))
+                                .map((a) => (
+                                  <tr key={a.idAsis}>
+                                    <td>{a.asisFecha ? new Date(`${a.asisFecha}T00:00:00`).toLocaleDateString('es-CL') : '—'}</td>
+                                    <td>{a.impartir?.asignatura?.asiNombre ?? '—'}</td>
+                                    <td>{a.impartir?.curso ? `${formatNivel(a.impartir.curso.nivel)} ${a.impartir.curso.curLetraSeccion}` : '—'}</td>
+                                    <td>
+                                      <Badge bg={a.asisEstado === 'PRESENTE' ? 'success' : a.asisEstado === 'JUSTIFICADO' ? 'secondary' : a.asisEstado === 'ATRASADO' ? 'warning' : 'danger'}>
+                                        {a.asisEstado}
+                                      </Badge>
+                                    </td>
+                                  </tr>
+                                ))}
                             </tbody>
                           </Table>
                         )}

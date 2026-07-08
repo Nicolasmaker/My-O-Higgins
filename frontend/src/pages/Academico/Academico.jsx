@@ -16,11 +16,15 @@ import PropTypes from 'prop-types'
 import { Row, Col, Nav, Table, Badge, Button, Alert, Spinner, Form } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
-import { getNotasByEstudiante, getCursoById, getImpartirByDocente, getAsignaturas, getCursos } from '../../services/academicoService'
+import {
+  getNotasByEstudiante, getCursoById, getImpartirByDocente, getAsignaturas, getCursos,
+  getAsistenciaPorImpartirYFecha, registrarAsistencia, actualizarAsistencia,
+} from '../../services/academicoService'
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
 import EntidadForm from '../../components/Academico/EntidadForm'
 import { ENTIDADES, formatNivel } from '../../components/Academico/entidadesConfig'
+import { formatRut } from '../../utils/formatRut'
 import styles from '../../styles/Academico.module.css'
 
 // Directivo: acceso completo (rw) a las 8 secciones.
@@ -272,6 +276,252 @@ VistaEstudianteApoderado.propTypes = {
   isApoderado: PropTypes.bool.isRequired,
 }
 
+// ── "Mis Estudiantes" para el Docente: roster de sus cursos (vía Impartir), agrupado por
+// curso, resuelto desde MS-GestionMatricula (que ya trae alumno/apoderado enriquecidos con
+// nombre+DV — no hace falta resolverlos aparte contra Autenticacion). ──────────────────────
+function DocenteMisEstudiantes({ impartirDocente, idsCursoPropios }) {
+  const [matriculas, setMatriculas] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getMatriculas()
+      .then((res) => setMatriculas(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setMatriculas([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const cursoPorId = useMemo(() => {
+    const m = new Map()
+    impartirDocente.forEach((i) => {
+      if (i.curso) m.set(i.curso.idCur, i.curso)
+    })
+    return m
+  }, [impartirDocente])
+
+  const matriculasPropias = useMemo(
+    () => matriculas.filter((m) => idsCursoPropios.has(m.cursoId) && m.matriculaEstado === 'ACTIVA'),
+    [matriculas, idsCursoPropios]
+  )
+
+  const porCurso = useMemo(() => {
+    const grupos = new Map()
+    matriculasPropias.forEach((m) => {
+      const lista = grupos.get(m.cursoId) ?? []
+      lista.push(m)
+      grupos.set(m.cursoId, lista)
+    })
+    return grupos
+  }, [matriculasPropias])
+
+  if (loading) {
+    return (
+      <div className={styles.emptyState}>
+        <Spinner animation="border" size="sm" className="me-2" />
+        Cargando estudiantes...
+      </div>
+    )
+  }
+  if (idsCursoPropios.size === 0) {
+    return <Alert variant="info">No tienes cursos asignados todavía.</Alert>
+  }
+  if (matriculasPropias.length === 0) {
+    return <Alert variant="info">Ninguno de tus cursos tiene estudiantes matriculados.</Alert>
+  }
+
+  return (
+    <>
+      <h2 className={styles.sectionTitle}>Mis Estudiantes</h2>
+      {Array.from(porCurso.entries()).map(([cursoId, lista]) => {
+        const curso = cursoPorId.get(cursoId)
+        return (
+          <div key={cursoId} className="mb-4">
+            <h3 className="h6 mt-3">
+              {curso ? `${formatNivel(curso.nivel)} ${curso.curLetraSeccion}` : `Curso #${cursoId}`}{' '}
+              <Badge bg="secondary">{lista.length}</Badge>
+            </h3>
+            <div className={styles.tableWrap}>
+              <Table size="sm" hover responsive className={styles.table}>
+                <thead className={styles.tableHead}>
+                  <tr>
+                    <th>Alumno</th>
+                    <th>Apoderado</th>
+                    <th>Tipo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lista.map((m) => (
+                    <tr key={m.idMatricula}>
+                      <td>{m.alumnoNombre ? `${m.alumnoNombre} ${m.alumnoApellido}` : formatRut(m.alumnoRut, m.alumnoDv)}</td>
+                      <td>{m.apoderadoNombre ? `${m.apoderadoNombre} ${m.apoderadoApellido}` : formatRut(m.apoderadoRut, m.apoderadoDv)}</td>
+                      <td>
+                        <Badge bg="secondary">{m.tipoAlumno}</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </div>
+        )
+      })}
+    </>
+  )
+}
+DocenteMisEstudiantes.propTypes = {
+  impartirDocente: PropTypes.array.isRequired,
+  idsCursoPropios: PropTypes.instanceOf(Set).isRequired,
+}
+
+const ESTADOS_ASISTENCIA = ['PRESENTE', 'AUSENTE', 'ATRASADO', 'JUSTIFICADO']
+
+// ── "Pasar Lista" para el Docente: registra asistencia por asignatura/curso/fecha (vía
+// Impartir). Al abrir una combinación asignatura+curso+fecha ya registrada, precarga los
+// estados existentes para editarlos en vez de duplicar. ──────────────────────────────────
+function DocentePasarLista({ impartirDocente }) {
+  const [idImpartir, setIdImpartir] = useState('')
+  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
+  const [matriculas, setMatriculas] = useState([])
+  const [asistenciaExistente, setAsistenciaExistente] = useState([])
+  const [estados, setEstados] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (impartirDocente.length > 0 && !idImpartir) setIdImpartir(String(impartirDocente[0].idImp))
+  }, [impartirDocente, idImpartir])
+
+  useEffect(() => {
+    getMatriculas()
+      .then((res) => setMatriculas(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setMatriculas([]))
+  }, [])
+
+  const impartirSeleccionado = impartirDocente.find((i) => String(i.idImp) === idImpartir)
+
+  const roster = useMemo(() => {
+    if (!impartirSeleccionado?.curso) return []
+    return matriculas.filter(
+      (m) => m.cursoId === impartirSeleccionado.curso.idCur && m.matriculaEstado === 'ACTIVA'
+    )
+  }, [matriculas, impartirSeleccionado])
+
+  useEffect(() => {
+    if (!idImpartir || !fecha) return
+    setLoading(true)
+    getAsistenciaPorImpartirYFecha(idImpartir, fecha)
+      .then((res) => setAsistenciaExistente(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setAsistenciaExistente([]))
+      .finally(() => setLoading(false))
+  }, [idImpartir, fecha])
+
+  useEffect(() => {
+    const inicial = {}
+    roster.forEach((m) => {
+      const existente = asistenciaExistente.find((a) => a.estudianteUsuRut === m.alumnoRut)
+      inicial[m.alumnoRut] = existente?.asisEstado ?? 'PRESENTE'
+    })
+    setEstados(inicial)
+  }, [roster, asistenciaExistente])
+
+  const guardarLista = async () => {
+    setSaving(true)
+    try {
+      await Promise.all(
+        roster.map((m) => {
+          const existente = asistenciaExistente.find((a) => a.estudianteUsuRut === m.alumnoRut)
+          const asisEstado = estados[m.alumnoRut] ?? 'PRESENTE'
+          return existente
+            ? actualizarAsistencia(existente.idAsis, { asisEstado })
+            : registrarAsistencia({ asisFecha: fecha, asisEstado, estudianteUsuRut: m.alumnoRut, idImpartir: Number(idImpartir) })
+        })
+      )
+      toast.success('Asistencia guardada')
+      const res = await getAsistenciaPorImpartirYFecha(idImpartir, fecha)
+      setAsistenciaExistente(Array.isArray(res.data) ? res.data : [])
+    } catch (error) {
+      console.error(error)
+      toast.error('No se pudo guardar la asistencia')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (impartirDocente.length === 0) {
+    return <Alert variant="info">No tienes asignaturas asignadas todavía.</Alert>
+  }
+
+  return (
+    <>
+      <h2 className={styles.sectionTitle}>Pasar Lista</h2>
+      <Row className="g-2 mb-3">
+        <Col md={7}>
+          <Form.Label>Asignatura / Curso</Form.Label>
+          <Form.Select value={idImpartir} onChange={(e) => setIdImpartir(e.target.value)}>
+            {impartirDocente.map((i) => (
+              <option key={i.idImp} value={i.idImp}>
+                {i.asignatura?.asiNombre ?? '—'} — {formatNivel(i.curso?.nivel)} {i.curso?.curLetraSeccion ?? ''}
+              </option>
+            ))}
+          </Form.Select>
+        </Col>
+        <Col md={3}>
+          <Form.Label>Fecha</Form.Label>
+          <Form.Control type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+        </Col>
+      </Row>
+
+      {loading ? (
+        <div className={styles.emptyState}>
+          <Spinner animation="border" size="sm" className="me-2" />
+          Cargando lista...
+        </div>
+      ) : roster.length === 0 ? (
+        <Alert variant="info">Este curso no tiene estudiantes matriculados.</Alert>
+      ) : (
+        <>
+          <div className={styles.tableWrap}>
+            <Table size="sm" hover responsive className={styles.table}>
+              <thead className={styles.tableHead}>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {roster.map((m) => (
+                  <tr key={m.alumnoRut}>
+                    <td>{m.alumnoNombre ? `${m.alumnoNombre} ${m.alumnoApellido}` : formatRut(m.alumnoRut, m.alumnoDv)}</td>
+                    <td>
+                      <Form.Select
+                        size="sm"
+                        value={estados[m.alumnoRut] ?? 'PRESENTE'}
+                        onChange={(e) => setEstados((prev) => ({ ...prev, [m.alumnoRut]: e.target.value }))}
+                      >
+                        {ESTADOS_ASISTENCIA.map((e) => (
+                          <option key={e} value={e}>{e}</option>
+                        ))}
+                      </Form.Select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          <div className="mt-3 text-end">
+            <Button className={styles.btnGranate} onClick={guardarLista} disabled={saving}>
+              {saving ? <Spinner as="span" size="sm" animation="border" className="me-2" /> : null}
+              Guardar asistencia
+            </Button>
+          </div>
+        </>
+      )}
+    </>
+  )
+}
+DocentePasarLista.propTypes = {
+  impartirDocente: PropTypes.array.isRequired,
+}
+
 export default function Academico() {
   const { usuario, hasRole } = useAuth()
   const esEstudiante = hasRole('ROLE_ESTUDIANTE')
@@ -279,8 +529,13 @@ export default function Academico() {
   const esDocente = hasRole('ROLE_DOCENTE')
   const esDirectivo = hasRole('ROLE_DIRECTIVO')
 
-  // Secciones visibles en el nav lateral según el rol
-  const seccionesVisibles = esDirectivo ? SECCIONES : SECCIONES.filter((key) => PERMISOS_DOCENTE[key])
+  // Secciones visibles en el nav lateral según el rol. "estudiantes" no es una entidad CRUD
+  // de ENTIDADES — es una vista de solo lectura propia del Docente (ver DocenteMisEstudiantes).
+  const seccionesVisibles = esDirectivo
+    ? SECCIONES
+    : esDocente
+    ? ['estudiantes', 'asistencia', ...SECCIONES.filter((key) => PERMISOS_DOCENTE[key])]
+    : SECCIONES.filter((key) => PERMISOS_DOCENTE[key])
 
   const [seccion, setSeccion] = useState('curso')
   const [items, setItems] = useState([])
@@ -372,6 +627,7 @@ export default function Academico() {
   }, [config, seccion, esDirectivo, impartirDocente])
 
   const load = useCallback(async () => {
+    if (!config) return
     setLoading(true)
     setLoadError('')
     try {
@@ -398,6 +654,19 @@ export default function Academico() {
     setEditItem(null)
     setShowForm(false)
   }
+
+  // Nav lateral compartido entre la vista de "Mis Estudiantes" (Docente) y la tabla genérica.
+  const navLateral = (
+    <Nav variant="pills" className={`flex-column ${styles.sideNav}`} activeKey={seccion} onSelect={cambiarSeccion}>
+      {seccionesVisibles.map((key) => (
+        <Nav.Item key={key}>
+          <Nav.Link eventKey={key} className={styles.sideNavLink}>
+            {key === 'estudiantes' ? 'Mis Estudiantes' : key === 'asistencia' ? 'Pasar Lista' : ENTIDADES[key].titulo}
+          </Nav.Link>
+        </Nav.Item>
+      ))}
+    </Nav>
+  )
 
   // Docente en modo ro-propio: recorta la lista a lo que le corresponde por Impartir.
   // Docente en modo rw-propio (Evaluación): recorta a lo que él mismo registró.
@@ -429,10 +698,10 @@ export default function Academico() {
     setSaving(true)
     try {
       if (editItem) {
-        await config.api.actualizar(editItem[config.idKey], config.payload(data, true))
+        await config.api.actualizar(editItem[config.idKey], config.payload(data, true, usuario))
         toast.success('Registro actualizado')
       } else {
-        await config.api.crear(config.payload(data, false))
+        await config.api.crear(config.payload(data, false, usuario))
         toast.success('Registro creado')
       }
       setShowForm(false)
@@ -480,6 +749,52 @@ export default function Academico() {
     )
   }
 
+  // Docente en "Mis Estudiantes": vista de solo lectura, no es una entidad CRUD de ENTIDADES.
+  if (esDocente && seccion === 'estudiantes') {
+    return (
+      <div className={styles.page}>
+        <main className={styles.shell}>
+          <header className={styles.pageHeader}>
+            <div>
+              <p className={styles.eyebrow}>MS-GestionAcademica</p>
+              <h1 className={styles.title}>Gestión Académica</h1>
+              <p className={styles.subtitle}>Cursos, asignaturas, evaluaciones, notas y bitácoras de clase</p>
+            </div>
+          </header>
+          <Row className="g-3">
+            <Col md={3} lg={2}>{navLateral}</Col>
+            <Col md={9} lg={10}>
+              <DocenteMisEstudiantes impartirDocente={impartirDocente} idsCursoPropios={idsCursoPropios} />
+            </Col>
+          </Row>
+        </main>
+      </div>
+    )
+  }
+
+  // Docente en "Pasar Lista": registra asistencia por asignatura/curso/fecha.
+  if (esDocente && seccion === 'asistencia') {
+    return (
+      <div className={styles.page}>
+        <main className={styles.shell}>
+          <header className={styles.pageHeader}>
+            <div>
+              <p className={styles.eyebrow}>MS-GestionAcademica</p>
+              <h1 className={styles.title}>Gestión Académica</h1>
+              <p className={styles.subtitle}>Cursos, asignaturas, evaluaciones, notas y bitácoras de clase</p>
+            </div>
+          </header>
+          <Row className="g-3">
+            <Col md={3} lg={2}>{navLateral}</Col>
+            <Col md={9} lg={10}>
+              <DocentePasarLista impartirDocente={impartirDocente} />
+            </Col>
+          </Row>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.page}>
       <main className={styles.shell}>
@@ -507,17 +822,7 @@ export default function Academico() {
 
         <Row className="g-3">
           {/* ── Nav lateral de secciones ── */}
-          <Col md={3} lg={2}>
-            <Nav variant="pills" className={`flex-column ${styles.sideNav}`} activeKey={seccion} onSelect={cambiarSeccion}>
-              {seccionesVisibles.map((key) => (
-                <Nav.Item key={key}>
-                  <Nav.Link eventKey={key} className={styles.sideNavLink}>
-                    {ENTIDADES[key].titulo}
-                  </Nav.Link>
-                </Nav.Item>
-              ))}
-            </Nav>
-          </Col>
+          <Col md={3} lg={2}>{navLateral}</Col>
 
           {/* ── Tabla de la sección activa ── */}
           <Col md={9} lg={10}>

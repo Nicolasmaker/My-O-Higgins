@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/UI/Button';
 import ProcesoMatriculaModal from '../../components/Home/ProcesoMatriculaModal';
+import MuralDigital from '../../components/Home/MuralDigital';
 import styles from './Home.module.css';
 import fachadaColegioBO from '../../assets/fachadaColegioBO.png';
 import iconoCalendario from '../../assets/iconoCalendario.png';
@@ -69,6 +70,13 @@ export default function Home() {
     navigate(item.link);
   };
 
+  // Usuario logueado: la portada pública (hero/accesos/noticias) se reemplaza por el Mural
+  // Digital — un tablero personalizado por rol (evaluaciones propias, eventos que le
+  // corresponden ver, avisos/talleres para todos).
+  if (isAuthenticated) {
+    return <MuralDigital />;
+  }
+
   const news = [
     {
       id: 1,
@@ -121,20 +129,12 @@ export default function Home() {
             </p>
 
             <div className={styles.heroButtons}>
-              {isAuthenticated ? (
-                <Button variant="primary" onClick={() => navigate('/academico')}>
-                  Ir a Mi Portal →
-                </Button>
-              ) : (
-                <>
-                  <Button variant="primary" onClick={() => navigate('/login')}>
-                    Ingresar a My O'Higgins →
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowProceso(true)}>
-                    Proceso de matrícula →
-                  </Button>
-                </>
-              )}
+              <Button variant="primary" onClick={() => navigate('/login')}>
+                Ingresar a My O'Higgins →
+              </Button>
+              <Button variant="outline" onClick={() => setShowProceso(true)}>
+                Proceso de matrícula →
+              </Button>
             </div>
           </div>
 
