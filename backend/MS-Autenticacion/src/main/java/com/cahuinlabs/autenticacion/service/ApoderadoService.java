@@ -58,8 +58,6 @@ public class ApoderadoService {
         nuevoApoderado.setUsuPassword(passwordEncriptada);
 
         nuevoApoderado.setUsuEstadoActividad(true);
-     //Datos de la entidad apoderado
-        nuevoApoderado.setApoParentesco(requestApoderado.getApoParentesco());
 
         Apoderado apoderadoGuardado = usuarioRepository.save(nuevoApoderado); //Guarda al apoderado
 
@@ -112,7 +110,6 @@ public class ApoderadoService {
         if(requestActApoderado.getApoApellidoMat()     != null) { apoderadoExistente.setUsuApeMat(requestActApoderado.getApoApellidoMat()); }
         if(requestActApoderado.getApoEmail()           != null) { apoderadoExistente.setUsuEmail(requestActApoderado.getApoEmail()); }
         if(requestActApoderado.getApoTel()             != null) { apoderadoExistente.setUsuTel(requestActApoderado.getApoTel()); }
-        if(requestActApoderado.getApoParentesco()      != null) { apoderadoExistente.setApoParentesco(requestActApoderado.getApoParentesco()); }
         if(requestActApoderado.getApoEstadoActividad() != null) { apoderadoExistente.setUsuEstadoActividad(requestActApoderado.getApoEstadoActividad()); }
 
      //Actualizar la direccion

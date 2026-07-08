@@ -15,8 +15,6 @@ public class CrearApoderadoRequest {
     private String    apoEmail;
     private String    apoTel;
     private String    apoPassword;
-//Dato de la tabla hija apoderado
-    private String    apoParentesco;
 //Datos de la tabla direccion
     private String    apoDireccion;  
     private Integer   apoNumeroDireccion;

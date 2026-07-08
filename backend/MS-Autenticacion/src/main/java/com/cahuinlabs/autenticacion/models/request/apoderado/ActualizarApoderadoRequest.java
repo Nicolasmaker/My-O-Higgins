@@ -13,8 +13,6 @@ public class ActualizarApoderadoRequest {
     private String    apoEmail;
     private String    apoTel;
     private Boolean   apoEstadoActividad;
-//Dato de la tabla hija apoderado
-    private String    apoParentesco;
 //Datos de la tabla direccion
     private String    apoDireccion;
     private Integer   apoNumeroDireccion;

@@ -47,6 +47,10 @@ public class SecurityConfig {
              //Solo los administradores (o directores) pueden registrar a otros funcionarios
                 .requestMatchers(HttpMethod.POST, "/funcionarios/**").hasAuthority("ROLE_DIRECTIVO")
 
+             //Solo el Directivo crea cuentas nuevas de Estudiante/Apoderado (wizard de matrícula)
+                .requestMatchers(HttpMethod.POST, "/estudiantes/**").hasAuthority("ROLE_DIRECTIVO")
+                .requestMatchers(HttpMethod.POST, "/apoderados/**").hasAuthority("ROLE_DIRECTIVO")
+
              //Solo los usuarios con ROLE_DOCENTE pueden editar su propia ficha de docente
                 .requestMatchers("/funcionarios/docente/**").hasAuthority("ROLE_DOCENTE")
 

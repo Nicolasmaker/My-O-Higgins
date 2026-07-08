@@ -467,7 +467,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante1.setEstEmail("l.molinav@alumno.myohiggins.cl");
             estudiante1.setEstPassword("estudiante123");
             estudiante1.setEstTel("+56940000001");
-            estudiante1.setEstParentesco("Hermano"); // Parentesco distinto 1
             estudiante1.setEstDireccion("Pasaje Los Girasoles");
             estudiante1.setEstNumeroDireccion(12);
             estudiante1.setEstTipoCasa("Casa");
@@ -484,7 +483,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante2.setEstEmail("s.carrascop@alumno.myohiggins.cl");
             estudiante2.setEstPassword("estudiante123");
             estudiante2.setEstTel("+56940000002");
-            estudiante2.setEstParentesco("Hija");
             estudiante2.setEstDireccion("Avenida Central");
             estudiante2.setEstNumeroDireccion(345);
             estudiante2.setEstTipoCasa("Departamento");
@@ -502,7 +500,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante3.setEstEmail("m.rojasc@alumno.myohiggins.cl");
             estudiante3.setEstPassword("estudiante123");
             estudiante3.setEstTel("+56940000003");
-            estudiante3.setEstParentesco("Hijo");
             estudiante3.setEstDireccion("Calle Las Rosas");
             estudiante3.setEstNumeroDireccion(88);
             estudiante3.setEstTipoCasa("Casa");
@@ -519,7 +516,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante4.setEstEmail("i.gomezs@alumno.myohiggins.cl");
             estudiante4.setEstPassword("estudiante123");
             estudiante4.setEstTel("+56940000004");
-            estudiante4.setEstParentesco("Tía"); // Parentesco distinto 2
             estudiante4.setEstDireccion("Avenida del Mar");
             estudiante4.setEstNumeroDireccion(102);
             estudiante4.setEstTipoCasa("Departamento");
@@ -537,7 +533,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante5.setEstEmail("a.silvat@alumno.myohiggins.cl");
             estudiante5.setEstPassword("estudiante123");
             estudiante5.setEstTel("+56940000005");
-            estudiante5.setEstParentesco("Hijo");
             estudiante5.setEstDireccion("Camino Real");
             estudiante5.setEstNumeroDireccion(555);
             estudiante5.setEstTipoCasa("Casa");
@@ -554,7 +549,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante6.setEstEmail("e.contrerasl@alumno.myohiggins.cl");
             estudiante6.setEstPassword("estudiante123");
             estudiante6.setEstTel("+56940000006");
-            estudiante6.setEstParentesco("Hija");
             estudiante6.setEstDireccion("Calle Los Tilos");
             estudiante6.setEstNumeroDireccion(90);
             estudiante6.setEstTipoCasa("Departamento");
@@ -572,7 +566,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante7.setEstEmail("m.moralesf@alumno.myohiggins.cl");
             estudiante7.setEstPassword("estudiante123");
             estudiante7.setEstTel("+56940000007");
-            estudiante7.setEstParentesco("Abuela"); // Parentesco distinto 3
             estudiante7.setEstDireccion("Pasaje Los Andes");
             estudiante7.setEstNumeroDireccion(11);
             estudiante7.setEstTipoCasa("Casa");
@@ -589,7 +582,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante8.setEstEmail("f.sepulvedaa@alumno.myohiggins.cl");
             estudiante8.setEstPassword("estudiante123");
             estudiante8.setEstTel("+56940000008");
-            estudiante8.setEstParentesco("Hija");
             estudiante8.setEstDireccion("Avenida Principal");
             estudiante8.setEstNumeroDireccion(776);
             estudiante8.setEstTipoCasa("Casa");
@@ -607,7 +599,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante9.setEstEmail("j.fuentesg@alumno.myohiggins.cl");
             estudiante9.setEstPassword("estudiante123");
             estudiante9.setEstTel("+56940000009");
-            estudiante9.setEstParentesco("Hijo");
             estudiante9.setEstDireccion("Calle Independencia");
             estudiante9.setEstNumeroDireccion(33);
             estudiante9.setEstTipoCasa("Departamento");
@@ -624,7 +615,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante10.setEstEmail("a.perezm@alumno.myohiggins.cl");
             estudiante10.setEstPassword("estudiante123");
             estudiante10.setEstTel("+56940000010");
-            estudiante10.setEstParentesco("Nieto"); // Parentesco distinto 4
             estudiante10.setEstDireccion("Pasaje La Estrella");
             estudiante10.setEstNumeroDireccion(101);
             estudiante10.setEstTipoCasa("Casa");
@@ -641,7 +631,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante11.setEstEmail("m.valenzuelar@alumno.myohiggins.cl");
             estudiante11.setEstPassword("estudiante123");
             estudiante11.setEstTel("+56940000011");
-            estudiante11.setEstParentesco("Hijo");
             estudiante11.setEstDireccion("Avenida Los Pinos");
             estudiante11.setEstNumeroDireccion(444);
             estudiante11.setEstTipoCasa("Casa");
@@ -659,7 +648,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante12.setEstEmail("m.cacereso@alumno.myohiggins.cl");
             estudiante12.setEstPassword("estudiante123");
             estudiante12.setEstTel("+56940000012");
-            estudiante12.setEstParentesco("Hija");
             estudiante12.setEstDireccion("Calle Los Naranjos");
             estudiante12.setEstNumeroDireccion(56);
             estudiante12.setEstTipoCasa("Departamento");
@@ -676,7 +664,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante13.setEstEmail("t.herrerav@alumno.myohiggins.cl");
             estudiante13.setEstPassword("estudiante123");
             estudiante13.setEstTel("+56940000013");
-            estudiante13.setEstParentesco("Tutor Legal"); // Parentesco distinto 5
             estudiante13.setEstDireccion("Avenida Libertad");
             estudiante13.setEstNumeroDireccion(890);
             estudiante13.setEstTipoCasa("Casa");
@@ -693,7 +680,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante14.setEstEmail("c.castillos@alumno.myohiggins.cl");
             estudiante14.setEstPassword("estudiante123");
             estudiante14.setEstTel("+56940000014");
-            estudiante14.setEstParentesco("Hija");
             estudiante14.setEstDireccion("Pasaje El Sol");
             estudiante14.setEstNumeroDireccion(23);
             estudiante14.setEstTipoCasa("Casa");
@@ -711,7 +697,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante15.setEstEmail("g.bravon@alumno.myohiggins.cl");
             estudiante15.setEstPassword("estudiante123");
             estudiante15.setEstTel("+56940000015");
-            estudiante15.setEstParentesco("Hijo");
             estudiante15.setEstDireccion("Calle Los Almendros");
             estudiante15.setEstNumeroDireccion(404);
             estudiante15.setEstTipoCasa("Departamento");
@@ -728,7 +713,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante16.setEstEmail("j.guzmanp@alumno.myohiggins.cl");
             estudiante16.setEstPassword("estudiante123");
             estudiante16.setEstTel("+56940000016");
-            estudiante16.setEstParentesco("Hermana"); // Parentesco distinto 6
             estudiante16.setEstDireccion("Avenida Sur");
             estudiante16.setEstNumeroDireccion(1020);
             estudiante16.setEstTipoCasa("Casa");
@@ -746,7 +730,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante17.setEstEmail("f.gallardol@alumno.myohiggins.cl");
             estudiante17.setEstPassword("estudiante123");
             estudiante17.setEstTel("+56940000017");
-            estudiante17.setEstParentesco("Hijo");
             estudiante17.setEstDireccion("Pasaje Bicentenario");
             estudiante17.setEstNumeroDireccion(99);
             estudiante17.setEstTipoCasa("Casa");
@@ -763,7 +746,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante18.setEstEmail("a.pobleteg@alumno.myohiggins.cl");
             estudiante18.setEstPassword("estudiante123");
             estudiante18.setEstTel("+56940000018");
-            estudiante18.setEstParentesco("Hija");
             estudiante18.setEstDireccion("Calle Nueva");
             estudiante18.setEstNumeroDireccion(201);
             estudiante18.setEstTipoCasa("Departamento");
@@ -780,7 +762,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante19.setEstEmail("d.saavedrav@alumno.myohiggins.cl");
             estudiante19.setEstPassword("estudiante123");
             estudiante19.setEstTel("+56940000019");
-            estudiante19.setEstParentesco("Tío"); // Parentesco distinto 7
             estudiante19.setEstDireccion("Avenida Costanera");
             estudiante19.setEstNumeroDireccion(665);
             estudiante19.setEstTipoCasa("Casa");
@@ -798,7 +779,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante20.setEstEmail("v.mendozac@alumno.myohiggins.cl");
             estudiante20.setEstPassword("estudiante123");
             estudiante20.setEstTel("+56940000020");
-            estudiante20.setEstParentesco("Hija");
             estudiante20.setEstDireccion("Calle Las Violetas");
             estudiante20.setEstNumeroDireccion(42);
             estudiante20.setEstTipoCasa("Casa");
@@ -815,7 +795,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante21.setEstEmail("v.urrutiaa@alumno.myohiggins.cl");
             estudiante21.setEstPassword("estudiante123");
             estudiante21.setEstTel("+56940000021");
-            estudiante21.setEstParentesco("Hijo");
             estudiante21.setEstDireccion("Pasaje Los Pinguinos");
             estudiante21.setEstNumeroDireccion(888);
             estudiante21.setEstTipoCasa("Departamento");
@@ -832,7 +811,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante22.setEstEmail("m.garridob@alumno.myohiggins.cl");
             estudiante22.setEstPassword("estudiante123");
             estudiante22.setEstTel("+56940000022");
-            estudiante22.setEstParentesco("Abuelo"); // Parentesco distinto 8
             estudiante22.setEstDireccion("Avenida Las Torres");
             estudiante22.setEstNumeroDireccion(1011);
             estudiante22.setEstTipoCasa("Casa");
@@ -850,7 +828,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante23.setEstEmail("n.penav@alumno.myohiggins.cl");
             estudiante23.setEstPassword("estudiante123");
             estudiante23.setEstTel("+56940000023");
-            estudiante23.setEstParentesco("Hijo");
             estudiante23.setEstDireccion("Calle El Alba");
             estudiante23.setEstNumeroDireccion(254);
             estudiante23.setEstTipoCasa("Casa");
@@ -867,7 +844,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante24.setEstEmail("j.corteso@alumno.myohiggins.cl");
             estudiante24.setEstPassword("estudiante123");
             estudiante24.setEstTel("+56940000024");
-            estudiante24.setEstParentesco("Hija");
             estudiante24.setEstDireccion("Avenida Brasil");
             estudiante24.setEstNumeroDireccion(96);
             estudiante24.setEstTipoCasa("Departamento");
@@ -884,7 +860,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante25.setEstEmail("r.donosop@alumno.myohiggins.cl");
             estudiante25.setEstPassword("estudiante123");
             estudiante25.setEstTel("+56940000025");
-            estudiante25.setEstParentesco("Nieta"); // Parentesco distinto 9
             estudiante25.setEstDireccion("Pasaje Las Lilas");
             estudiante25.setEstNumeroDireccion(14);
             estudiante25.setEstTipoCasa("Casa");
@@ -902,7 +877,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante26.setEstEmail("a.moyag@alumno.myohiggins.cl");
             estudiante26.setEstPassword("estudiante123");
             estudiante26.setEstTel("+56940000026");
-            estudiante26.setEstParentesco("Hija");
             estudiante26.setEstDireccion("Calle Los Copihues");
             estudiante26.setEstNumeroDireccion(785);
             estudiante26.setEstTipoCasa("Casa");
@@ -919,7 +893,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante27.setEstEmail("j.riosl@alumno.myohiggins.cl");
             estudiante27.setEstPassword("estudiante123");
             estudiante27.setEstTel("+56940000027");
-            estudiante27.setEstParentesco("Hijo");
             estudiante27.setEstDireccion("Avenida Las Perdices");
             estudiante27.setEstNumeroDireccion(109);
             estudiante27.setEstTipoCasa("Departamento");
@@ -936,7 +909,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante28.setEstEmail("t.salazarm@alumno.myohiggins.cl");
             estudiante28.setEstPassword("estudiante123");
             estudiante28.setEstTel("+56940000028");
-            estudiante28.setEstParentesco("Hermano Mayor"); // Parentesco distinto 10
             estudiante28.setEstDireccion("Pasaje Los Canelos");
             estudiante28.setEstNumeroDireccion(332);
             estudiante28.setEstTipoCasa("Casa");
@@ -954,7 +926,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante29.setEstEmail("a.navarretea@alumno.myohiggins.cl");
             estudiante29.setEstPassword("estudiante123");
             estudiante29.setEstTel("+56940000029");
-            estudiante29.setEstParentesco("Hijo");
             estudiante29.setEstDireccion("Calle O'Higgins");
             estudiante29.setEstNumeroDireccion(881);
             estudiante29.setEstTipoCasa("Casa");
@@ -971,7 +942,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante30.setEstEmail("s.reyesf@alumno.myohiggins.cl");
             estudiante30.setEstPassword("estudiante123");
             estudiante30.setEstTel("+56940000030");
-            estudiante30.setEstParentesco("Hija");
             estudiante30.setEstDireccion("Avenida España");
             estudiante30.setEstNumeroDireccion(65);
             estudiante30.setEstTipoCasa("Departamento");
@@ -988,7 +958,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante31.setEstEmail("m.vidalc@alumno.myohiggins.cl");
             estudiante31.setEstPassword("estudiante123");
             estudiante31.setEstTel("+56940000031");
-            estudiante31.setEstParentesco("Tía"); // Parentesco distinto 11
             estudiante31.setEstDireccion("Pasaje Las Encinas");
             estudiante31.setEstNumeroDireccion(105);
             estudiante31.setEstTipoCasa("Casa");
@@ -1006,7 +975,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante32.setEstEmail("c.zunigap@alumno.myohiggins.cl");
             estudiante32.setEstPassword("estudiante123");
             estudiante32.setEstTel("+56940000032");
-            estudiante32.setEstParentesco("Hija");
             estudiante32.setEstDireccion("Calle Los Robles");
             estudiante32.setEstNumeroDireccion(330);
             estudiante32.setEstTipoCasa("Casa");
@@ -1023,7 +991,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante33.setEstEmail("c.aedov@alumno.myohiggins.cl");
             estudiante33.setEstPassword("estudiante123");
             estudiante33.setEstTel("+56940000033");
-            estudiante33.setEstParentesco("Hijo");
             estudiante33.setEstDireccion("Avenida Caupolican");
             estudiante33.setEstNumeroDireccion(710);
             estudiante33.setEstTipoCasa("Departamento");
@@ -1040,7 +1007,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante34.setEstEmail("e.lagoso@alumno.myohiggins.cl");
             estudiante34.setEstPassword("estudiante123");
             estudiante34.setEstTel("+56940000034");
-            estudiante34.setEstParentesco("Primo"); // Parentesco distinto 12
             estudiante34.setEstDireccion("Pasaje Los Notros");
             estudiante34.setEstNumeroDireccion(18);
             estudiante34.setEstTipoCasa("Casa");
@@ -1058,7 +1024,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante35.setEstEmail("d.castrof@alumno.myohiggins.cl");
             estudiante35.setEstPassword("estudiante123");
             estudiante35.setEstTel("+56940000035");
-            estudiante35.setEstParentesco("Hijo");
             estudiante35.setEstDireccion("Calle San Martin");
             estudiante35.setEstNumeroDireccion(555);
             estudiante35.setEstTipoCasa("Casa");
@@ -1075,7 +1040,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante36.setEstEmail("b.escobarj@alumno.myohiggins.cl");
             estudiante36.setEstPassword("estudiante123");
             estudiante36.setEstTel("+56940000036");
-            estudiante36.setEstParentesco("Hija");
             estudiante36.setEstDireccion("Avenida Pedro de Valdivia");
             estudiante36.setEstNumeroDireccion(912);
             estudiante36.setEstTipoCasa("Departamento");
@@ -1092,7 +1056,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante37.setEstEmail("p.orellanam@alumno.myohiggins.cl");
             estudiante37.setEstPassword("estudiante123");
             estudiante37.setEstTel("+56940000037");
-            estudiante37.setEstParentesco("Hermana"); // Parentesco distinto 13
             estudiante37.setEstDireccion("Pasaje Los Abedules");
             estudiante37.setEstNumeroDireccion(77);
             estudiante37.setEstTipoCasa("Casa");
@@ -1110,7 +1073,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante38.setEstEmail("m.guzmanc@alumno.myohiggins.cl");
             estudiante38.setEstPassword("estudiante123");
             estudiante38.setEstTel("+56940000038");
-            estudiante38.setEstParentesco("Hija");
             estudiante38.setEstDireccion("Calle Los Maitenes");
             estudiante38.setEstNumeroDireccion(620);
             estudiante38.setEstTipoCasa("Casa");
@@ -1127,7 +1089,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante39.setEstEmail("b.pinov@alumno.myohiggins.cl");
             estudiante39.setEstPassword("estudiante123");
             estudiante39.setEstTel("+56940000039");
-            estudiante39.setEstParentesco("Abuela"); // Parentesco distinto 14
             estudiante39.setEstDireccion("Avenida Bicentenario");
             estudiante39.setEstNumeroDireccion(112);
             estudiante39.setEstTipoCasa("Departamento");
@@ -1144,7 +1105,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             estudiante40.setEstEmail("l.santanar@alumno.myohiggins.cl");
             estudiante40.setEstPassword("estudiante123");
             estudiante40.setEstTel("+56940000040");
-            estudiante40.setEstParentesco("Tutor Institucional"); // Parentesco distinto 15
             estudiante40.setEstDireccion("Pasaje La Amistad");
             estudiante40.setEstNumeroDireccion(49);
             estudiante40.setEstTipoCasa("Casa");
@@ -1163,7 +1123,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado1.setApoEmail("f.molinav@apoderado.myohiggins.cl");
             apoderado1.setApoPassword("apoderado123");
             apoderado1.setApoTel("+56950000001");
-            apoderado1.setApoParentesco("Hermano Mayor");
             apoderado1.setApoDireccion("Pasaje Los Girasoles");
             apoderado1.setApoNumeroDireccion(12);
             apoderado1.setApoTipoCasa("Casa");
@@ -1180,7 +1139,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado2.setApoEmail("c.pinos@apoderado.myohiggins.cl");
             apoderado2.setApoPassword("apoderado123");
             apoderado2.setApoTel("+56950000002");
-            apoderado2.setApoParentesco("Madre");
             apoderado2.setApoDireccion("Avenida Central");
             apoderado2.setApoNumeroDireccion(345);
             apoderado2.setApoTipoCasa("Departamento");
@@ -1197,7 +1155,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado3.setApoEmail("j.rojasm@apoderado.myohiggins.cl");
             apoderado3.setApoPassword("apoderado123");
             apoderado3.setApoTel("+56950000003");
-            apoderado3.setApoParentesco("Padre");
             apoderado3.setApoDireccion("Calle Las Rosas");
             apoderado3.setApoNumeroDireccion(88);
             apoderado3.setApoTipoCasa("Casa");
@@ -1214,7 +1171,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado4.setApoEmail("m.salinasp@apoderado.myohiggins.cl");
             apoderado4.setApoPassword("apoderado123");
             apoderado4.setApoTel("+56950000004");
-            apoderado4.setApoParentesco("Tía");
             apoderado4.setApoDireccion("Avenida del Mar");
             apoderado4.setApoNumeroDireccion(102);
             apoderado4.setApoTipoCasa("Departamento");
@@ -1231,7 +1187,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado5.setApoEmail("a.tapiav@apoderado.myohiggins.cl");
             apoderado5.setApoPassword("apoderado123");
             apoderado5.setApoTel("+56950000005");
-            apoderado5.setApoParentesco("Madre");
             apoderado5.setApoDireccion("Camino Real");
             apoderado5.setApoNumeroDireccion(555);
             apoderado5.setApoTipoCasa("Casa");
@@ -1248,7 +1203,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado6.setApoEmail("l.contrerass@apoderado.myohiggins.cl");
             apoderado6.setApoPassword("apoderado123");
             apoderado6.setApoTel("+56950000006");
-            apoderado6.setApoParentesco("Padre");
             apoderado6.setApoDireccion("Calle Los Tilos");
             apoderado6.setApoNumeroDireccion(90);
             apoderado6.setApoTipoCasa("Departamento");
@@ -1265,7 +1219,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado7.setApoEmail("c.moralesr@apoderado.myohiggins.cl");
             apoderado7.setApoPassword("apoderado123");
             apoderado7.setApoTel("+56950000007");
-            apoderado7.setApoParentesco("Abuela");
             apoderado7.setApoDireccion("Pasaje Los Andes");
             apoderado7.setApoNumeroDireccion(11);
             apoderado7.setApoTipoCasa("Casa");
@@ -1282,7 +1235,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado8.setApoEmail("d.arayac@apoderado.myohiggins.cl");
             apoderado8.setApoPassword("apoderado123");
             apoderado8.setApoTel("+56950000008");
-            apoderado8.setApoParentesco("Madre");
             apoderado8.setApoDireccion("Avenida Principal");
             apoderado8.setApoNumeroDireccion(776);
             apoderado8.setApoTipoCasa("Casa");
@@ -1299,7 +1251,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado9.setApoEmail("r.fuentesl@apoderado.myohiggins.cl");
             apoderado9.setApoPassword("apoderado123");
             apoderado9.setApoTel("+56950000009");
-            apoderado9.setApoParentesco("Padre");
             apoderado9.setApoDireccion("Calle Independencia");
             apoderado9.setApoNumeroDireccion(33);
             apoderado9.setApoTipoCasa("Departamento");
@@ -1316,7 +1267,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado10.setApoEmail("h.perezg@apoderado.myohiggins.cl");
             apoderado10.setApoPassword("apoderado123");
             apoderado10.setApoTel("+56950000010");
-            apoderado10.setApoParentesco("Abuelo");
             apoderado10.setApoDireccion("Pasaje La Estrella");
             apoderado10.setApoNumeroDireccion(101);
             apoderado10.setApoTipoCasa("Casa");
@@ -1333,7 +1283,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado11.setApoEmail("l.rioss@apoderado.myohiggins.cl");
             apoderado11.setApoPassword("apoderado123");
             apoderado11.setApoTel("+56950000011");
-            apoderado11.setApoParentesco("Madre");
             apoderado11.setApoDireccion("Avenida Los Pinos");
             apoderado11.setApoNumeroDireccion(444);
             apoderado11.setApoTipoCasa("Casa");
@@ -1350,7 +1299,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado12.setApoEmail("e.caceresm@apoderado.myohiggins.cl");
             apoderado12.setApoPassword("apoderado123");
             apoderado12.setApoTel("+56950000012");
-            apoderado12.setApoParentesco("Padre");
             apoderado12.setApoDireccion("Calle Los Naranjos");
             apoderado12.setApoNumeroDireccion(56);
             apoderado12.setApoTipoCasa("Departamento");
@@ -1367,7 +1315,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado13.setApoEmail("r.herrerap@apoderado.myohiggins.cl");
             apoderado13.setApoPassword("apoderado123");
             apoderado13.setApoTel("+56950000013");
-            apoderado13.setApoParentesco("Tutor Legal");
             apoderado13.setApoDireccion("Avenida Libertad");
             apoderado13.setApoNumeroDireccion(890);
             apoderado13.setApoTipoCasa("Casa");
@@ -1384,7 +1331,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado14.setApoEmail("v.sotom@apoderado.myohiggins.cl");
             apoderado14.setApoPassword("apoderado123");
             apoderado14.setApoTel("+56950000014");
-            apoderado14.setApoParentesco("Madre");
             apoderado14.setApoDireccion("Pasaje El Sol");
             apoderado14.setApoNumeroDireccion(23);
             apoderado14.setApoTipoCasa("Casa");
@@ -1401,7 +1347,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado15.setApoEmail("m.bravoo@apoderado.myohiggins.cl");
             apoderado15.setApoPassword("apoderado123");
             apoderado15.setApoTel("+56950000015");
-            apoderado15.setApoParentesco("Padre");
             apoderado15.setApoDireccion("Calle Los Almendros");
             apoderado15.setApoNumeroDireccion(404);
             apoderado15.setApoTipoCasa("Departamento");
@@ -1418,7 +1363,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado16.setApoEmail("c.guzmanp@apoderado.myohiggins.cl");
             apoderado16.setApoPassword("apoderado123");
             apoderado16.setApoTel("+56950000016");
-            apoderado16.setApoParentesco("Hermana Mayor");
             apoderado16.setApoDireccion("Avenida Sur");
             apoderado16.setApoNumeroDireccion(1020);
             apoderado16.setApoTipoCasa("Casa");
@@ -1435,7 +1379,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado17.setApoEmail("t.leivac@apoderado.myohiggins.cl");
             apoderado17.setApoPassword("apoderado123");
             apoderado17.setApoTel("+56950000017");
-            apoderado17.setApoParentesco("Madre");
             apoderado17.setApoDireccion("Pasaje Bicentenario");
             apoderado17.setApoNumeroDireccion(99);
             apoderado17.setApoTipoCasa("Casa");
@@ -1452,7 +1395,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado18.setApoEmail("c.pobletef@apoderado.myohiggins.cl");
             apoderado18.setApoPassword("apoderado123");
             apoderado18.setApoTel("+56950000018");
-            apoderado18.setApoParentesco("Padre");
             apoderado18.setApoDireccion("Calle Nueva");
             apoderado18.setApoNumeroDireccion(201);
             apoderado18.setApoTipoCasa("Departamento");
@@ -1469,7 +1411,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado19.setApoEmail("p.saavedrab@apoderado.myohiggins.cl");
             apoderado19.setApoPassword("apoderado123");
             apoderado19.setApoTel("+56950000019");
-            apoderado19.setApoParentesco("Tío");
             apoderado19.setApoDireccion("Avenida Costanera");
             apoderado19.setApoNumeroDireccion(665);
             apoderado19.setApoTipoCasa("Casa");
@@ -1486,7 +1427,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado20.setApoEmail("a.cardenasv@apoderado.myohiggins.cl");
             apoderado20.setApoPassword("apoderado123");
             apoderado20.setApoTel("+56950000020");
-            apoderado20.setApoParentesco("Madre");
             apoderado20.setApoDireccion("Calle Las Violetas");
             apoderado20.setApoNumeroDireccion(42);
             apoderado20.setApoTipoCasa("Casa");
@@ -1503,7 +1443,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado21.setApoEmail("s.urrutiar@apoderado.myohiggins.cl");
             apoderado21.setApoPassword("apoderado123");
             apoderado21.setApoTel("+56950000021");
-            apoderado21.setApoParentesco("Padre");
             apoderado21.setApoDireccion("Pasaje Los Pinguinos");
             apoderado21.setApoNumeroDireccion(888);
             apoderado21.setApoTipoCasa("Departamento");
@@ -1520,7 +1459,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado22.setApoEmail("p.garridon@apoderado.myohiggins.cl");
             apoderado22.setApoPassword("apoderado123");
             apoderado22.setApoTel("+56950000022");
-            apoderado22.setApoParentesco("Abuelo");
             apoderado22.setApoDireccion("Avenida Las Torres");
             apoderado22.setApoNumeroDireccion(1011);
             apoderado22.setApoTipoCasa("Casa");
@@ -1537,7 +1475,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado23.setApoEmail("m.veral@apoderado.myohiggins.cl");
             apoderado23.setApoPassword("apoderado123");
             apoderado23.setApoTel("+56950000023");
-            apoderado23.setApoParentesco("Madre");
             apoderado23.setApoDireccion("Calle El Alba");
             apoderado23.setApoNumeroDireccion(254);
             apoderado23.setApoTipoCasa("Casa");
@@ -1554,7 +1491,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado24.setApoEmail("h.cortesv@apoderado.myohiggins.cl");
             apoderado24.setApoPassword("apoderado123");
             apoderado24.setApoTel("+56950000024");
-            apoderado24.setApoParentesco("Padre");
             apoderado24.setApoDireccion("Avenida Brasil");
             apoderado24.setApoNumeroDireccion(96);
             apoderado24.setApoTipoCasa("Departamento");
@@ -1571,7 +1507,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado25.setApoEmail("m.donosog@apoderado.myohiggins.cl");
             apoderado25.setApoPassword("apoderado123");
             apoderado25.setApoTel("+56950000025");
-            apoderado25.setApoParentesco("Abuela");
             apoderado25.setApoDireccion("Pasaje Las Lilas");
             apoderado25.setApoNumeroDireccion(14);
             apoderado25.setApoTipoCasa("Casa");
@@ -1588,7 +1523,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado26.setApoEmail("a.gutierrezr@apoderado.myohiggins.cl");
             apoderado26.setApoPassword("apoderado123");
             apoderado26.setApoTel("+56950000026");
-            apoderado26.setApoParentesco("Madre");
             apoderado26.setApoDireccion("Calle Los Copihues");
             apoderado26.setApoNumeroDireccion(785);
             apoderado26.setApoTipoCasa("Casa");
@@ -1605,7 +1539,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado27.setApoEmail("f.riosp@apoderado.myohiggins.cl");
             apoderado27.setApoPassword("apoderado123");
             apoderado27.setApoTel("+56950000027");
-            apoderado27.setApoParentesco("Padre");
             apoderado27.setApoDireccion("Avenida Las Perdices");
             apoderado27.setApoNumeroDireccion(109);
             apoderado27.setApoTipoCasa("Departamento");
@@ -1622,7 +1555,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado28.setApoEmail("b.salazarm@apoderado.myohiggins.cl");
             apoderado28.setApoPassword("apoderado123");
             apoderado28.setApoTel("+56950000028");
-            apoderado28.setApoParentesco("Hermano Mayor");
             apoderado28.setApoDireccion("Pasaje Los Canelos");
             apoderado28.setApoNumeroDireccion(332);
             apoderado28.setApoTipoCasa("Casa");
@@ -1639,7 +1571,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado29.setApoEmail("p.ariasg@apoderado.myohiggins.cl");
             apoderado29.setApoPassword("apoderado123");
             apoderado29.setApoTel("+56950000029");
-            apoderado29.setApoParentesco("Madre");
             apoderado29.setApoDireccion("Calle O'Higgins");
             apoderado29.setApoNumeroDireccion(881);
             apoderado29.setApoTipoCasa("Casa");
@@ -1656,7 +1587,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado30.setApoEmail("m.reyesl@apoderado.myohiggins.cl");
             apoderado30.setApoPassword("apoderado123");
             apoderado30.setApoTel("+56950000030");
-            apoderado30.setApoParentesco("Padre");
             apoderado30.setApoDireccion("Avenida España");
             apoderado30.setApoNumeroDireccion(65);
             apoderado30.setApoTipoCasa("Departamento");
@@ -1673,7 +1603,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado31.setApoEmail("v.correac@apoderado.myohiggins.cl");
             apoderado31.setApoPassword("apoderado123");
             apoderado31.setApoTel("+56950000031");
-            apoderado31.setApoParentesco("Tía");
             apoderado31.setApoDireccion("Pasaje Las Encinas");
             apoderado31.setApoNumeroDireccion(105);
             apoderado31.setApoTipoCasa("Casa");
@@ -1690,7 +1619,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado32.setApoEmail("s.paredesh@apoderado.myohiggins.cl");
             apoderado32.setApoPassword("apoderado123");
             apoderado32.setApoTel("+56950000032");
-            apoderado32.setApoParentesco("Madre");
             apoderado32.setApoDireccion("Calle Los Robles");
             apoderado32.setApoNumeroDireccion(330);
             apoderado32.setApoTipoCasa("Casa");
@@ -1707,7 +1635,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado33.setApoEmail("m.aedoo@apoderado.myohiggins.cl");
             apoderado33.setApoPassword("apoderado123");
             apoderado33.setApoTel("+56950000033");
-            apoderado33.setApoParentesco("Padre");
             apoderado33.setApoDireccion("Avenida Caupolican");
             apoderado33.setApoNumeroDireccion(710);
             apoderado33.setApoTipoCasa("Departamento");
@@ -1724,7 +1651,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado34.setApoEmail("f.lagosm@apoderado.myohiggins.cl");
             apoderado34.setApoPassword("apoderado123");
             apoderado34.setApoTel("+56950000034");
-            apoderado34.setApoParentesco("Primo");
             apoderado34.setApoDireccion("Pasaje Los Notros");
             apoderado34.setApoNumeroDireccion(18);
             apoderado34.setApoTipoCasa("Casa");
@@ -1741,7 +1667,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado35.setApoEmail("x.fuenzalidau@apoderado.myohiggins.cl");
             apoderado35.setApoPassword("apoderado123");
             apoderado35.setApoTel("+56950000035");
-            apoderado35.setApoParentesco("Madre");
             apoderado35.setApoDireccion("Calle San Martin");
             apoderado35.setApoNumeroDireccion(555);
             apoderado35.setApoTipoCasa("Casa");
@@ -1758,7 +1683,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado36.setApoEmail("v.escobara@apoderado.myohiggins.cl");
             apoderado36.setApoPassword("apoderado123");
             apoderado36.setApoTel("+56950000036");
-            apoderado36.setApoParentesco("Padre");
             apoderado36.setApoDireccion("Avenida Pedro de Valdivia");
             apoderado36.setApoNumeroDireccion(912);
             apoderado36.setApoTipoCasa("Departamento");
@@ -1775,7 +1699,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado37.setApoEmail("b.orellanam@apoderado.myohiggins.cl");
             apoderado37.setApoPassword("apoderado123");
             apoderado37.setApoTel("+56950000037");
-            apoderado37.setApoParentesco("Hermana Mayor");
             apoderado37.setApoDireccion("Pasaje Los Abedules");
             apoderado37.setApoNumeroDireccion(77);
             apoderado37.setApoTipoCasa("Casa");
@@ -1792,7 +1715,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado38.setApoEmail("t.carvajalp@apoderado.myohiggins.cl");
             apoderado38.setApoPassword("apoderado123");
             apoderado38.setApoTel("+56950000038");
-            apoderado38.setApoParentesco("Madre");
             apoderado38.setApoDireccion("Calle Los Maitenes");
             apoderado38.setApoNumeroDireccion(620);
             apoderado38.setApoTipoCasa("Casa");
@@ -1809,7 +1731,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado39.setApoEmail("e.valdesc@apoderado.myohiggins.cl");
             apoderado39.setApoPassword("apoderado123");
             apoderado39.setApoTel("+56950000039");
-            apoderado39.setApoParentesco("Abuela");
             apoderado39.setApoDireccion("Avenida Bicentenario");
             apoderado39.setApoNumeroDireccion(112);
             apoderado39.setApoTipoCasa("Departamento");
@@ -1826,7 +1747,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderado40.setApoEmail("r.santanal@apoderado.myohiggins.cl");
             apoderado40.setApoPassword("apoderado123");
             apoderado40.setApoTel("+56950000040");
-            apoderado40.setApoParentesco("Tutor Institucional");
             apoderado40.setApoDireccion("Pasaje La Amistad");
             apoderado40.setApoNumeroDireccion(49);
             apoderado40.setApoTipoCasa("Casa");

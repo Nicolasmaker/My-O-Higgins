@@ -10,7 +10,6 @@ public class ActualizarEstudianteRequest {
     private String    estApellidoMat;
     private String    estEmail;
     private String    estTel;
-    private String    estParentesco;
     private Integer   cursoId;
     private Boolean   estEstadoActividad;
 //Datos de la tabla direccion
