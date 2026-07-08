@@ -52,5 +52,15 @@ export const buscarApoderadoPorEmail = (email) =>
 export const crearApoderado = (data) => authHttp.post('/apoderados', data)
 export const crearEstudiante = (data) => authHttp.post('/estudiantes', data)
 
+// POST /funcionarios/docente|inspector|directivo — solo ROLE_DIRECTIVO. Usados por la página
+// de creación de funcionarios.
+export const crearDocente = (data) => authHttp.post('/funcionarios/docente', data)
+export const crearInspector = (data) => authHttp.post('/funcionarios/inspector', data)
+export const crearDirectivo = (data) => authHttp.post('/funcionarios/directivo', data)
+
+// GET /funcionarios — listado completo (Docente/Inspector/Directivo), lectura pública
+// entre microservicios (ver SecurityConfig).
+export const getFuncionarios = () => authHttp.get('/funcionarios')
+
 // GET /comunas — para el <select> de dirección en los formularios de creación de cuenta.
 export const getComunas = () => authHttp.get('/comunas')

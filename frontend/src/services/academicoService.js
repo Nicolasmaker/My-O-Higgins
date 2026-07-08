@@ -63,3 +63,12 @@ export const getNotasByEstudiante = (rut) => academicoHttp.get(`/notas/estudiant
 export const registrarNota = (data) => academicoHttp.post('/notas', data)
 export const actualizarNota = (id, data) => academicoHttp.put(`/notas/${id}`, data)
 export const eliminarNota = (id) => academicoHttp.delete(`/notas/${id}`)
+
+// --- Asistencia (por asignatura/hora específica, vía Impartir) ---
+export const getAsistencia = () => academicoHttp.get('/asistencia')
+export const getAsistenciaByEstudiante = (rut) => academicoHttp.get(`/asistencia/estudiante/${rut}`)
+export const getAsistenciaPorImpartirYFecha = (idImpartir, fecha) =>
+  academicoHttp.get(`/asistencia/impartir/${idImpartir}`, { params: { fecha } })
+export const registrarAsistencia = (data) => academicoHttp.post('/asistencia', data)
+export const actualizarAsistencia = (id, data) => academicoHttp.put(`/asistencia/${id}`, data)
+export const eliminarAsistencia = (id) => academicoHttp.delete(`/asistencia/${id}`)
