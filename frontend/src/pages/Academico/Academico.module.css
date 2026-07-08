@@ -69,6 +69,12 @@
   --bs-btn-disabled-border-color: var(--color-primary-light);
   box-shadow: 0 4px 12px rgba(107, 35, 35, 0.25);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  width: 180px !important;
+  height: 50px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--font-size-md);
 }
 
 .btnGranate:hover {
