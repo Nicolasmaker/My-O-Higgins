@@ -74,7 +74,7 @@ export const ENTIDADES = {
       { label: 'Descripción', render: (i) => i.asiDescripcion },
     ],
     campos: [
-      { name: 'asiNom', label: 'Nombre', maxLength: 30, width: 12, rules: { required: 'Obligatorio' }, getValue: (i) => i.asiNombre ?? '' },
+      { name: 'asiNom', label: 'Nombre', maxLength: 60, width: 12, rules: { required: 'Obligatorio' }, getValue: (i) => i.asiNombre ?? '' },
       { name: 'asiDes', label: 'Descripción', type: 'textarea', maxLength: 200, width: 12, rules: { required: 'Obligatorio' }, getValue: (i) => i.asiDescripcion ?? '' },
     ],
     defaults: { asiNom: '', asiDes: '' },
