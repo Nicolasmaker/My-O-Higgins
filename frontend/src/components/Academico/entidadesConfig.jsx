@@ -28,6 +28,13 @@ function fecha(value) {
   return new Date(`${value}T00:00:00`).toLocaleDateString('es-CL')
 }
 
+export function formatNivel(nivel) {
+  if (!nivel) return '—'
+  if (nivel.nivTipo === 'KINDER') return 'Kínder'
+  const etiqueta = nivel.nivTipo === 'MEDIA' ? 'medio' : 'básico'
+  return `${nivel.nivNum}° ${etiqueta}`
+}
+
 export const ENTIDADES = {
   curso: {
     titulo: 'Cursos',
@@ -39,13 +46,13 @@ export const ENTIDADES = {
       { label: '#', render: (i) => i.idCur },
       { label: 'Sección', render: (i) => i.curLetraSeccion },
       { label: 'Año escolar', render: (i) => i.curAnioEscolar },
-      { label: 'Nivel', render: (i) => i.nivel?.nivNum ?? '—' },
+      { label: 'Nivel', render: (i) => formatNivel(i.nivel) },
       { label: 'Sala', render: (i) => i.sala?.salLetra ?? '—' },
     ],
     campos: [
       { name: 'curLetraSec', label: 'Letra sección', maxLength: 1, width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curLetraSeccion ?? '' },
       { name: 'curAnioEscolar', label: 'Año escolar', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curAnioEscolar ?? '', soloCrear: true },
-      { name: 'idNivel', label: 'Nivel', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.nivel?.idNiv ?? '', soloCrear: true, loadOptions: () => getNiveles().then((r) => r.data), optionValue: (o) => o.idNiv, optionLabel: (o) => `Nivel ${o.nivNum}` },
+      { name: 'idNivel', label: 'Nivel', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.nivel?.idNiv ?? '', soloCrear: true, loadOptions: () => getNiveles().then((r) => r.data), optionValue: (o) => o.idNiv, optionLabel: (o) => formatNivel(o) },
       { name: 'idSala', label: 'Sala', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.sala?.idSal ?? '', loadOptions: () => getSalas().then((r) => r.data), optionValue: (o) => o.idSal, optionLabel: (o) => `Sala ${o.salLetra} (cap. ${o.salaCapacidad})` },
     ],
     defaults: { curLetraSec: '', curAnioEscolar: new Date().getFullYear(), idNivel: '', idSala: '' },
@@ -82,13 +89,14 @@ export const ENTIDADES = {
     api: { list: getNiveles, crear: crearNivel, actualizar: actualizarNivel, eliminar: eliminarNivel },
     columnas: [
       { label: '#', render: (i) => i.idNiv },
-      { label: 'Número de nivel', render: (i) => i.nivNum },
+      { label: 'Nivel', render: (i) => formatNivel(i) },
     ],
     campos: [
+      { name: 'nivTipo', label: 'Tipo', type: 'select', options: ['KINDER', 'BASICO', 'MEDIA'], width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.nivTipo ?? 'BASICO' },
       { name: 'nivNum', label: 'Número de nivel', type: 'number', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.nivNum ?? '' },
     ],
-    defaults: { nivNum: '' },
-    payload: (d) => ({ nivNum: Number(d.nivNum) }),
+    defaults: { nivTipo: 'BASICO', nivNum: '' },
+    payload: (d) => ({ nivTipo: d.nivTipo, nivNum: Number(d.nivNum) }),
   },
 
   sala: {
@@ -123,7 +131,7 @@ export const ENTIDADES = {
       { label: 'Período', render: (i) => i.evaPeriodoAcad },
       { label: 'Tipo', render: (i) => <Badge bg="secondary">{i.evaTipo}</Badge> },
       { label: 'Asignatura', render: (i) => i.asignatura?.asiNombre ?? '—' },
-      { label: 'Curso', render: (i) => (i.curso ? `${i.curso.nivel?.nivNum ?? '—'}°${i.curso.curLetraSeccion}` : '—') },
+      { label: 'Curso', render: (i) => (i.curso ? `${formatNivel(i.curso.nivel)} ${i.curso.curLetraSeccion}` : '—') },
       { label: 'Docente', render: (i) => i.docenteUsuRut },
     ],
     campos: [
@@ -133,7 +141,7 @@ export const ENTIDADES = {
       { name: 'evaTip', label: 'Tipo', type: 'select', options: ['Prueba', 'Control', 'Trabajo', 'Examen'], width: 6, rules: { required: true }, getValue: (i) => i.evaTipo ?? 'Prueba' },
       { name: 'docenteUsuRut', label: 'RUT docente', type: 'rut', width: 6, getValue: (i) => i.docenteUsuRut ?? '' },
       { name: 'idAsignatura', label: 'Asignatura', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.asignatura?.idAsi ?? '', soloCrear: true, loadOptions: () => getAsignaturas().then((r) => r.data), optionValue: (o) => o.idAsi, optionLabel: (o) => o.asiNombre },
-      { name: 'idCurso', label: 'Curso', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curso?.idCur ?? '', loadOptions: () => getCursos().then((r) => r.data), optionValue: (o) => o.idCur, optionLabel: (o) => `${o.nivel?.nivNum ?? '—'}°${o.curLetraSeccion} (${o.curAnioEscolar})` },
+      { name: 'idCurso', label: 'Curso', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curso?.idCur ?? '', loadOptions: () => getCursos().then((r) => r.data), optionValue: (o) => o.idCur, optionLabel: (o) => `${formatNivel(o.nivel)} ${o.curLetraSeccion} (${o.curAnioEscolar})` },
     ],
     defaults: { evaNom: '', evaFec: '', evaPerioAcad: '', evaTip: 'Prueba', docenteUsuRut: '', idAsignatura: '', idCurso: '' },
     payload: (d, editing) => {
@@ -194,12 +202,12 @@ export const ENTIDADES = {
       { label: '#', render: (i) => i.idImp },
       { label: 'RUT docente', render: (i) => i.docenteUsuRut },
       { label: 'Asignatura', render: (i) => i.asignatura?.asiNombre ?? '—' },
-      { label: 'Curso', render: (i) => (i.curso ? `${i.curso.nivel?.nivNum ?? '—'}°${i.curso.curLetraSeccion ?? ''}` : '—') },
+      { label: 'Curso', render: (i) => (i.curso ? `${formatNivel(i.curso.nivel)} ${i.curso.curLetraSeccion ?? ''}` : '—') },
     ],
     campos: [
       { name: 'docenteUsuRut', label: 'RUT docente', type: 'rut', width: 6, getValue: (i) => i.docenteUsuRut ?? '' },
       { name: 'idAsignatura', label: 'Asignatura', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.asignatura?.idAsi ?? '', loadOptions: () => getAsignaturas().then((r) => r.data), optionValue: (o) => o.idAsi, optionLabel: (o) => o.asiNombre },
-      { name: 'idCurso', label: 'Curso', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curso?.idCur ?? '', loadOptions: () => getCursos().then((r) => r.data), optionValue: (o) => o.idCur, optionLabel: (o) => `${o.nivel?.nivNum ?? '—'}°${o.curLetraSeccion} (${o.curAnioEscolar})` },
+      { name: 'idCurso', label: 'Curso', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curso?.idCur ?? '', loadOptions: () => getCursos().then((r) => r.data), optionValue: (o) => o.idCur, optionLabel: (o) => `${formatNivel(o.nivel)} ${o.curLetraSeccion} (${o.curAnioEscolar})` },
     ],
     defaults: { docenteUsuRut: '', idAsignatura: '', idCurso: '' },
     payload: (d) => ({

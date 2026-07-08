@@ -23,6 +23,7 @@ import {
   rechazarSolicitudMatricula,
 } from '../../services/matriculaService'
 import { getCursos } from '../../services/academicoService'
+import { formatNivel } from '../../components/Academico/entidadesConfig'
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
 import styles from './Matricula.module.css'
 
@@ -86,7 +87,7 @@ export default function Matricula() {
 
   const cursoLabel = (id) => {
     const c = cursos.find((x) => x.idCur === Number(id))
-    return c ? `${c.nivel?.nivNum ?? '—'}°${c.curLetraSeccion} (${c.curAnioEscolar})` : id ?? '—'
+    return c ? `${formatNivel(c.nivel)} ${c.curLetraSeccion} (${c.curAnioEscolar})` : id ?? '—'
   }
 
   const loadSolicitudes = useCallback(async () => {
@@ -415,7 +416,7 @@ export default function Matricula() {
                       <option value="">Sin preferencia</option>
                       {cursos.map((c) => (
                         <option key={c.idCur} value={c.idCur}>
-                          {c.nivel?.nivNum ?? '—'}°{c.curLetraSeccion} ({c.curAnioEscolar})
+                          {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar})
                         </option>
                       ))}
                     </Form.Select>
@@ -493,7 +494,7 @@ export default function Matricula() {
                               <option value="">Sin curso</option>
                               {cursos.map((c) => (
                                 <option key={c.idCur} value={c.idCur}>
-                                  {c.nivel?.nivNum ?? '—'}°{c.curLetraSeccion} ({c.curAnioEscolar})
+                                  {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar})
                                 </option>
                               ))}
                             </Form.Select>

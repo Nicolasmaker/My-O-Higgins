@@ -41,6 +41,7 @@ import {
 } from '../../services/hojaDeVidaService'
 import { getAnotacionesByHojaVida } from '../../services/anotacionesService'
 import { getImpartirByDocente, getCursos } from '../../services/academicoService'
+import { formatNivel } from '../../components/Academico/entidadesConfig'
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
 import HojaVidaForm from '../../components/HojaDeVida/HojaVidaForm'
@@ -101,7 +102,7 @@ export default function HojaDeVida() {
 
   const cursoLabelPorId = useMemo(() => {
     const m = new Map()
-    cursos.forEach((c) => m.set(c.idCur, `${c.nivel?.nivNum ?? '—'}°${c.curLetraSeccion ?? ''}`))
+    cursos.forEach((c) => m.set(c.idCur, `${formatNivel(c.nivel)} ${c.curLetraSeccion ?? ''}`))
     return m
   }, [cursos])
   const cursoLabelPorRut = useMemo(() => {

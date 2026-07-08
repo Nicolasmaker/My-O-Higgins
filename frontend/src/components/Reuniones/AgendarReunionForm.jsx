@@ -19,6 +19,7 @@ import { Card, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
 import { toast } from 'react-toastify'
 import { buscarApoderadoPorEmail } from '../../services/authService'
 import { getMatriculas } from '../../services/matriculaService'
+import { formatNivel } from '../Academico/entidadesConfig'
 import styles from '../../pages/Reuniones/Reuniones.module.css'
 
 const TITULOS = {
@@ -178,7 +179,7 @@ export default function AgendarReunionForm({ tipo, cursos = [], saving, onSubmit
                       <option value="">Selecciona un curso</option>
                       {cursos.map((c) => (
                         <option key={c.idCur} value={c.idCur}>
-                          {c.nivel?.nivNum ?? '—'}°{c.curLetraSeccion} ({c.curAnioEscolar})
+                          {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar})
                         </option>
                       ))}
                     </Form.Select>

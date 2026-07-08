@@ -20,7 +20,7 @@ import { getNotasByEstudiante, getCursoById, getImpartirByDocente, getAsignatura
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
 import EntidadForm from '../../components/Academico/EntidadForm'
-import { ENTIDADES } from '../../components/Academico/entidadesConfig'
+import { ENTIDADES, formatNivel } from '../../components/Academico/entidadesConfig'
 import styles from '../../styles/Academico.module.css'
 
 // Directivo: acceso completo (rw) a las 8 secciones.
@@ -201,7 +201,7 @@ function VistaEstudianteApoderado({ usuario, isApoderado }) {
            </thead>
            <tbody>
              <tr>
-               <td>{curso.nivel?.nivNum ?? '—'}</td>
+               <td>{formatNivel(curso.nivel)}</td>
                <td>{curso.curLetraSeccion}</td>
                <td>{curso.curAnioEscolar}</td>
                <td>{curso.sala?.salLetra ?? '—'}</td>

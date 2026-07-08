@@ -35,6 +35,7 @@ import {
   confirmarReunionApoderado,
 } from '../../services/reunionesService'
 import { getCursos, getImpartirByDocente } from '../../services/academicoService'
+import { formatNivel } from '../../components/Academico/entidadesConfig'
 import AgendarReunionForm from '../../components/Reuniones/AgendarReunionForm'
 import ReunionIndividualCard from '../../components/Reuniones/ReunionIndividualCard'
 import ReunionGeneralCard from '../../components/Reuniones/ReunionGeneralCard'
@@ -98,7 +99,7 @@ export default function Reuniones() {
   }, [])
   const cursoLabelPorId = (id) => {
     const c = cursos.find((x) => x.idCur === Number(id))
-    return c ? `${c.nivel?.nivNum ?? '—'}°${c.curLetraSeccion} (${c.curAnioEscolar})` : null
+    return c ? `${formatNivel(c.nivel)} ${c.curLetraSeccion} (${c.curAnioEscolar})` : null
   }
 
   // Docente: acota el dropdown de curso (General) a los cursos donde dicta clases.
