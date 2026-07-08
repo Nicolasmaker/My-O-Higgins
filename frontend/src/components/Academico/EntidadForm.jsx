@@ -57,7 +57,9 @@ export default function EntidadForm({ show, config, item, saving, onSave, onClos
 
   if (!config) return null
 
-  const camposVisibles = config.campos.filter((c) => !(editing && c.soloCrear))
+  const camposVisibles = config.campos.filter(
+    (c) => !(editing && c.soloCrear) && !(!editing && c.soloEditar)
+  )
 
   const renderControl = (campo) => {
     const rules = campo.type === 'rut' ? rutRules : campo.rules

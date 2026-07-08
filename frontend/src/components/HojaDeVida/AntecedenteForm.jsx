@@ -31,7 +31,7 @@ export const TIPOS_ANTECEDENTE = {
     campos: [
       { name: 'nombre', label: 'Nombre completo *', maxLength: 80, width: 12, rules: { required: 'El nombre es obligatorio' } },
       { name: 'profesion', label: 'Profesión *', maxLength: 30, width: 6, rules: { required: 'La profesión es obligatoria' } },
-      { name: 'telefono', label: 'Teléfono *', maxLength: 10, width: 6, rules: { required: 'El teléfono es obligatorio' } },
+      { name: 'telefono', label: 'Teléfono *', maxLength: 20, width: 6, rules: { required: 'El teléfono es obligatorio' } },
       { name: 'direccion', label: 'Dirección *', maxLength: 100, width: 12, rules: { required: 'La dirección es obligatoria' } },
       { name: 'lugarTrabajo', label: 'Lugar de trabajo *', maxLength: 100, width: 6, rules: { required: 'El lugar de trabajo es obligatorio' } },
       { name: 'disponibilidadHoraria', label: '¿Disponibilidad horaria? *', type: 'siNo', width: 6, rules: { required: true } },

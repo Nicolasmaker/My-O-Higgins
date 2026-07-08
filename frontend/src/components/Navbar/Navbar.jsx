@@ -29,6 +29,7 @@ const MODULOS = [
   { to: '/matriculas', label: 'Matrículas' },
   { to: '/hoja-de-vida', label: 'Hoja de Vida' },
   { to: '/academico', label: 'Académico' },
+  { to: '/funcionarios', label: 'Funcionarios' },
 ];
 
 const PUBLICOS = [

@@ -29,6 +29,14 @@ function fecha(value) {
   return new Date(`${value}T00:00:00`).toLocaleDateString('es-CL')
 }
 
+// Períodos académicos disponibles para Evaluación — año escolar actual, 2 semestres (convención
+// chilena). eva_periodo_acad tiene length=20 en el backend, ojo si se agregan más opciones.
+const ANIO_ACADEMICO_ACTUAL = new Date().getFullYear()
+const PERIODOS_ACADEMICOS = [
+  `${ANIO_ACADEMICO_ACTUAL} - 1er Semestre`,
+  `${ANIO_ACADEMICO_ACTUAL} - 2do Semestre`,
+]
+
 export function formatNivel(nivel) {
   if (!nivel) return '—'
   if (nivel.nivTipo === 'KINDER') return 'Kínder'
@@ -138,20 +146,24 @@ export const ENTIDADES = {
     campos: [
       { name: 'evaNom', label: 'Nombre', maxLength: 100, width: 12, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaNom ?? '' },
       { name: 'evaFec', label: 'Fecha', type: 'date', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaFecha ?? '' },
-      { name: 'evaPerioAcad', label: 'Período académico', maxLength: 20, width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaPeriodoAcad ?? '' },
+      { name: 'evaPerioAcad', label: 'Período académico', type: 'select', options: PERIODOS_ACADEMICOS, width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.evaPeriodoAcad ?? '' },
       { name: 'evaTip', label: 'Tipo', type: 'select', options: ['Prueba', 'Control', 'Trabajo', 'Examen'], width: 6, rules: { required: true }, getValue: (i) => i.evaTipo ?? 'Prueba' },
-      { name: 'docenteUsuRut', label: 'RUT docente', type: 'rut', width: 6, getValue: (i) => i.docenteUsuRut ?? '' },
+      // Solo visible al editar: al crear, el docente es quien está logueado (ver payload) — no
+      // tiene sentido pedirle que tipee su propio RUT.
+      { name: 'docenteUsuRut', label: 'RUT docente', type: 'rut', width: 6, soloEditar: true, getValue: (i) => i.docenteUsuRut ?? '' },
       { name: 'idAsignatura', label: 'Asignatura', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.asignatura?.idAsi ?? '', soloCrear: true, loadOptions: () => getAsignaturas().then((r) => r.data), optionValue: (o) => o.idAsi, optionLabel: (o) => o.asiNombre },
       { name: 'idCurso', label: 'Curso', type: 'entity-select', width: 6, rules: { required: 'Obligatorio' }, getValue: (i) => i.curso?.idCur ?? '', loadOptions: () => getCursos().then((r) => r.data), optionValue: (o) => o.idCur, optionLabel: (o) => `${formatNivel(o.nivel)} ${o.curLetraSeccion} (${o.curAnioEscolar})` },
     ],
-    defaults: { evaNom: '', evaFec: '', evaPerioAcad: '', evaTip: 'Prueba', docenteUsuRut: '', idAsignatura: '', idCurso: '' },
-    payload: (d, editing) => {
+    defaults: { evaNom: '', evaFec: '', evaPerioAcad: PERIODOS_ACADEMICOS[0], evaTip: 'Prueba', docenteUsuRut: '', idAsignatura: '', idCurso: '' },
+    payload: (d, editing, usuario) => {
       const base = {
         evaNom: d.evaNom,
         evaFec: d.evaFec,
         evaPerioAcad: d.evaPerioAcad,
         evaTip: d.evaTip,
-        docenteUsuRut: limpiarRut(d.docenteUsuRut),
+        // Al crear: el docente es quien está logueado, no un dato que se tipee. Al editar: se
+        // conserva/ajusta el RUT del campo (soloEditar, visible en el form al editar).
+        docenteUsuRut: editing ? limpiarRut(d.docenteUsuRut) : limpiarRut(usuario?.usuRut),
         idCurso: Number(d.idCurso),
       }
       return editing ? base : { ...base, idAsignatura: Number(d.idAsignatura) }
