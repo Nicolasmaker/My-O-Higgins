@@ -82,6 +82,17 @@ public class EstudianteService {
         return estudianteRepository.findAll();
     }
 
+    // Actualiza solo el curso del estudiante — usado por MS-GestionMatricula al registrar o
+    // editar una matrícula, para que Estudiante.cursoId (Autenticacion) quede sincronizado con
+    // Matricula.cursoId (GestionMatricula). Antes de esto, la sección Académico del estudiante
+    // quedaba mostrando cursoId=null aunque ya estuviera matriculado en un curso real.
+    @Transactional
+    public void actualizarCursoEstudiante(Integer rut, Integer cursoId) {
+        Estudiante estudiante = obtenerEstudiantePorRut(rut);
+        estudiante.setCursoId(cursoId);
+        usuarioRepository.save(estudiante);
+    }
+
     public Estudiante obtenerEstudiantePorRut(Integer rut){
         Usuario usuario = usuarioRepository.findById(rut)
             .orElseThrow(() -> new RuntimeException("No se encontro un usuario con el rut: " + rut));

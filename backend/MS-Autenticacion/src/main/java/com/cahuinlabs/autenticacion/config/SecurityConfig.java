@@ -44,6 +44,11 @@ public class SecurityConfig {
                 // se rompe crear anotacion, matricula, mensaje, evaluacion y reunion.
                 .requestMatchers(HttpMethod.GET, "/estudiantes/**", "/funcionarios/**", "/apoderados/**", "/usuarios/**").permitAll()
 
+             // MS-GestionMatricula sincroniza Estudiante.cursoId al registrar/editar una
+             // matrícula (server a servidor, sin JWT). Angosto a solo /curso — no expone
+             // el resto de los campos editables del estudiante sin autenticación.
+                .requestMatchers(HttpMethod.PATCH, "/estudiantes/*/curso").permitAll()
+
              //Solo los administradores (o directores) pueden registrar a otros funcionarios
                 .requestMatchers(HttpMethod.POST, "/funcionarios/**").hasAuthority("ROLE_DIRECTIVO")
 
