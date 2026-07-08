@@ -82,6 +82,10 @@
   box-shadow: 0 6px 16px rgba(107, 35, 35, 0.35);
 }
 
+.table :global(.btn){
+  font-size: 13px !important;
+}
+
 /* ── Nav lateral ────────────────────────────────────────────── */
 .sideNav {
   background: var(--color-bg-white);
@@ -182,6 +186,13 @@
 .table :global(tbody tr:hover) {
   background-color: #faf5f5;
 }
+
+
+.table td:last-child, 
+.table th:last-child {
+  white-space: nowrap; 
+  width: 1%; 
+ }
 
 /* ── Modal ──────────────────────────────────────────────────── */
 .modalHeader {
