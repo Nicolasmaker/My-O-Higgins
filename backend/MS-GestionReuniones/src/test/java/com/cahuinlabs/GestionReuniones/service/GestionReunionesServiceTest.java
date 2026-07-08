@@ -83,7 +83,7 @@ public class GestionReunionesServiceTest {
         when(autenticacionRestClient.get()).thenReturn((RestClient.RequestHeadersUriSpec) headersUriSpec);
         when(headersUriSpec.uri(anyString(), anyLong())).thenReturn(headersSpec);
         when(headersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.body(FuncionarioDTO.class)).thenReturn(new FuncionarioDTO(12345678L, "Juan", "Pérez", null));
+        when(responseSpec.body(FuncionarioDTO.class)).thenReturn(new FuncionarioDTO(12345678L,"k", "Juan", "Pérez", null));
         when(baseRepository.save(any(BitReunionApoderado.class))).thenReturn(base);
         when(individualRepository.save(any(BitReunionIndividual.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
