@@ -1,5 +1,7 @@
 package com.myohiggins.msmatricula.service;
 
+import com.myohiggins.msmatricula.dto.ActualizarCursoRequest;
+import com.myohiggins.msmatricula.dto.AntecedentesApoderadoDTO;
 import com.myohiggins.msmatricula.dto.EstudianteDTO;
 import com.myohiggins.msmatricula.dto.ApoderadoDTO;
 import com.myohiggins.msmatricula.dto.FuncionarioDTO;
@@ -51,6 +53,7 @@ public class MatriculaService {
         }
 
         Matricula guardada = matriculaRepository.save(matricula);
+        sincronizarCursoEstudiante(guardada);
         sincronizarHojaVida(guardada);
         return guardada;
     }
@@ -91,7 +94,9 @@ public class MatriculaService {
             matriculaExistente.setTipoAlumno(detallesMatricula.getTipoAlumno());
             matriculaExistente.setParentesco(detallesMatricula.getParentesco());
 
-            return matriculaRepository.save(matriculaExistente);
+            Matricula actualizada = matriculaRepository.save(matriculaExistente);
+            sincronizarCursoEstudiante(actualizada);
+            return actualizada;
         }
         return null;
     }
@@ -221,11 +226,33 @@ public class MatriculaService {
         }
     }
 
+    // Sincroniza Estudiante.cursoId en MS-Autenticacion con el curso real de la matrícula.
+    // Sin esto, la sección Académico (que lee estudiante.cursoId, no Matricula.cursoId) seguía
+    // mostrando al estudiante sin curso aunque ya estuviera matriculado. Best-effort.
+    private void sincronizarCursoEstudiante(Matricula matricula) {
+        if (matricula.getCursoId() == null) {
+            return;
+        }
+        try {
+            ActualizarCursoRequest body = new ActualizarCursoRequest();
+            body.setCursoId(matricula.getCursoId().intValue());
+            autenticacionRestClient.patch()
+                    .uri("/estudiantes/{rut}/curso", matricula.getAlumnoRut())
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.warn("No se pudo sincronizar el curso del estudiante {}: {}", matricula.getAlumnoRut(), e.getMessage());
+        }
+    }
+
     // Sincroniza la hoja de vida del estudiante en MS-HojaDeVida tras registrar la matrícula:
-    // si el estudiante aún no tiene hoja de vida, la crea; si ya tiene una (de un año anterior),
-    // la actualiza para que apunte a esta matrícula nueva (la hoja de vida es única por estudiante
-    // durante toda su vida escolar, no una por año). Best-effort: si MS-HojaDeVida no responde,
-    // solo se registra en el log — no bloquea el registro de la matrícula.
+    // si el estudiante aún no tiene hoja de vida, la crea (y de paso crea un antecedente de
+    // apoderado inicial con nombre/teléfono ya conocidos, ver crearAntecedenteApoderadoInicial);
+    // si ya tiene una (de un año anterior), la actualiza para que apunte a esta matrícula nueva
+    // (la hoja de vida es única por estudiante durante toda su vida escolar, no una por año).
+    // Best-effort: si MS-HojaDeVida no responde, solo se registra en el log — no bloquea el
+    // registro de la matrícula.
     private void sincronizarHojaVida(Matricula matricula) {
         try {
             HojaVidaDTO existente = buscarHojaVidaPorRut(matricula.getAlumnoRut());
@@ -236,11 +263,14 @@ public class MatriculaService {
             body.setEstado(existente != null ? existente.getEstado() : "ACTIVA");
 
             if (existente == null) {
-                hojaVidaRestClient.post()
+                HojaVidaDTO creada = hojaVidaRestClient.post()
                         .uri("/api/hojas-vida")
                         .body(body)
                         .retrieve()
-                        .toBodilessEntity();
+                        .body(HojaVidaDTO.class);
+                if (creada != null) {
+                    crearAntecedenteApoderadoInicial(matricula, creada.getIdHojaVida());
+                }
             } else {
                 hojaVidaRestClient.put()
                         .uri("/api/hojas-vida/{id}", existente.getIdHojaVida())
@@ -250,6 +280,39 @@ public class MatriculaService {
             }
         } catch (Exception e) {
             logger.warn("No se pudo sincronizar la hoja de vida del estudiante {}: {}", matricula.getAlumnoRut(), e.getMessage());
+        }
+    }
+
+    // Crea un antecedente de apoderado inicial en la hoja de vida recién creada, con nombre y
+    // teléfono reales (los únicos datos que Autenticacion realmente tiene del apoderado).
+    // profesion/direccion/lugarTrabajo/disponibilidadHoraria son NOT NULL en HojaDeVida pero no
+    // existen en Autenticacion, así que quedan con placeholder — el Directivo/Docente los
+    // completa después desde la propia sección Hoja de Vida. Solo se ejecuta la primera vez
+    // (hoja de vida recién creada), para no duplicar el antecedente en cada re-matrícula anual.
+    private void crearAntecedenteApoderadoInicial(Matricula matricula, Long idHojaVida) {
+        if (idHojaVida == null) {
+            return;
+        }
+        try {
+            ApoderadoDTO apoderado = obtenerApoderado(matricula.getApoderadoRut());
+            if (apoderado == null) {
+                return;
+            }
+            AntecedentesApoderadoDTO body = new AntecedentesApoderadoDTO();
+            body.setIdHojaVida(idHojaVida);
+            body.setNombre((apoderado.nombre() + " " + apoderado.apellido()).trim());
+            body.setTelefono(apoderado.telefono() != null ? apoderado.telefono() : "No especificado");
+            body.setProfesion("No especificado");
+            body.setDireccion("No especificado");
+            body.setLugarTrabajo("No especificado");
+            body.setDisponibilidadHoraria("N");
+            hojaVidaRestClient.post()
+                    .uri("/api/antecedentes-apoderado")
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.warn("No se pudo crear el antecedente de apoderado inicial para la hoja de vida {}: {}", idHojaVida, e.getMessage());
         }
     }
 

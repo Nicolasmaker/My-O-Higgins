@@ -9,5 +9,6 @@ public record ApoderadoDTO(
     @JsonProperty("usuRut") Long rut,
     @JsonProperty("usuDvRut") String dv,
     @JsonProperty("usuPNombre") String nombre,
-    @JsonProperty("usuApePat") String apellido
+    @JsonProperty("usuApePat") String apellido,
+    @JsonProperty("usuTel") String telefono
 ) {}

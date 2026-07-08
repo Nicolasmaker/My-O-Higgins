@@ -1,5 +1,7 @@
 package com.myohiggins.msmatricula.service;
 
+import com.myohiggins.msmatricula.dto.ActualizarCursoRequest;
+import com.myohiggins.msmatricula.dto.AntecedentesApoderadoDTO;
 import com.myohiggins.msmatricula.dto.EstudianteDTO;
 import com.myohiggins.msmatricula.dto.ApoderadoDTO;
 import com.myohiggins.msmatricula.dto.FuncionarioDTO;
@@ -84,6 +86,7 @@ public class SolicitudMatriculaService {
         matricula.setParentesco(solicitud.getParentesco());
         matricula.setFuncionarioUsuRut(funcionarioUsuRut);
         Matricula matriculaCreada = matriculaRepository.save(matricula);
+        sincronizarCursoEstudiante(matriculaCreada);
         sincronizarHojaVida(matriculaCreada);
 
         solicitud.setEstado("APROBADA");
@@ -206,9 +209,27 @@ public class SolicitudMatriculaService {
         }
     }
 
+    // Sincroniza Estudiante.cursoId en MS-Autenticacion — ver MatriculaService, mismo criterio.
+    private void sincronizarCursoEstudiante(Matricula matricula) {
+        if (matricula.getCursoId() == null) {
+            return;
+        }
+        try {
+            ActualizarCursoRequest body = new ActualizarCursoRequest();
+            body.setCursoId(matricula.getCursoId().intValue());
+            autenticacionRestClient.patch()
+                    .uri("/estudiantes/{rut}/curso", matricula.getAlumnoRut())
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.warn("No se pudo sincronizar el curso del estudiante {}: {}", matricula.getAlumnoRut(), e.getMessage());
+        }
+    }
+
     // Sincroniza la hoja de vida del estudiante en MS-HojaDeVida tras aprobar la solicitud (mismo
-    // criterio que MatriculaService.sincronizarHojaVida): crea si no existe, actualiza el
-    // matriculaId si ya existe. Best-effort, no bloquea la aprobación.
+    // criterio que MatriculaService.sincronizarHojaVida): crea si no existe (y crea el antecedente
+    // de apoderado inicial), actualiza el matriculaId si ya existe. Best-effort.
     private void sincronizarHojaVida(Matricula matricula) {
         try {
             HojaVidaDTO existente = buscarHojaVidaPorRut(matricula.getAlumnoRut());
@@ -219,11 +240,14 @@ public class SolicitudMatriculaService {
             body.setEstado(existente != null ? existente.getEstado() : "ACTIVA");
 
             if (existente == null) {
-                hojaVidaRestClient.post()
+                HojaVidaDTO creada = hojaVidaRestClient.post()
                         .uri("/api/hojas-vida")
                         .body(body)
                         .retrieve()
-                        .toBodilessEntity();
+                        .body(HojaVidaDTO.class);
+                if (creada != null) {
+                    crearAntecedenteApoderadoInicial(matricula, creada.getIdHojaVida());
+                }
             } else {
                 hojaVidaRestClient.put()
                         .uri("/api/hojas-vida/{id}", existente.getIdHojaVida())
@@ -233,6 +257,34 @@ public class SolicitudMatriculaService {
             }
         } catch (Exception e) {
             logger.warn("No se pudo sincronizar la hoja de vida del estudiante {}: {}", matricula.getAlumnoRut(), e.getMessage());
+        }
+    }
+
+    // Ver MatriculaService.crearAntecedenteApoderadoInicial — mismo criterio.
+    private void crearAntecedenteApoderadoInicial(Matricula matricula, Long idHojaVida) {
+        if (idHojaVida == null) {
+            return;
+        }
+        try {
+            ApoderadoDTO apoderado = obtenerApoderado(matricula.getApoderadoRut());
+            if (apoderado == null) {
+                return;
+            }
+            AntecedentesApoderadoDTO body = new AntecedentesApoderadoDTO();
+            body.setIdHojaVida(idHojaVida);
+            body.setNombre((apoderado.nombre() + " " + apoderado.apellido()).trim());
+            body.setTelefono(apoderado.telefono() != null ? apoderado.telefono() : "No especificado");
+            body.setProfesion("No especificado");
+            body.setDireccion("No especificado");
+            body.setLugarTrabajo("No especificado");
+            body.setDisponibilidadHoraria("N");
+            hojaVidaRestClient.post()
+                    .uri("/api/antecedentes-apoderado")
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.warn("No se pudo crear el antecedente de apoderado inicial para la hoja de vida {}: {}", idHojaVida, e.getMessage());
         }
     }
 
