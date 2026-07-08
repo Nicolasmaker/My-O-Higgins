@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class NivelRequest {
     private Integer nivNum;
+    private String nivTipo;
 }

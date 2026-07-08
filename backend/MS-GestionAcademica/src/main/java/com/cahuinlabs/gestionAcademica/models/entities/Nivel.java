@@ -19,4 +19,8 @@ public class Nivel {
 
     @Column(name = "niv_num", nullable = false)
     private Integer nivNum;
+
+    // KINDER | BASICO | MEDIA — distingue "1° básico" de "1° medio", que comparten nivNum=1.
+    @Column(name = "niv_tipo", nullable = false, length = 10)
+    private String nivTipo;
 }

@@ -19,7 +19,8 @@ public class NivelService {
     public Nivel crearNivel(NivelRequest nivelRequest) {
         Nivel nivel = new Nivel();
         nivel.setNivNum(nivelRequest.getNivNum());
-        
+        nivel.setNivTipo(nivelRequest.getNivTipo());
+
         return nivelRepository.save(nivel);
     }
 
@@ -28,7 +29,8 @@ public class NivelService {
             .orElseThrow(() -> new RuntimeException("Nivel no encontrado"));
     
         nivelExistente.setNivNum(request.getNivNum());
-    
+        nivelExistente.setNivTipo(request.getNivTipo());
+
         return nivelRepository.save(nivelExistente);
     }
 
