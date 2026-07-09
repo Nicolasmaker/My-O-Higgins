@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Button, Spinner } from 'react-bootstrap'
 import { rutRules } from '../../validators/fieldValidators'
-import styles from '../../pages/HojaDeVida/HojaDeVida.module.css'
+import styles from '../../styles/HojaDeVida.module.css'
 
 export default function HojaVidaForm({ show, hoja, saving, onSave, onClose }) {
   const editing = !!hoja

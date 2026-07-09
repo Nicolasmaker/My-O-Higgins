@@ -17,7 +17,7 @@ import PropTypes from 'prop-types'
 import { Modal, Form, Button, Spinner } from 'react-bootstrap'
 import { getUsuarios } from '../../services/authService'
 import { emailRules } from '../../validators/fieldValidators'
-import styles from '../../pages/Mensajeria/Mensajeria.module.css'
+import styles from '../../styles/Mensajeria.module.css'
 
 export default function MensajeCompose({ show, sending, onSend, onClose }) {
   const [usuarios, setUsuarios] = useState([])

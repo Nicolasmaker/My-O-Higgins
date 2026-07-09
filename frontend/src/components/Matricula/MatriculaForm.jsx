@@ -3,16 +3,18 @@
 // =============================================================
 // Modal para registrar o actualizar matrículas (RF-17).
 // En creación el backend setea fecha, año académico y estado
-// ACTIVA automáticamente (@PrePersist); el estado solo se puede
-// cambiar al editar. El backend valida que alumno, apoderado y
-// funcionario existan en MS-Autenticacion.
+// ACTIVA automáticamente (@PrePersist). El funcionario que registra
+// es el usuario logueado (no se pide; va oculto). Al teclear el RUT
+// del alumno/apoderado se muestra a qué correo pertenece.
 // =============================================================
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
-import { rutRules } from '../../validators/fieldValidators'
-import styles from '../../pages/Matricula/Matricula.module.css'
+import { rutRules, rutValido, limpiarRut } from '../../validators/fieldValidators'
+import { getEstudiante, getApoderado } from '../../services/authService'
+import { formatNivel } from '../Academico/entidadesConfig'
+import styles from '../../styles/Matricula.module.css'
 
 const emptyValues = {
   alumnoRut: '',
@@ -24,17 +26,59 @@ const emptyValues = {
   matriculaEstado: 'ACTIVA',
 }
 
-export default function MatriculaForm({ show, matricula, defaultRut, saving, onSave, onClose }) {
+// Busca el correo de una persona por RUT en Autenticacion (estudiante o apoderado).
+// Devuelve el email o null. Hook reutilizable para alumno y apoderado.
+function useEmailPorRut(rutValue, fetcher) {
+  const [info, setInfo] = useState(null) // { email } | { noExiste:true } | null
+  useEffect(() => {
+    const valor = (rutValue || '').trim()
+    if (!valor || !rutValido(valor)) {
+      setInfo(null)
+      return
+    }
+    let cancelado = false
+    const t = setTimeout(() => {
+      fetcher(limpiarRut(valor))
+        .then((res) => {
+          if (cancelado) return
+          const d = res.data || {}
+          setInfo({ email: d.usuEmail ?? d.email ?? d.correo ?? null })
+        })
+        .catch(() => !cancelado && setInfo({ noExiste: true }))
+    }, 500)
+    return () => {
+      cancelado = true
+      clearTimeout(t)
+    }
+  }, [rutValue, fetcher])
+  return info
+}
+
+function MensajeRut({ info, tipo }) {
+  if (!info) return null
+  if (info.noExiste) {
+    return <small className="text-warning">No se encontró un {tipo} con ese RUT.</small>
+  }
+  return (
+    <small className="text-muted d-block" style={{ fontSize: '0.75rem', lineHeight: 1.3 }}>
+      {tipo === 'alumno' ? 'Alumno' : 'Apoderado'}: {info.email || 'sin correo registrado'}
+    </small>
+  )
+}
+
+MensajeRut.propTypes = { info: PropTypes.object, tipo: PropTypes.string.isRequired }
+
+export default function MatriculaForm({ show, matricula, defaultRut, cursos = [], matriculas = [], saving, onSave, onClose }) {
   const editing = !!matricula
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm({ defaultValues: emptyValues })
 
-  // Al abrir el modal, carga los datos de la matrícula (edición) o valores limpios (creación)
   useEffect(() => {
     if (!show) return
     reset(
@@ -45,12 +89,24 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
             cursoId: String(matricula.cursoId ?? ''),
             tipoAlumno: matricula.tipoAlumno || 'NUEVO',
             parentesco: matricula.parentesco || '',
-            funcionarioUsuRut: String(matricula.funcionarioUsuRut ?? ''),
+            funcionarioUsuRut: String(matricula.funcionarioUsuRut ?? defaultRut ?? ''),
             matriculaEstado: matricula.matriculaEstado || 'ACTIVA',
           }
         : { ...emptyValues, funcionarioUsuRut: String(defaultRut || '') }
     )
   }, [show, editing, matricula, defaultRut, reset])
+
+  const alumnoInfo = useEmailPorRut(watch('alumnoRut'), getEstudiante)
+  const apoderadoInfo = useEmailPorRut(watch('apoderadoRut'), getApoderado)
+
+  // Cupos disponibles por curso (mismo criterio que el wizard).
+  const cupoLabel = (c) => {
+    const tope = c.cupos ?? c.sala?.salaCapacidad ?? null
+    if (tope === null) return 'sin cupo definido'
+    const activas = matriculas.filter((m) => m.cursoId === c.idCur && m.matriculaEstado === 'ACTIVA').length
+    const disp = tope - activas
+    return disp <= 0 ? 'SIN CUPOS' : `${disp} cupos`
+  }
 
   return (
     <Modal show={show} onHide={onClose} centered>
@@ -61,6 +117,8 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
       </Modal.Header>
       <Form onSubmit={handleSubmit(onSave)} noValidate>
         <Modal.Body>
+          {/* El funcionario que registra es el usuario logueado: va oculto, no se pide. */}
+          <input type="hidden" {...register('funcionarioUsuRut')} />
           <Row className="g-3">
             <Col md={6}>
               <Form.Group controlId="alumnoRut">
@@ -71,6 +129,7 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
                   {...register('alumnoRut', rutRules)}
                 />
                 <Form.Control.Feedback type="invalid">{errors.alumnoRut?.message}</Form.Control.Feedback>
+                <MensajeRut info={alumnoInfo} tipo="alumno" />
               </Form.Group>
             </Col>
             <Col md={6}>
@@ -82,12 +141,20 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
                   {...register('apoderadoRut', rutRules)}
                 />
                 <Form.Control.Feedback type="invalid">{errors.apoderadoRut?.message}</Form.Control.Feedback>
+                <MensajeRut info={apoderadoInfo} tipo="apoderado" />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group controlId="cursoId">
-                <Form.Label>ID curso</Form.Label>
-                <Form.Control type="number" placeholder="Curso asignado" {...register('cursoId')} />
+                <Form.Label>Curso</Form.Label>
+                <Form.Select {...register('cursoId')}>
+                  <option value="">Selecciona un curso</option>
+                  {cursos.map((c) => (
+                    <option key={c.idCur} value={c.idCur}>
+                      {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar}) — {cupoLabel(c)}
+                    </option>
+                  ))}
+                </Form.Select>
               </Form.Group>
             </Col>
             <Col md={6}>
@@ -111,17 +178,6 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
                 <Form.Control.Feedback type="invalid">{errors.parentesco?.message}</Form.Control.Feedback>
               </Form.Group>
             </Col>
-            <Col md={6}>
-              <Form.Group controlId="funcionarioUsuRut">
-                <Form.Label>RUT funcionario *</Form.Label>
-                <Form.Control
-                  placeholder="Quien registra"
-                  isInvalid={!!errors.funcionarioUsuRut}
-                  {...register('funcionarioUsuRut', rutRules)}
-                />
-                <Form.Control.Feedback type="invalid">{errors.funcionarioUsuRut?.message}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
             {editing && (
               <Col md={6}>
                 <Form.Group controlId="matriculaEstado">
@@ -137,7 +193,8 @@ export default function MatriculaForm({ show, matricula, defaultRut, saving, onS
           </Row>
           {!editing && (
             <p className={styles.formHint}>
-              La fecha, el año académico y el estado inicial (ACTIVA) se asignan automáticamente.
+              La fecha, el año académico y el estado inicial (ACTIVA) se asignan automáticamente. La matrícula
+              queda registrada a tu nombre como funcionario.
             </p>
           )}
         </Modal.Body>
@@ -167,6 +224,8 @@ MatriculaForm.propTypes = {
   show: PropTypes.bool.isRequired,
   matricula: PropTypes.object,
   defaultRut: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  cursos: PropTypes.array,
+  matriculas: PropTypes.array,
   saving: PropTypes.bool,
   onSave: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,

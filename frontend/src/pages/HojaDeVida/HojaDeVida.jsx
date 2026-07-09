@@ -48,7 +48,7 @@ import { getEstudiante } from '../../services/authService'
 import { generarHojaVidaPdf } from '../../utils/hojaVidaPdf'
 import HojaVidaForm from '../../components/HojaDeVida/HojaVidaForm'
 import AntecedenteForm from '../../components/HojaDeVida/AntecedenteForm'
-import styles from './HojaDeVida.module.css'
+import styles from '../../styles/HojaDeVida.module.css'
 
 // Solo Directivo gestiona la ficha (crear/editar/eliminar hoja + antecedentes).
 // Docente/Inspector consultan (con distinto alcance) pero registran vía Anotaciones, no acá.

@@ -1,5 +1,5 @@
 import Button from '../UI/Button'
-import './AnotacionesToolbar.css'
+import '../../styles/AnotacionesToolbar.css'
 
 export default function AnotacionesToolbar({
   filterRut,
@@ -11,6 +11,7 @@ export default function AnotacionesToolbar({
   setFilterTipo,
   filterCurso,
   setFilterCurso,
+  cursos = [],
   filterGravedad,
   setFilterGravedad,
 }) {
@@ -36,13 +37,14 @@ export default function AnotacionesToolbar({
         </label>
         <label>
           Curso
-          <input
-            type="text"
-            className="anotaciones-toolbar__input--curso"
-            value={filterCurso}
-            onChange={(event) => setFilterCurso(event.target.value)}
-            placeholder="8°B"
-          />
+          <select value={filterCurso} onChange={(event) => setFilterCurso(event.target.value)}>
+            <option value="">Todos</option>
+            {cursos.map((curso) => (
+              <option key={curso} value={curso}>
+                {curso}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Estudiante (RUT o nombre)

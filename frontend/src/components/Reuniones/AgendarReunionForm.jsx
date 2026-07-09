@@ -20,7 +20,7 @@ import { toast } from 'react-toastify'
 import { buscarApoderadoPorEmail } from '../../services/authService'
 import { getMatriculas } from '../../services/matriculaService'
 import { formatNivel } from '../Academico/entidadesConfig'
-import styles from '../../pages/Reuniones/Reuniones.module.css'
+import styles from '../../styles/Reuniones.module.css'
 
 const TITULOS = {
   individual: 'Agendar entrevista individual',

@@ -144,6 +144,7 @@
 .modalTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
+  color: #ffffff !important; /* header granate: título blanco (gana al color oscuro global de .h4) */
 }
 
 .formHint {
@@ -161,3 +162,5 @@
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);
 }
+
+

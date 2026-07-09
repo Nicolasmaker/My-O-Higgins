@@ -39,7 +39,10 @@ public class CalendarioEstudiantil {
     @Column(name = "MURAL_DIGITAL_id_mur_dig")
     private Long idMuralDigital;
 
-    @Column(name = "ASIGNATURA_id_asi", nullable = false)
+    // Nullable: los eventos institucionales/actividades generales (actos cívicos,
+    // reuniones de apoderados, semana de la chilenidad, etc.) no pertenecen a una
+    // asignatura concreta. Solo los eventos académicos (pruebas/clases) la llevan.
+    @Column(name = "ASIGNATURA_id_asi")
     private Long idAsignatura;
 
     @Column(name = "cal_est_des_eve", length = 300)

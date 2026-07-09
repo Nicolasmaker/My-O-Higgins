@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import './Input.css'
+import '../../../styles/Input.css'
 
 const Input = forwardRef(function Input({ label, error, className = '', ...props }, ref) {
   const inputClassName = ['ui-input', className].filter(Boolean).join(' ')

@@ -204,6 +204,33 @@ $env:HOJA_DE_VIDA_URL="http://localhost:8088"
 
 Vuelve a levantar `MS-HojaDeVida`. El frontend ya está preparado para leer `HOJA_DE_VIDA_URL` en el proxy de Vite.
 
+## Seguridad y configuración por entorno (auditoría)
+
+Los valores sensibles están **externalizados con default de desarrollo**: si no defines la variable de entorno, todo funciona igual que hoy. En producción defines las variables y no tocas código.
+
+| Variable de entorno | Qué controla | Default (dev) | Producción |
+|---|---|---|---|
+| `JWT_SECRET` | Secreto de firma JWT (MS-Autenticacion) | valor de dev | secreto propio (rotarlo) |
+| `DB_USERNAME` / `DB_PASSWORD` | Credenciales MySQL de cada MS | las de dev | credenciales reales |
+| `DDL_AUTO` | `spring.jpa.hibernate.ddl-auto` | `create-drop`/`create`/`update` | `validate` |
+| `ERROR_INCLUDE_MESSAGE` | Detalle de errores en respuestas HTTP | `always` | `never` |
+| `APP_SECURITY_ENABLED` | Enciende la validación de token JWT en los 8 MSes | `false` | `true` |
+| `JWT_EXPIRATION_MS` | Vida del token | `86400000` (24h) | más corta si se desea |
+
+### El interruptor de seguridad (`app.security.enabled`)
+
+- **`false` (por defecto):** todos los endpoints abiertos — mismo comportamiento actual, ideal para desarrollo.
+- **`true`:** los 8 microservicios exigen un **token JWT válido** (el frontend ya lo envía en cada petición). Swagger/consola H2 quedan públicos. Las rutas que otros microservicios consultan de servidor a servidor sin token quedan abiertas a propósito para no romper esas llamadas: en **MS-HojaDeVida** (`/api/hojas-vida/**`, `/api/antecedentes-apoderado/**`) y en **MS-GestionAcademica** (`GET /curso/**`). MS-Autenticacion mantiene además su control por rol propio.
+
+Para probar con seguridad activada, levanta cada MS con la variable, por ejemplo:
+
+```powershell
+$env:APP_SECURITY_ENABLED="true"
+.\mvnw.cmd spring-boot:run
+```
+
+> Nota: dejar abiertas esas rutas internas es la misma postura que ya tenía MS-Autenticacion. Cerrarlas por completo requeriría un *service token* entre microservicios (mejora futura).
+
 ## Pendiente por hacer
 
 ### Crítico

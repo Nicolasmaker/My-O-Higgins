@@ -10,7 +10,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import PropTypes from 'prop-types'
 import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
-import styles from '../../pages/HojaDeVida/HojaDeVida.module.css'
+import styles from '../../styles/HojaDeVida.module.css'
 
 const TIPO_SANGRE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 

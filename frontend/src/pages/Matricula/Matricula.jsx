@@ -23,11 +23,12 @@ import {
   rechazarSolicitudMatricula,
 } from '../../services/matriculaService'
 import { getCursos } from '../../services/academicoService'
+import { getEstudiante } from '../../services/authService'
 import { formatNivel } from '../../components/Academico/entidadesConfig'
 import { formatRut } from '../../utils/formatRut'
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
 import NuevaMatriculaWizard from '../../components/Matricula/NuevaMatriculaWizard'
-import styles from './Matricula.module.css'
+import styles from '../../styles/Matricula.module.css'
 
 const ROLES_GESTION = ['ROLE_DIRECTIVO']
 
@@ -81,6 +82,9 @@ export default function Matricula() {
   const [procesandoId, setProcesandoId] = useState(null)
   const [cursoElegido, setCursoElegido] = useState({})
   const [solForm, setSolForm] = useState({ alumnoRut: '', cursoId: '', tipoAlumno: 'NUEVO', parentesco: '', observaciones: '' })
+  // Estado de existencia del alumno tecleado en la solicitud: informa si el RUT ya
+  // pertenece a la institución o es un estudiante nuevo (no bloquea el envío).
+  const [alumnoCheck, setAlumnoCheck] = useState('idle') // idle | checking | existe | no-existe
 
   useEffect(() => {
     getCursos()
@@ -91,6 +95,15 @@ export default function Matricula() {
   const cursoLabel = (id) => {
     const c = cursos.find((x) => x.idCur === Number(id))
     return c ? `${formatNivel(c.nivel)} ${c.curLetraSeccion} (${c.curAnioEscolar})` : id ?? '—'
+  }
+
+  // Al aprobar, el directivo elige entre las secciones del MISMO nivel que el curso pedido
+  // (ej. si pidió 5°D y está lleno, ve los otros 5° con cupo). Si la solicitud no trae curso
+  // preferido, se muestran todos.
+  const cursosMismoNivel = (cursoId) => {
+    const pedido = cursos.find((c) => Number(c.idCur) === Number(cursoId))
+    const nivelId = pedido?.nivel?.idNiv ?? null
+    return nivelId != null ? cursos.filter((c) => c.nivel?.idNiv === nivelId) : cursos
   }
 
   const loadSolicitudes = useCallback(async () => {
@@ -110,6 +123,29 @@ export default function Matricula() {
   useEffect(() => {
     loadSolicitudes()
   }, [loadSolicitudes])
+
+  // Comprueba (con debounce) si el RUT del alumno tecleado ya existe en la institución.
+  // Solo informativo: un apoderado puede solicitar matrícula para un hijo nuevo cuyo RUT
+  // aún no está en el sistema; en ese caso se avisa que "no pertenece a la institución".
+  useEffect(() => {
+    if (!esApoderado) return
+    const valor = (solForm.alumnoRut || '').trim()
+    if (!valor || !rutValido(valor)) {
+      setAlumnoCheck('idle')
+      return
+    }
+    let cancelado = false
+    setAlumnoCheck('checking')
+    const t = setTimeout(() => {
+      getEstudiante(limpiarRut(valor))
+        .then(() => !cancelado && setAlumnoCheck('existe'))
+        .catch(() => !cancelado && setAlumnoCheck('no-existe'))
+    }, 500)
+    return () => {
+      cancelado = true
+      clearTimeout(t)
+    }
+  }, [solForm.alumnoRut, esApoderado])
 
   const handleSolicitarMatricula = async (event) => {
     event.preventDefault()
@@ -204,12 +240,22 @@ export default function Matricula() {
   )
 
   const filtradas = useMemo(() => {
-    const rutQuery = busquedaRut.trim()
+    // Normaliza el query: quita puntos/espacios y baja a minúscula (para DV 'K').
+    // Se compara contra el RUT completo "cuerpo-dv", así matchea tanto "26000001"
+    // como "26000001-7" (antes solo funcionaba sin dígito verificador).
+    const rutQuery = busquedaRut.trim().replace(/[.\s]/g, '').toLowerCase()
+    const rutCompleto = (rut, dv) =>
+      rut === null || rut === undefined || rut === ''
+        ? ''
+        : `${rut}${dv ? `-${String(dv).toLowerCase()}` : ''}`
     return propias.filter((m) => {
       if (filtroEstado && (m.matriculaEstado || '') !== filtroEstado) return false
       if (filtroTipo && (m.tipoAlumno || '') !== filtroTipo) return false
-      if (rutQuery && !String(m.alumnoRut ?? '').includes(rutQuery) && !String(m.apoderadoRut ?? '').includes(rutQuery))
-        return false
+      if (rutQuery) {
+        const alumno = rutCompleto(m.alumnoRut, m.alumnoDv)
+        const apoderado = rutCompleto(m.apoderadoRut, m.apoderadoDv)
+        if (!alumno.includes(rutQuery) && !apoderado.includes(rutQuery)) return false
+      }
       return true
     })
   }, [propias, filtroEstado, filtroTipo, busquedaRut])
@@ -474,6 +520,26 @@ export default function Matricula() {
                     </Button>
                   </Col>
                 </Row>
+                {/* Mensaje del RUT del alumno: en su propia línea, no descuadra la fila. */}
+                {alumnoCheck !== 'idle' && (
+                  <div className="mt-2">
+                    <small
+                      className={
+                        alumnoCheck === 'existe'
+                          ? 'text-success'
+                          : alumnoCheck === 'no-existe'
+                          ? 'text-warning'
+                          : 'text-muted'
+                      }
+                    >
+                      {alumnoCheck === 'checking'
+                        ? 'Verificando RUT del alumno…'
+                        : alumnoCheck === 'existe'
+                        ? 'Alumno encontrado en la institución.'
+                        : 'El alumno no existe: se creará su cuenta al aprobar la solicitud.'}
+                    </small>
+                  </div>
+                )}
               </Form>
             )}
 
@@ -519,11 +585,20 @@ export default function Matricula() {
                               }
                             >
                               <option value="">Sin curso</option>
-                              {cursos.map((c) => (
-                                <option key={c.idCur} value={c.idCur}>
-                                  {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar})
-                                </option>
-                              ))}
+                              {cursosMismoNivel(s.cursoId).map((c) => {
+                                const tope = c.cupos ?? c.sala?.salaCapacidad ?? null
+                                const activas = matriculas.filter(
+                                  (m) => m.cursoId === c.idCur && m.matriculaEstado === 'ACTIVA'
+                                ).length
+                                const disponibles = tope === null ? null : tope - activas
+                                const sinCupo = disponibles !== null && disponibles <= 0
+                                return (
+                                  <option key={c.idCur} value={c.idCur} disabled={sinCupo}>
+                                    {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar}) —{' '}
+                                    {disponibles === null ? 'sin cupo definido' : sinCupo ? 'SIN CUPOS' : `${disponibles} cupos`}
+                                  </option>
+                                )
+                              })}
                             </Form.Select>
                           ) : (
                             cursoLabel(s.cursoId)
@@ -538,13 +613,12 @@ export default function Matricula() {
                           <Badge bg={ESTADO_SOLICITUD_BADGE[s.estado] || 'secondary'}>{s.estado}</Badge>
                         </td>
                         {canManage && (
-                          <td className="text-end">
+                          <td className="text-end" style={{ whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                             {s.estado === 'PENDIENTE' && (
-                              <>
+                              <div className="d-flex gap-2 justify-content-end align-items-center">
                                 <Button
                                   size="sm"
-                                  variant="outline-success"
-                                  className="me-2"
+                                  variant="outline-secondary"
                                   disabled={procesandoId === s.idSolicitud}
                                   onClick={() => handleAprobarSolicitud(s)}
                                 >
@@ -558,7 +632,7 @@ export default function Matricula() {
                                 >
                                   Rechazar
                                 </Button>
-                              </>
+                              </div>
                             )}
                           </td>
                         )}
@@ -578,6 +652,8 @@ export default function Matricula() {
         show={showForm}
         matricula={editTarget}
         defaultRut={userRut}
+        cursos={cursos}
+        matriculas={matriculas}
         saving={saving}
         onSave={handleSave}
         onClose={() => {

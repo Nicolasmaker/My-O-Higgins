@@ -1,7 +1,7 @@
 import Button from '../UI/Button'
 import Input from '../UI/Input'
 import { anotacionRules } from '../../validators/fieldValidators'
-import './AnotacionForm.css'
+import '../../styles/AnotacionForm.css'
 
 const ESTADO_HOJA_VIDA = {
   idle: null,

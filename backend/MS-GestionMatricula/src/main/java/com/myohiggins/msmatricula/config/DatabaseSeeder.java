@@ -1,15 +1,24 @@
 package com.myohiggins.msmatricula.config;
 
+import com.myohiggins.msmatricula.dto.ActualizarCursoRequest;
 import com.myohiggins.msmatricula.model.entities.Matricula;
 import com.myohiggins.msmatricula.repository.MatriculaRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
 
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
+
     private final MatriculaRepository matriculaRepository;
+    // Para sincronizar Estudiante.cursoId en Autenticacion (igual que MatriculaService.crearMatricula).
+    private final RestClient autenticacionRestClient;
 
     // RUTs reales sembrados por MS-Autenticacion/DatabaseSeeder.java — NO inventar nuevos.
     // 40 estudiantes (26000001-26000040) pareados 1:1 con 40 apoderados (15000001-15000040,
@@ -31,8 +40,10 @@ public class DatabaseSeeder implements CommandLineRunner {
     // obligaría a levantar Autenticacion ANTES que este MS solo para poder sembrar (mismo tipo
     // de fragilidad de orden de arranque que tumbó a MS-HojaDeVida). Los RUTs usados acá son
     // copia exacta de los que Autenticacion ya siembra, así que el riesgo de dato huérfano es bajo.
-    public DatabaseSeeder(MatriculaRepository matriculaRepository) {
+    public DatabaseSeeder(MatriculaRepository matriculaRepository,
+                          @Qualifier("autenticacionRestClient") RestClient autenticacionRestClient) {
         this.matriculaRepository = matriculaRepository;
+        this.autenticacionRestClient = autenticacionRestClient;
     }
 
     // cursoId asume el orden de creación del DatabaseSeeder de MS-GestionAcademica (create-drop,
@@ -74,7 +85,25 @@ public class DatabaseSeeder implements CommandLineRunner {
             matricula.setParentesco(PARENTESCOS[indice % PARENTESCOS.length]);
 
             matriculaRepository.save(matricula);
+            sincronizarCursoEstudiante(matricula.getAlumnoRut(), cursoId);
         }
         return desdeIndice + cantidad;
+    }
+
+    // Sincroniza Estudiante.cursoId en Autenticacion para que la sección Académico y las
+    // anotaciones (que leen estudiante.cursoId, no Matricula.cursoId) muestren el curso.
+    // Best-effort: requiere Autenticacion arriba; si falla, solo se registra en el log.
+    private void sincronizarCursoEstudiante(long alumnoRut, long cursoId) {
+        try {
+            ActualizarCursoRequest body = new ActualizarCursoRequest();
+            body.setCursoId((int) cursoId);
+            autenticacionRestClient.patch()
+                    .uri("/estudiantes/{rut}/curso", alumnoRut)
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.warn("No se pudo sincronizar el curso del estudiante {}: {}", alumnoRut, e.getMessage());
+        }
     }
 }

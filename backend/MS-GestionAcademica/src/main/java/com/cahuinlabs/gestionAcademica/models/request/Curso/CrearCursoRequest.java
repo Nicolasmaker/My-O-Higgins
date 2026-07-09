@@ -6,6 +6,7 @@ import lombok.Data;
 public class CrearCursoRequest {
     private String curLetraSec;
     private Integer curAnioEscolar;
-    private Integer idSala;  
-    private Integer idNivel; 
+    private Integer cupos;   // opcional; si es null se usa la capacidad de la sala
+    private Integer idSala;
+    private Integer idNivel;
 }

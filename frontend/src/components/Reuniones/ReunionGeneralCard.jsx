@@ -10,7 +10,7 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Card, Badge, Button, Form } from 'react-bootstrap'
 import { formatRut } from '../../utils/formatRut'
-import styles from '../../pages/Reuniones/Reuniones.module.css'
+import styles from '../../styles/Reuniones.module.css'
 
 export default function ReunionGeneralCard({ reunion, formatDate, cursoLabel, onCompletarActa, canManage }) {
   const base = reunion.bitReunionApoderado

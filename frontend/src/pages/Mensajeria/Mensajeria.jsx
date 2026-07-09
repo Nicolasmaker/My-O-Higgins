@@ -23,7 +23,7 @@ import {
   eliminarMensaje,
 } from '../../services/mensajeriaService'
 import MensajeCompose from '../../components/Mensajeria/MensajeCompose'
-import styles from './Mensajeria.module.css'
+import styles from '../../styles/Mensajeria.module.css'
 
 function formatDate(value) {
   if (!value) return ''

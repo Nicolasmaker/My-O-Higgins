@@ -1,5 +1,7 @@
 # Estructura del Proyecto Spring Boot
 
+> ⚠️ **DOCUMENTO OBSOLETO / GENÉRICO.** Este archivo es una plantilla genérica (`com.example`, monolito Thymeleaf/H2) que **no refleja** la arquitectura real de My-O-Higgins (microservicios Spring Boot + SPA React). La fuente de verdad de la estructura, puertos, BDs y arranque es **`README.md`**. Puede eliminarse.
+
 ## 📁 Descripción de Carpetas
 
 ```

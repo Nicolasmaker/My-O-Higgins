@@ -47,32 +47,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         }
 
      //Extrae el token quitando los primeros 7 caracteres del bearer
-        jwt = authHeader.substring(7); 
+        jwt = authHeader.substring(7);
 
-        userEmail = jwtService.extraerUsername(jwt); //Extrae el email del token
+     //Un token expirado, malformado o con firma invalida hace que extraerUsername/validacion
+     //lanzar excepcion. Se captura para NO responder 500: se deja la peticion sin autenticar y
+     //la cadena de seguridad responde 401 limpio en las rutas protegidas.
+        try {
+            userEmail = jwtService.extraerUsername(jwt); //Extrae el email del token
 
-     //Si hay un email pero el usuario no esta autenticado, se autentica
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+         //Si hay un email pero el usuario no esta autenticado, se autentica
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail); //Busca al usuario en la bd
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail); //Busca al usuario en la bd
 
-         //Si el token es valido, se autentica al usuario
-            if (jwtService.tokenEsValido(jwt, userDetails)) {
+             //Si el token es valido, se autentica al usuario
+                if (jwtService.tokenEsValido(jwt, userDetails)) {
 
-             //Pase de acceso oficial del spring security
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-                );
+                 //Pase de acceso oficial del spring security
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                    );
 
-                authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-                );
+                    authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
 
-             //Le da acceso al usuario
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                 //Le da acceso al usuario
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
         }
 
      //Continuar con el resto de los filtros

@@ -5,20 +5,22 @@ import { FiCalendar, FiChevronLeft, FiChevronRight, FiClock, FiList, FiPlus, FiR
 import Button from '../../components/UI/Button'
 import Input from '../../components/UI/Input'
 import { useAuth } from '../../hooks/useAuth'
-import { crearEvento, actualizarEvento, eliminarEvento, getEventos } from '../../services/calendarioService'
+import { crearEvento, actualizarEvento, eliminarEvento, getEventos, crearMural } from '../../services/calendarioService'
 import { getAsignaturas } from '../../services/asignaturaService'
 import { getImpartirByDocente } from '../../services/academicoService'
 import { getMatriculas } from '../../services/matriculaService'
-import styles from './Calendario.module.css'
+import styles from '../../styles/Calendario.module.css'
 
 const eventTypes = ['Institucional', 'Académico', 'Actividad']
+// Institucional/Actividad no tienen asignatura real; Mural Digital solo recibe estos dos tipos.
+const tiposSinAsignatura = ['Institucional', 'Actividad']
+const tiposParaMural = ['Institucional', 'Actividad']
 
 const initialForm = {
   tituloEvento: '',
   tipoEvento: 'Académico',
   fechaInicio: '',
   fechaFin: '',
-  idMuralDigital: '',
   idAsignatura: '',
   descripcionEvento: '',
 }
@@ -216,6 +218,12 @@ export default function Calendario() {
   } = useForm({ defaultValues: initialForm })
 
   const watchFechaInicio = watch('fechaInicio')
+  const watchTipoEvento = watch('tipoEvento')
+  const asignaturaNoAplica = tiposSinAsignatura.includes(watchTipoEvento)
+
+  useEffect(() => {
+    if (asignaturaNoAplica) setValue('idAsignatura', '')
+  }, [asignaturaNoAplica, setValue])
 
   const loadData = async () => {
     setLoading(true)
@@ -339,17 +347,30 @@ export default function Calendario() {
   const handleCreateOrUpdate = async (data) => {
     setSaving(true)
 
+    const esSinAsignatura = tiposSinAsignatura.includes(data.tipoEvento)
+
     const payload = {
       tituloEvento: data.tituloEvento,
       tipoEvento: data.tipoEvento,
       fechaInicio: data.fechaInicio,
       fechaFin: data.fechaFin,
-      idMuralDigital: data.idMuralDigital ? Number(data.idMuralDigital) : null,
-      idAsignatura: Number(data.idAsignatura),
+      idAsignatura: esSinAsignatura ? null : Number(data.idAsignatura),
       descripcionEvento: data.descripcionEvento,
+      idMuralDigital: null,
     }
 
     try {
+      // Institucional/Actividad se reflejan también en el Mural Digital, vinculados al creador.
+      if (!editingId && tiposParaMural.includes(data.tipoEvento)) {
+        const muralResponse = await crearMural({
+          titulo: data.tituloEvento,
+          contenido: data.descripcionEvento,
+          fechaPublicacion: data.fechaInicio,
+          funcionarioUsuRut: usuario?.usuRut ?? null,
+        })
+        payload.idMuralDigital = muralResponse?.data?.idMurDig ?? null
+      }
+
       if (editingId) {
         await actualizarEvento(editingId, payload)
         toast.success('Evento actualizado')
@@ -379,7 +400,6 @@ export default function Calendario() {
       tipoEvento: evento.tipoEvento || 'Académico',
       fechaInicio,
       fechaFin,
-      idMuralDigital: evento.idMuralDigital ?? '',
       idAsignatura: evento.idAsignatura ? String(evento.idAsignatura) : '',
       descripcionEvento: evento.descripcionEvento || '',
     })
@@ -388,7 +408,7 @@ export default function Calendario() {
       const parsed = fromInputDate(fechaInicio)
       if (parsed) setCurrentMonth(startOfMonth(parsed))
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    document.getElementById('form-evento')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   const handleDelete = async (id) => {
@@ -491,7 +511,7 @@ export default function Calendario() {
             </div>
             <div className={styles.listItemMeta}>
               <span>{formatLongDate(evento.fechaInicio)}</span>
-              <span>Asignatura #{evento.idAsignatura}</span>
+              <span>{evento.idAsignatura ? `Asignatura #${evento.idAsignatura}` : 'No aplica'}</span>
             </div>
           </article>
         ))
@@ -615,7 +635,7 @@ export default function Calendario() {
                       </div>
                       <p>{evento.descripcionEvento}</p>
                       <div className={styles.detailMeta}>
-                        <span>Asignatura #{evento.idAsignatura}</span>
+                        <span>{evento.idAsignatura ? `Asignatura #${evento.idAsignatura}` : 'No aplica'}</span>
                         <span>{formatLongDate(evento.fechaInicio)}</span>
                       </div>
                       {puedeEditarEvento(evento) && (
@@ -686,24 +706,25 @@ export default function Calendario() {
                 {...register('fechaFin', { required: 'La fecha de fin es obligatoria' })}
               />
 
-              <Input
-                label="ID mural digital"
-                type="number"
-                placeholder="Opcional"
-                error={errors.idMuralDigital?.message}
-                {...register('idMuralDigital')}
-              />
-
               <label className={styles.field}>
                 <span>Asignatura</span>
-                <select className={styles.select} {...register('idAsignatura', { required: 'La asignatura es obligatoria' })}>
-                  <option value="">Selecciona una asignatura</option>
-                  {asignaturasParaForm.map((asignatura) => (
-                    <option key={asignatura.idAsi} value={asignatura.idAsi}>
-                      {asignatura.asiNombre}
-                    </option>
-                  ))}
-                </select>
+                {asignaturaNoAplica ? (
+                  <select className={styles.select} value="no-aplica" disabled>
+                    <option value="no-aplica">No aplica</option>
+                  </select>
+                ) : (
+                  <select
+                    className={styles.select}
+                    {...register('idAsignatura', { required: 'La asignatura es obligatoria' })}
+                  >
+                    <option value="">Selecciona una asignatura</option>
+                    {asignaturasParaForm.map((asignatura) => (
+                      <option key={asignatura.idAsi} value={asignatura.idAsi}>
+                        {asignatura.asiNombre}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {errors.idAsignatura ? <span className={styles.errorText}>{errors.idAsignatura.message}</span> : null}
               </label>
 

@@ -8,6 +8,17 @@
 // `limpiarRut` extrae el cuerpo numérico para enviar al backend.
 // =============================================================
 
+// Normaliza el RUT tecleado: quita puntos/espacios, sube a mayúscula (por la 'k') y
+// reemplaza guiones "raros" (en-dash, em-dash, guion tipográfico — comunes al copiar/
+// pegar desde Word) por el guion ASCII normal, para que el regex no falle en silencio.
+function normalizarRut(valor) {
+  return String(valor)
+    .replace(/\./g, '')
+    .replace(/\s/g, '')
+    .replace(/[‐‑‒–—−]/g, '-')
+    .toUpperCase()
+}
+
 // Calcula el dígito verificador por módulo 11
 export function calcularDv(cuerpo) {
   let suma = 0
@@ -24,7 +35,7 @@ export function calcularDv(cuerpo) {
 
 // Valida formato y (si viene) el DV. Acepta "12345678" o "12.345.678-5".
 export function rutValido(valor) {
-  const limpio = String(valor).replace(/\./g, '').replace(/\s/g, '').toUpperCase()
+  const limpio = normalizarRut(valor)
   const match = limpio.match(/^(\d{7,8})(-([\dK]))?$/)
   if (!match) return false
   const [, cuerpo, , dv] = match
@@ -35,7 +46,7 @@ export function rutValido(valor) {
 // Igual que rutValido pero exige guión + DV (para el RUT de estudiante en
 // Anotaciones: solo se busca la hoja de vida si el formato viene completo).
 export function rutValidoConDv(valor) {
-  const limpio = String(valor).replace(/\./g, '').replace(/\s/g, '').toUpperCase()
+  const limpio = normalizarRut(valor)
   const match = limpio.match(/^(\d{7,8})-([\dK])$/)
   if (!match) return false
   const [, cuerpo, dv] = match
@@ -44,7 +55,7 @@ export function rutValidoConDv(valor) {
 
 // Extrae el cuerpo numérico del RUT (lo que espera el backend)
 export function limpiarRut(valor) {
-  const limpio = String(valor).replace(/\./g, '').replace(/\s/g, '')
+  const limpio = normalizarRut(valor)
   return Number(limpio.split('-')[0])
 }
 
@@ -52,7 +63,7 @@ export function limpiarRut(valor) {
 // no trae DV — usado al crear cuentas nuevas (Estudiante/Apoderado), donde el backend guarda
 // cuerpo y DV en columnas separadas (usuRut / usuDvRut).
 export function extraerDv(valor) {
-  const limpio = String(valor).replace(/\./g, '').replace(/\s/g, '').toUpperCase()
+  const limpio = normalizarRut(valor)
   const partes = limpio.split('-')
   return partes.length > 1 ? partes[1] : null
 }

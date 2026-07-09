@@ -216,7 +216,7 @@
 .composeTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .composeLabel {
@@ -234,6 +234,9 @@
   border-radius: var(--radius-pill, 999px);
   padding: 6px 14px;
   font-weight: var(--font-weight-medium);
+  height: 32px;
+  weight: 500px;
+  margin-left: 10px;
 }
 
 .destinatarioChip button {

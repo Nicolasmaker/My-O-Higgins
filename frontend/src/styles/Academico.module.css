@@ -69,11 +69,21 @@
   --bs-btn-disabled-border-color: var(--color-primary-light);
   box-shadow: 0 4px 12px rgba(107, 35, 35, 0.25);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  width: 180px !important;
+  height: 50px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--font-size-md);
 }
 
 .btnGranate:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(107, 35, 35, 0.35);
+}
+
+.table :global(.btn){
+  font-size: 13px !important;
 }
 
 /* ── Nav lateral ────────────────────────────────────────────── */
@@ -177,10 +187,29 @@
   background-color: #faf5f5;
 }
 
+
+.table td:last-child,
+.table th:last-child {
+  white-space: nowrap;
+  width: 1%;
+ }
+
+/* Select de estado al pasar lista: la última columna se colapsa a width:1%,
+   lo que apretaba el desplegable y ocultaba la opción seleccionada. Con un
+   min-width propio el <select> se muestra completo y más horizontal. */
+.estadoSelect {
+  min-width: 170px;
+  width: 100%;
+  font-weight: var(--font-weight-semibold);
+}
+
 /* ── Modal ──────────────────────────────────────────────────── */
 .modalHeader {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: var(--color-text-light);
+  /* Opcional: asegura que las esquinas de arriba se mantengan redonditas */
+  border-top-left-radius: calc(0.3rem - 1px);
+  border-top-right-radius: calc(0.3rem - 1px);
 }
 
 .modalHeader :global(.btn-close) {
@@ -192,6 +221,34 @@
   font-weight: var(--font-weight-semibold);
 }
 
+:global(.modal-body .form-control:focus),
+:global(.modal-body .form-select:focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+/* 2. Radio buttons color granate */
+:global(.modal-body .form-check-input:checked) {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+:global(.modal-body .form-check-input:focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+/* 3. Si usas los menús desplegables (Dropdowns personalizados) en este modal: */
+:global(.modal-body .dropdown-toggle:focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+.modalTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: #ffffff !important;
+}
 /* ── Estados vacíos ─────────────────────────────────────────── */
 .emptyState {
   padding: var(--spacing-2xl);

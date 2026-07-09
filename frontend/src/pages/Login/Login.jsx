@@ -7,7 +7,7 @@ import Button from '../../components/UI/Button/Button'
 import Input from '../../components/UI/Input/Input'
 import { emailRules, passwordRules } from '../../validators/fieldValidators'
 import colegioFachada from '../../assets/colegioFachada.webp'
-import './login.css'
+import '../../styles/login.css'
 
 export default function Login() {
   const {
@@ -44,7 +44,8 @@ export default function Login() {
 
       loginContext(token, usuario || { rolNombre: 'ROLE_DOCENTE' })
       toast.success('Sesión iniciada')
-      window.location.href = '/anotaciones'
+      // Tras login, ir al inicio (Home muestra el Mural Digital cuando hay sesión).
+      window.location.href = '/'
     } catch (error) {
       console.error(error)
       toast.error(error.response?.data?.message || error.message || 'No se pudo iniciar sesión')
