@@ -82,7 +82,7 @@ export default function Home() {
       id: 1,
       image: academicoImg,
       category: 'Académico',
-      title: 'Inicio del Nuevo Período Académico 2024',
+      title: 'Inicio del Nuevo Período Académico 2026',
       excerpt:
         'Nos complace anunciar el inicio del nuevo período académico. Todos los estudiantes deben presentarse con sus útiles y uniformes completos.',
       link: '#',
@@ -91,7 +91,7 @@ export default function Home() {
       id: 2,
       image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop',
       category: 'Actividades',
-      title: 'Jornada de Integración 2024',
+      title: 'Jornada de Integración 2026',
       excerpt:
         'Se realizará una jornada de integración para todos los cursos con actividades recreativas y deportivas en el patio principal.',
       link: '#',
