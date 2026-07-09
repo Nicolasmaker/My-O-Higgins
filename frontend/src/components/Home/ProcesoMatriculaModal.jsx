@@ -19,26 +19,22 @@ const DOCUMENTOS = [
   'Certificado de vacunas al día (educación básica).',
 ];
 
+const DATOS_PERSONALES = [
+  'Nombre completo del postulante.',
+  'RUT del postulante.',
+  'Curso al que postula.',
+  'Información de contacto del apoderado (correo electrónico y teléfono).',
+];
+
 export default function ProcesoMatriculaModal({ show, onClose }) {
   const [paso, setPaso] = useState(0);
-  const [datos, setDatos] = useState({
-    nombre: '',
-    rut: '',
-    cursoPostula: '',
-    contacto: '',
-  });
 
   const esUltimoPaso = paso === PASOS.length - 1;
   const esPrimerPaso = paso === 0;
 
   const handleClose = () => {
     setPaso(0);
-    setDatos({ nombre: '', rut: '', cursoPostula: '', contacto: '' });
     onClose();
-  };
-
-  const handleChange = (campo) => (e) => {
-    setDatos((prev) => ({ ...prev, [campo]: e.target.value }));
   };
 
   return (
@@ -84,28 +80,23 @@ export default function ProcesoMatriculaModal({ show, onClose }) {
 
         {paso === 2 && (
           <div>
-            <h5>Datos personales</h5>
+            <h5>Datos personales requeridos</h5>
             <p className="text-muted small">
-              Este formulario es solo referencial para que sepas qué información se te pedirá — no se envía a ninguna parte todavía.
+              Asegúrate de tener a mano los siguientes datos para cuando realices el proceso:
             </p>
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Nombre completo del postulante</Form.Label>
-                <Form.Control value={datos.nombre} onChange={handleChange('nombre')} placeholder="Nombre y apellidos" />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>RUT del postulante</Form.Label>
-                <Form.Control value={datos.rut} onChange={handleChange('rut')} placeholder="12.345.678-9" />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Curso al que postula</Form.Label>
-                <Form.Control value={datos.cursoPostula} onChange={handleChange('cursoPostula')} placeholder="Ej: 1° Básico" />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Contacto del apoderado (correo o teléfono)</Form.Label>
-                <Form.Control value={datos.contacto} onChange={handleChange('contacto')} placeholder="correo@ejemplo.cl o +56 9..." />
-              </Form.Group>
-            </Form>
+            <ul>
+              {DATOS_PERSONALES.map((dp) => (
+                <li key={dp}>{dp}</li>
+              ))}
+            </ul>
+            
+            <hr className="my-3" />
+            
+            <p className="text-muted small bg-light p-3 rounded border">
+              <strong>Nota:</strong> El proceso de matrícula se puede realizar de forma presencial 
+              directamente en el establecimiento, o bien de manera telefónica comunicándote al 
+              número <strong>+56 51 231 3192</strong>.
+            </p>
           </div>
         )}
 
