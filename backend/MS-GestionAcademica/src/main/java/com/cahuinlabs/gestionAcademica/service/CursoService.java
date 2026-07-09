@@ -40,8 +40,9 @@ public class CursoService {
         Curso curso = new Curso();
         curso.setCurLetraSeccion(cursoRequest.getCurLetraSec());
         curso.setCurAnioEscolar(cursoRequest.getCurAnioEscolar());
-        curso.setSala(sala);   
-        curso.setNivel(nivel); 
+        curso.setCupos(cursoRequest.getCupos());
+        curso.setSala(sala);
+        curso.setNivel(nivel);
 
         return cursoRepository.save(curso);
     }
@@ -58,6 +59,9 @@ public class CursoService {
 
      //Actualiza los datos
         cursoExistente.setCurLetraSeccion(request.getCurLetraSec());
+        if (request.getCupos() != null) {
+            cursoExistente.setCupos(request.getCupos());
+        }
         cursoExistente.setSala(sala);
 
         return cursoRepository.save(cursoExistente);

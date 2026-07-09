@@ -40,6 +40,11 @@ public class NotaController {
         return ResponseEntity.ok(notasService.listarPorEstudiante(rut));
     }
 
+    @GetMapping("/evaluacion/{idEva}")
+    public ResponseEntity<List<Notas>> listarPorEvaluacion(@PathVariable Integer idEva) {
+        return ResponseEntity.ok(notasService.listarPorEvaluacion(idEva));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Notas> obtenerPorId(@PathVariable Integer id) {
         return notasService.buscarPorId(id)

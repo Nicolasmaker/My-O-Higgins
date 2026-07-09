@@ -42,13 +42,11 @@ public class SolicitudMatriculaService {
         this.hojaVidaRestClient = hojaVidaRestClient;
     }
 
-    // El apoderado crea la solicitud (sin funcionario: aun no hay matricula real, solo la solicitud)
+    // El apoderado crea la solicitud (sin funcionario: aun no hay matricula real, solo la solicitud).
+    // A diferencia de Matricula, aqui el alumno puede NO existir todavia en Autenticacion (hijo nuevo
+    // que aun no tiene cuenta): esa cuenta recien se crea cuando el Directivo aprueba la solicitud.
+    // Por eso no se valida existeEstudiante aqui.
     public SolicitudMatricula crearSolicitud(SolicitudMatricula solicitud) {
-        if (!existeEstudiante(solicitud.getAlumnoRut())) {
-            throw new IllegalArgumentException(
-                    "El estudiante con RUT " + solicitud.getAlumnoRut()
-                            + " no tiene una cuenta registrada. Debe crearse su cuenta antes de solicitar matrícula.");
-        }
         if (!existeApoderado(solicitud.getApoderadoRut())) {
             throw new IllegalArgumentException(
                     "El apoderado con RUT " + solicitud.getApoderadoRut() + " no existe en el sistema.");
@@ -104,21 +102,6 @@ public class SolicitudMatriculaService {
         solicitud.setEstado("RECHAZADA");
         solicitud.setMotivoRechazo(motivo);
         return solicitudRepository.save(solicitud);
-    }
-
-    // Verifica si el estudiante existe en el microservicio de Autenticacion
-    private boolean existeEstudiante(Long rut) {
-        try {
-            EstudianteDTO estudiante = autenticacionRestClient.get()
-                    .uri("/estudiantes/{rut}", rut)
-                    .retrieve()
-                    .body(EstudianteDTO.class);
-            return estudiante != null;
-        } catch (HttpClientErrorException.NotFound e) {
-            return false;
-        } catch (Exception e) {
-            throw new RuntimeException("Error al comunicarse con el microservicio de Autenticacion: " + e.getMessage());
-        }
     }
 
     // Verifica si el apoderado existe en el microservicio de Autenticacion

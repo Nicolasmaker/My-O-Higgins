@@ -57,6 +57,10 @@ public class NotaService {
         return notasRepository.findByEstudianteUsuRut(estudianteUsuRut);
     }
 
+    public List<Notas> listarPorEvaluacion(Integer idEva) {
+        return notasRepository.findByEvaluacion_IdEva(idEva);
+    }
+
     public void eliminar(Integer id) {
         notasRepository.deleteById(id);
     }

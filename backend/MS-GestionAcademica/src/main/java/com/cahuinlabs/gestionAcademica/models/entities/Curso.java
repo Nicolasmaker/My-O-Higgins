@@ -30,7 +30,12 @@ public class Curso {
     @Column(name = "cur_anio_escolar", nullable = false)
     private Integer curAnioEscolar;
 
-    // Relaciones 
+    // Cupos del curso. Si es null, el cupo efectivo se toma de la capacidad de la
+    // sala asignada (sala.salaCapacidad). Permite sobrescribir ese tope por curso.
+    @Column(name = "cur_cupos")
+    private Integer cupos;
+
+    // Relaciones
     @ManyToOne
     @JoinColumn(name = "sala_id_sal", nullable = false)
     private Sala sala;
