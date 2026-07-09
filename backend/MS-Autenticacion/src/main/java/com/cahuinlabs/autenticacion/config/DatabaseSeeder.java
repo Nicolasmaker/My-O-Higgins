@@ -1754,15 +1754,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             apoderadoService.crearApoderado(apoderado40);
 
             System.out.println("==========================================================================");
-            System.out.println("====== BASE DE DATOS INICIALIZADA CON USUARIOS DE PRUEBA (SEEDER) ========");
-            System.out.println("==========================================================================");
-            System.out.println("1. DIRECTIVO  (Admin)  -> RUT: 11111111 | Email: admin@colegio.cl");
-            System.out.println("2. DOCENTE    (Profe)  -> RUT: 22222222 | Email: profe@colegio.cl");
-            System.out.println("3. INSPECTOR           -> RUT: 33333333 | Email: inspector@colegio.cl");
-            System.out.println("4. ESTUDIANTE (Alumno) -> RUT: 12345678 | Email: juan.perez@estudiante.cl");
-            System.out.println("5. APODERADO           -> RUT: 44444444 | Email: maria.apoderada@gmail.com");
-            System.out.println("==========================================================================");
-            System.out.println("Todas las contraseñas siguen el formato: [rol]123 (ej. admin123, alumno123)");
+            System.out.println("======          Autenticacion operativo + info usuarios           ========");
             System.out.println("==========================================================================");
         }
     }
