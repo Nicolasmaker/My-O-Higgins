@@ -25,9 +25,9 @@ public class JwtService {
     @Value("${jwt.secret:TXlPaGlnZ2lucyEyMDI2IU1pY3JvU2VydmljaW9BdXRlbnRpY2FjaW9u}")
     private String secretKey;
 
-    // Tiempo de expiración del token en milisegundos (por defecto 24h). Externalizado para
+    // Tiempo de expiración del token en milisegundos (por defecto 8h). Externalizado para
     // poder acortarlo en producción.
-    @Value("${jwt.expiration-ms:86400000}")
+    @Value("${jwt.expiration-ms:28800000}") // 8 horas token
     private long expirationMs;
 
  //Generacion de token
