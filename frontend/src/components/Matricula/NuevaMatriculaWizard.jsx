@@ -313,6 +313,7 @@ export default function NuevaMatriculaWizard({ show, funcionarioUsuRut, onClose,
           className="mb-4"
           now={(paso / 3) * 100}
           label={`Paso ${paso} de 3: ${paso === 1 ? 'Apoderado' : paso === 2 ? 'Estudiante' : 'Matrícula'}`}
+          style={{ '--bs-progress-bar-bg': '#6B2323' }}
         />
 
         {paso === 1 && (
