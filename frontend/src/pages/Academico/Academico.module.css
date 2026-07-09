@@ -188,11 +188,20 @@
 }
 
 
-.table td:last-child, 
+.table td:last-child,
 .table th:last-child {
-  white-space: nowrap; 
-  width: 1%; 
+  white-space: nowrap;
+  width: 1%;
  }
+
+/* Select de estado al pasar lista: la última columna se colapsa a width:1%,
+   lo que apretaba el desplegable y ocultaba la opción seleccionada. Con un
+   min-width propio el <select> se muestra completo y más horizontal. */
+.estadoSelect {
+  min-width: 170px;
+  width: 100%;
+  font-weight: var(--font-weight-semibold);
+}
 
 /* ── Modal ──────────────────────────────────────────────────── */
 .modalHeader {

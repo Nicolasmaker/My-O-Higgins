@@ -19,6 +19,7 @@ import { useAuth } from '../../hooks/useAuth'
 import {
   getNotasByEstudiante, getCursoById, getImpartirByDocente, getAsignaturas, getCursos,
   getAsistenciaPorImpartirYFecha, registrarAsistencia, actualizarAsistencia,
+  getEvaluaciones, registrarNota, actualizarNota, getNotasByEvaluacion,
 } from '../../services/academicoService'
 import { getMatriculas } from '../../services/matriculaService'
 import { getEstudiante } from '../../services/authService'
@@ -494,6 +495,7 @@ function DocentePasarLista({ impartirDocente }) {
                     <td>
                       <Form.Select
                         size="sm"
+                        className={styles.estadoSelect}
                         value={estados[m.alumnoRut] ?? 'PRESENTE'}
                         onChange={(e) => setEstados((prev) => ({ ...prev, [m.alumnoRut]: e.target.value }))}
                       >
@@ -522,6 +524,233 @@ DocentePasarLista.propTypes = {
   impartirDocente: PropTypes.array.isRequired,
 }
 
+// ── "Ingresar Notas" para el Docente: elige un curso+asignatura que dicta (vía Impartir)
+// y una de sus evaluaciones; despliega el roster del curso con un input de nota por alumno,
+// con estado en vivo (Aprobado ≥4.0 / Reprobado / Pendiente). Guarda en lote: crea las notas
+// nuevas y actualiza las ya registradas de esa evaluación (precargadas). Promedio simple. ──
+// Acepta coma o punto como separador decimal (teclado ES) — devuelve NaN si está vacío.
+function parseNota(valor) {
+  if (valor === '' || valor === null || valor === undefined) return NaN
+  return parseFloat(String(valor).replace(',', '.'))
+}
+
+function estadoDeNota(valor) {
+  const n = parseNota(valor)
+  if (Number.isNaN(n)) {
+    return { label: 'Pendiente', bg: 'secondary' }
+  }
+  return n >= 4.0 ? { label: 'Aprobado', bg: 'success' } : { label: 'Reprobado', bg: 'danger' }
+}
+
+function DocenteIngresoNotas({ impartirDocente }) {
+  const [idImpartir, setIdImpartir] = useState('')
+  const [evaluaciones, setEvaluaciones] = useState([])
+  const [idEvaluacion, setIdEvaluacion] = useState('')
+  const [matriculas, setMatriculas] = useState([])
+  const [notasExistentes, setNotasExistentes] = useState([])
+  const [valores, setValores] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (impartirDocente.length > 0 && !idImpartir) setIdImpartir(String(impartirDocente[0].idImp))
+  }, [impartirDocente, idImpartir])
+
+  useEffect(() => {
+    getMatriculas().then((r) => setMatriculas(Array.isArray(r.data) ? r.data : [])).catch(() => setMatriculas([]))
+    getEvaluaciones().then((r) => setEvaluaciones(Array.isArray(r.data) ? r.data : [])).catch(() => setEvaluaciones([]))
+  }, [])
+
+  const impartirSel = impartirDocente.find((i) => String(i.idImp) === idImpartir)
+
+  // Evaluaciones del curso+asignatura seleccionados (ya acotado a lo que dicta el docente).
+  const evaluacionesFiltradas = useMemo(() => {
+    if (!impartirSel) return []
+    return evaluaciones.filter(
+      (e) => e.asignatura?.idAsi === impartirSel.asignatura?.idAsi && e.curso?.idCur === impartirSel.curso?.idCur
+    )
+  }, [evaluaciones, impartirSel])
+
+  useEffect(() => {
+    setIdEvaluacion((prev) =>
+      evaluacionesFiltradas.some((e) => String(e.idEva) === prev)
+        ? prev
+        : evaluacionesFiltradas.length > 0
+        ? String(evaluacionesFiltradas[0].idEva)
+        : ''
+    )
+  }, [evaluacionesFiltradas])
+
+  const roster = useMemo(() => {
+    if (!impartirSel?.curso) return []
+    return matriculas.filter((m) => m.cursoId === impartirSel.curso.idCur && m.matriculaEstado === 'ACTIVA')
+  }, [matriculas, impartirSel])
+
+  useEffect(() => {
+    if (!idEvaluacion) {
+      setNotasExistentes([])
+      return
+    }
+    setLoading(true)
+    getNotasByEvaluacion(idEvaluacion)
+      .then((r) => setNotasExistentes(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setNotasExistentes([]))
+      .finally(() => setLoading(false))
+  }, [idEvaluacion])
+
+  useEffect(() => {
+    const init = {}
+    roster.forEach((m) => {
+      const ex = notasExistentes.find((n) => n.estudianteUsuRut === m.alumnoRut)
+      init[m.alumnoRut] = ex?.notCalif != null ? String(ex.notCalif) : ''
+    })
+    setValores(init)
+  }, [roster, notasExistentes])
+
+  const guardar = async () => {
+    if (!idEvaluacion) {
+      toast.error('Selecciona una evaluación')
+      return
+    }
+    const conValor = roster.filter((m) => (valores[m.alumnoRut] ?? '') !== '')
+    if (conValor.length === 0) {
+      toast.error('Ingresa al menos una nota')
+      return
+    }
+    const fueraDeRango = conValor.some((m) => {
+      const n = parseNota(valores[m.alumnoRut])
+      return Number.isNaN(n) || n < 1.0 || n > 7.0
+    })
+    if (fueraDeRango) {
+      toast.error('Hay notas fuera del rango permitido (1.0 a 7.0)')
+      return
+    }
+    setSaving(true)
+    const hoy = new Date().toISOString().slice(0, 10)
+    try {
+      await Promise.all(
+        conValor.map((m) => {
+          const notCalif = parseNota(valores[m.alumnoRut])
+          const ex = notasExistentes.find((n) => n.estudianteUsuRut === m.alumnoRut)
+          return ex
+            ? actualizarNota(ex.idNot, { notCalif, notFechaReg: hoy })
+            : registrarNota({ notCalif, notFechaReg: hoy, idEvaluacion: Number(idEvaluacion), estudianteUsuRut: m.alumnoRut })
+        })
+      )
+      toast.success('Notas guardadas')
+      const r = await getNotasByEvaluacion(idEvaluacion)
+      setNotasExistentes(Array.isArray(r.data) ? r.data : [])
+    } catch (error) {
+      console.error(error)
+      toast.error('No se pudieron guardar las notas')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (impartirDocente.length === 0) {
+    return <Alert variant="info">No tienes asignaturas asignadas todavía.</Alert>
+  }
+
+  return (
+    <>
+      <h2 className={styles.sectionTitle}>Ingresar Notas</h2>
+      <Row className="g-2 mb-3">
+        <Col md={6}>
+          <Form.Label>Asignatura / Curso</Form.Label>
+          <Form.Select value={idImpartir} onChange={(e) => setIdImpartir(e.target.value)}>
+            {impartirDocente.map((i) => (
+              <option key={i.idImp} value={i.idImp}>
+                {i.asignatura?.asiNombre ?? '—'} — {formatNivel(i.curso?.nivel)} {i.curso?.curLetraSeccion ?? ''}
+              </option>
+            ))}
+          </Form.Select>
+        </Col>
+        <Col md={6}>
+          <Form.Label>Evaluación</Form.Label>
+          <Form.Select
+            value={idEvaluacion}
+            onChange={(e) => setIdEvaluacion(e.target.value)}
+            disabled={evaluacionesFiltradas.length === 0}
+          >
+            {evaluacionesFiltradas.length === 0 ? (
+              <option value="">No hay evaluaciones para este curso</option>
+            ) : (
+              evaluacionesFiltradas.map((ev) => (
+                <option key={ev.idEva} value={ev.idEva}>
+                  {ev.evaNom} {ev.evaFecha ? `(${ev.evaFecha})` : ''}
+                </option>
+              ))
+            )}
+          </Form.Select>
+        </Col>
+      </Row>
+
+      {loading ? (
+        <div className={styles.emptyState}>
+          <Spinner animation="border" size="sm" className="me-2" />
+          Cargando notas...
+        </div>
+      ) : !idEvaluacion ? (
+        <Alert variant="info">Crea o selecciona una evaluación para este curso para ingresar notas.</Alert>
+      ) : roster.length === 0 ? (
+        <Alert variant="info">Este curso no tiene estudiantes matriculados.</Alert>
+      ) : (
+        <>
+          <div className={styles.tableWrap}>
+            <Table size="sm" hover responsive className={styles.table}>
+              <thead className={styles.tableHead}>
+                <tr>
+                  <th>N°</th>
+                  <th>RUT</th>
+                  <th>Nombre del Alumno</th>
+                  <th>Nota (1.0 - 7.0)</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {roster.map((m, idx) => {
+                  const estado = estadoDeNota(valores[m.alumnoRut] ?? '')
+                  return (
+                    <tr key={m.alumnoRut}>
+                      <td>{idx + 1}</td>
+                      <td>{formatRut(m.alumnoRut, m.alumnoDv)}</td>
+                      <td>{m.alumnoNombre ? `${m.alumnoNombre} ${m.alumnoApellido}` : '—'}</td>
+                      <td>
+                        <Form.Control
+                          type="text"
+                          inputMode="decimal"
+                          size="sm"
+                          placeholder="1.0 - 7.0"
+                          style={{ maxWidth: 90 }}
+                          value={valores[m.alumnoRut] ?? ''}
+                          onChange={(e) => setValores((prev) => ({ ...prev, [m.alumnoRut]: e.target.value }))}
+                        />
+                      </td>
+                      <td>
+                        <Badge bg={estado.bg}>{estado.label}</Badge>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
+          </div>
+          <div className="mt-3 text-end">
+            <Button className={styles.btnGranate} onClick={guardar} disabled={saving}>
+              {saving ? <Spinner as="span" size="sm" animation="border" className="me-2" /> : null}
+              Guardar notas
+            </Button>
+          </div>
+        </>
+      )}
+    </>
+  )
+}
+DocenteIngresoNotas.propTypes = {
+  impartirDocente: PropTypes.array.isRequired,
+}
+
 export default function Academico() {
   const { usuario, hasRole } = useAuth()
   const esEstudiante = hasRole('ROLE_ESTUDIANTE')
@@ -534,7 +763,7 @@ export default function Academico() {
   const seccionesVisibles = esDirectivo
     ? SECCIONES
     : esDocente
-    ? ['estudiantes', 'asistencia', ...SECCIONES.filter((key) => PERMISOS_DOCENTE[key])]
+    ? ['estudiantes', 'asistencia', 'ingresoNotas', ...SECCIONES.filter((key) => PERMISOS_DOCENTE[key])]
     : SECCIONES.filter((key) => PERMISOS_DOCENTE[key])
 
   const [seccion, setSeccion] = useState('curso')
@@ -661,7 +890,13 @@ export default function Academico() {
       {seccionesVisibles.map((key) => (
         <Nav.Item key={key}>
           <Nav.Link eventKey={key} className={styles.sideNavLink}>
-            {key === 'estudiantes' ? 'Mis Estudiantes' : key === 'asistencia' ? 'Pasar Lista' : ENTIDADES[key].titulo}
+            {key === 'estudiantes'
+              ? 'Mis Estudiantes'
+              : key === 'asistencia'
+              ? 'Pasar Lista'
+              : key === 'ingresoNotas'
+              ? 'Ingresar Notas'
+              : ENTIDADES[key].titulo}
           </Nav.Link>
         </Nav.Item>
       ))}
@@ -734,7 +969,6 @@ export default function Academico() {
         <main className={styles.shell}>
           <header className={styles.pageHeader}>
             <div>
-              <p className={styles.eyebrow}>MS-GestionAcademica</p>
               <h1 className={styles.title}>
                 {esEstudiante ? 'Mi Información Académica' : 'Información Académica del Estudiante'}
               </h1>
@@ -756,7 +990,6 @@ export default function Academico() {
         <main className={styles.shell}>
           <header className={styles.pageHeader}>
             <div>
-              <p className={styles.eyebrow}>MS-GestionAcademica</p>
               <h1 className={styles.title}>Gestión Académica</h1>
               <p className={styles.subtitle}>Cursos, asignaturas, evaluaciones, notas y bitácoras de clase</p>
             </div>
@@ -779,7 +1012,6 @@ export default function Academico() {
         <main className={styles.shell}>
           <header className={styles.pageHeader}>
             <div>
-              <p className={styles.eyebrow}>MS-GestionAcademica</p>
               <h1 className={styles.title}>Gestión Académica</h1>
               <p className={styles.subtitle}>Cursos, asignaturas, evaluaciones, notas y bitácoras de clase</p>
             </div>
@@ -795,12 +1027,33 @@ export default function Academico() {
     )
   }
 
+  // Docente en "Ingresar Notas": roster del curso con input de nota por alumno.
+  if (esDocente && seccion === 'ingresoNotas') {
+    return (
+      <div className={styles.page}>
+        <main className={styles.shell}>
+          <header className={styles.pageHeader}>
+            <div>
+              <h1 className={styles.title}>Gestión Académica</h1>
+              <p className={styles.subtitle}>Cursos, asignaturas, evaluaciones, notas y bitácoras de clase</p>
+            </div>
+          </header>
+          <Row className="g-3">
+            <Col md={3} lg={2}>{navLateral}</Col>
+            <Col md={9} lg={10}>
+              <DocenteIngresoNotas impartirDocente={impartirDocente} />
+            </Col>
+          </Row>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.page}>
       <main className={styles.shell}>
         <header className={styles.pageHeader}>
           <div>
-            <p className={styles.eyebrow}>MS-GestionAcademica</p>
             <h1 className={styles.title}>Gestión Académica</h1>
             <p className={styles.subtitle}>
               Cursos, asignaturas, evaluaciones, notas y bitácoras de clase
