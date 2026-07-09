@@ -408,7 +408,7 @@ export default function Calendario() {
       const parsed = fromInputDate(fechaInicio)
       if (parsed) setCurrentMonth(startOfMonth(parsed))
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    document.getElementById('form-evento')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   const handleDelete = async (id) => {
