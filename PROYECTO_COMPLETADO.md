@@ -1,4 +1,6 @@
 
+> ⚠️ **DOCUMENTO HISTÓRICO (obsoleto).** Describe solo la **landing page** inicial (v1.0, "2024"), no el sistema completo actual (8 microservicios + SPA). La fuente de verdad del estado, arquitectura y operación es **`README.md`**. Para el estado de seguridad y deuda técnica, ver `AUDITORIA_My-O-Higgins.md`.
+
 # ✅ PROYECTO COMPLETADO - My O'Higgins Landing Page
 
 ## 🎉 ¡TAREA FINALIZADA CON ÉXITO!
