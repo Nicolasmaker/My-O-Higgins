@@ -8,16 +8,16 @@
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-xl);
 }
 
 /* =====================================================
-   SECCIÓN HERO
+ SECCIÓN HERO
    ===================================================== */
 .heroSection {
-  background-color: var(--color-bg-hero);
+  background-color: rgb(243, 236, 232);
   padding: var(--spacing-xl) 0 var(--spacing-3xl) 0;
   min-height: 500px;
   display: flex;
@@ -26,11 +26,11 @@
 }
 .heroContainer {
   width: 100%;
-  max-width: 1200px; 
-  margin: 0 auto;    
-  padding: 0 var(--spacing-md);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.2fr 0.8fr; 
   gap: var(--spacing-3xl);
   align-items: center;
 }
@@ -60,16 +60,20 @@
   color: #413c3c;
 }
 
+.heroButtons > * {
+  width: auto !important; /* Quitamos los 500px fijos */
+  min-width: 250px;       /* Un tamaño razonable */
+  display: inline-flex;
+  justify-content: center;
+}
+
 .heroButtons {
+  display: flex;
   flex: 1;
   gap: var(--spacing-md);
   flex-wrap: wrap;
   margin-top: var(--spacing-md);
-}
-
-.heroButtons > * {
-  width: 500px;   
-  justify-content: center;
+  justify-content: flex-start; /* Asegura que los botones se peguen a la izquierda */
 }
 
 .heroButtons button,
@@ -83,8 +87,12 @@
 
 .fachadaColegioBO {
   max-width: 100%;    
-  height: auto;      
-  border-radius: 8px; 
+  height: auto;    
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%);
+  mask-image: linear-gradient(to right, transparent 0%, black 10%);
+  border-right: 2px solid #03045083;
 }
 
 .heroImg {
@@ -122,13 +130,16 @@
   color: #f8f9fa !important; /* Un gris muuuy clarito casi blanco para que lea bien */
 }
 
+
 .sectionHeader {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   margin-bottom: var(--spacing-2xl);
 }
+
+
 
 .sectionTitle {
   font-size: var(--font-size-3xl);
@@ -144,13 +155,12 @@
 }
 
 .quickAccessHint {
-  text-align: center;
+  text-align: left;
   color: #f8f9fa;
   font-size: 0.95rem;
   margin-bottom: var(--spacing-lg);
   opacity: 0.9;
 }
-
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -350,6 +360,33 @@
 
 .newsLink:hover {
   color: var(--color-primary-dark);
+}
+/* =====================================================
+   SECCIÓN NOTICIAS
+   ===================================================== */
+.newsSection {
+  background-color: var(--color-bg-news);
+  padding: var(--spacing-3xl) 0;
+  scroll-margin-top: 80px;
+  
+
+  position: relative; 
+}
+
+.newsSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 12px; 
+  margin-bottom: 100px;
+  
+  /* Degradado elegante de borgoña oscuro a un tono un poco más claro en el centro */
+  background: linear-gradient(90deg, #570b0163 0%, var(--color-primary) 50%, #02057c81 100%);
+  
+  /* Una pequeña sombra hacia abajo para darle volumen y separar las secciones */
+  box-shadow: 0 7px 11px rgba(0, 0, 0, 0.15);
 }
 
 /* =====================================================

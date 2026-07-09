@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button } from 'react-bootstrap';
 import styles from '../../styles/ProcesoMatriculaModal.module.css';
 
 const PASOS = ['Requisitos', 'Documentos', 'Datos personales', 'Confirmación'];
@@ -37,93 +37,152 @@ export default function ProcesoMatriculaModal({ show, onClose }) {
     onClose();
   };
 
-  return (
-    <Modal show={show} onHide={handleClose} centered size="lg">
-      <Modal.Header closeButton className={styles.header}>
-        <Modal.Title className={styles.title}>Proceso de matrícula</Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>
-        <div className={styles.pasos}>
-          {PASOS.map((label, i) => (
-            <div
-              key={label}
-              className={`${styles.paso} ${i === paso ? styles.pasoActivo : ''} ${i < paso ? styles.pasoCompletado : ''}`}
-            >
-              <span className={styles.pasoNumero}>{i + 1}</span>
-              <span className={styles.pasoLabel}>{label}</span>
-            </div>
-          ))}
-        </div>
-
-        {paso === 0 && (
-          <div>
+  const renderPaso = () => {
+    switch (paso) {
+      case 0:
+        return (
+          <>
             <h5>Requisitos de postulación</h5>
             <ul>
               {REQUISITOS.map((r) => (
                 <li key={r}>{r}</li>
               ))}
             </ul>
-          </div>
-        )}
+          </>
+        );
 
-        {paso === 1 && (
-          <div>
+      case 1:
+        return (
+          <>
             <h5>Documentos que debes preparar</h5>
             <ul>
               {DOCUMENTOS.map((d) => (
                 <li key={d}>{d}</li>
               ))}
             </ul>
-          </div>
-        )}
+          </>
+        );
 
-        {paso === 2 && (
-          <div>
+      case 2:
+        return (
+          <>
             <h5>Datos personales requeridos</h5>
+
             <p className="text-muted small">
-              Asegúrate de tener a mano los siguientes datos para cuando realices el proceso:
+              Asegúrate de tener a mano los siguientes datos para cuando realices
+              el proceso:
             </p>
+
             <ul>
               {DATOS_PERSONALES.map((dp) => (
                 <li key={dp}>{dp}</li>
               ))}
             </ul>
-            
-            <hr className="my-3" />
-            
-            <p className="text-muted small bg-light p-3 rounded border">
-              <strong>Nota:</strong> El proceso de matrícula se puede realizar de forma presencial 
-              directamente en el establecimiento, o bien de manera telefónica comunicándote al 
-              número <strong>+56 51 231 3192</strong>.
-            </p>
-          </div>
-        )}
 
-        {paso === 3 && (
+            <hr className="my-3" />
+
+            <p className="text-muted small bg-light p-3 rounded border">
+              <strong>Nota:</strong> El proceso de matrícula se puede realizar
+              de forma presencial directamente en el establecimiento, o bien de
+              manera telefónica comunicándote al número{' '}
+              <strong>+56 51 231 3192</strong>.
+            </p>
+          </>
+        );
+
+      case 3:
+        return (
           <div className={styles.confirmacion}>
             <h5>¡Listo!</h5>
+
             <p>
-              Una vez que tengas los documentos y datos reunidos, acércate a inspectoría o contacta al colegio para
-              formalizar tu matrícula. Un funcionario del colegio se pondrá en contacto contigo para continuar el proceso.
+              Una vez que tengas los documentos y datos reunidos, acércate a
+              inspectoría o contacta al colegio para formalizar tu matrícula.
+              Un funcionario del colegio se pondrá en contacto contigo para
+              continuar el proceso.
             </p>
           </div>
-        )}
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Modal show={show} onHide={handleClose} centered size="lg">
+      <Modal.Header closeButton className={styles.header}>
+        <Modal.Title className={styles.title}>
+          Proceso de matrícula
+        </Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body className={styles.modalBody}>
+
+        {/* Stepper */}
+        <div className={styles.stepper}>
+
+          <div
+            className={styles.progressBar}
+            style={{
+                width: `calc(${(paso / (PASOS.length - 1)) * 75}% - 30px)`
+            }}
+          />
+
+          <div className={styles.pasos}>
+            {PASOS.map((label, i) => (
+              <div
+                key={label}
+                className={`${styles.paso}
+                  ${i === paso ? styles.pasoActivo : ''}
+                  ${i < paso ? styles.pasoCompletado : ''}`}
+              >
+                <span className={styles.pasoNumero}>
+                  {i + 1}
+                </span>
+
+                <span className={styles.pasoLabel}>
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+        {/* Contenido */}
+        <div key={paso} className={styles.stepContent}>
+          {renderPaso()}
+        </div>
+
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="outline-secondary" onClick={() => setPaso((p) => p - 1)} disabled={esPrimerPaso}>
+
+        <Button
+          variant="outline-secondary"
+          disabled={esPrimerPaso}
+          onClick={() => setPaso((p) => p - 1)}
+        >
           Anterior
         </Button>
+
         {esUltimoPaso ? (
-          <Button className={styles.btnGranate} onClick={handleClose}>
+          <Button
+            className={styles.btnGranate}
+            onClick={handleClose}
+          >
             Cerrar
           </Button>
         ) : (
-          <Button className={styles.btnGranate} onClick={() => setPaso((p) => p + 1)}>
+          <Button
+            className={styles.btnGranate}
+            onClick={() => setPaso((p) => p + 1)}
+          >
             Siguiente
           </Button>
         )}
+
       </Modal.Footer>
     </Modal>
   );
