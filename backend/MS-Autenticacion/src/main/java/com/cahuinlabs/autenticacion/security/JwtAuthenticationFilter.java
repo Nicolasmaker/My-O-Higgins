@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         jwt = authHeader.substring(7);
 
      //Un token expirado, malformado o con firma invalida hace que extraerUsername/validacion
-     //lancen excepcion. Se captura para NO responder 500: se deja la peticion sin autenticar y
+     //lanzar excepcion. Se captura para NO responder 500: se deja la peticion sin autenticar y
      //la cadena de seguridad responde 401 limpio en las rutas protegidas.
         try {
             userEmail = jwtService.extraerUsername(jwt); //Extrae el email del token
