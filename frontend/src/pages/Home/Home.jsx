@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/UI/Button';
@@ -6,69 +6,12 @@ import ProcesoMatriculaModal from '../../components/Home/ProcesoMatriculaModal';
 import MuralDigital from '../../components/Home/MuralDigital';
 import styles from '../../styles/Home.module.css';
 import fachadaColegioBO from '../../assets/fachadaColegioBO.png';
-import iconoCalendario from '../../assets/iconoCalendario.png';
-import iconoPortal from '../../assets/iconoPortal.png';
-import iconoCertificado from '../../assets/iconoCertificado.png';
 import academicoImg from '../../assets/academico.png';
-import { getRecommendedQuickAccess, initializeQuickAccessItems, updateQuickAccessUsage } from './quickAccessUtils';
-
-const baseQuickAccess = [
-  {
-    id: 1,
-    icon: iconoCalendario,
-    title: 'Calendario Escolar',
-    description: 'Consulta fechas importantes, feriados y períodos académicos del año.',
-    link: '/calendario',
-  },
-  {
-    id: 2,
-    icon: iconoPortal,
-    title: 'Portal Académico',
-    description: 'Acceso a calificaciones, horarios y material educativo de tus cursos.',
-    link: '/academico',
-  },
-  {
-    id: 3,
-    icon: iconoPortal,
-    title: 'Anotaciones',
-    description: 'Revisa y administra tareas, notas y material de tus clases.',
-    link: '/anotaciones',
-  },
-  {
-    id: 5,
-    icon: iconoCalendario,
-    title: 'Reuniones',
-    description: 'Consulta y organiza juntas entre docentes, apoderados y directivos.',
-    link: '/reuniones',
-  },
-  {
-    id: 6,
-    icon: iconoPortal,
-    title: 'Mensajería',
-    description: 'Envía y recibe comunicaciones oficiales del colegio.',
-    link: '/mensajeria',
-  },
-  {
-    id: 7,
-    icon: iconoCertificado,
-    title: 'Matrículas',
-    description: 'Gestiona el proceso de matrícula de tu curso o tu pupilo.',
-    link: '/matriculas',
-  },
-];
 
 export default function Home() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [quickAccess, setQuickAccess] = useState(() => initializeQuickAccessItems(baseQuickAccess));
   const [showProceso, setShowProceso] = useState(false);
-
-  const recommendedQuickAccess = useMemo(() => getRecommendedQuickAccess(quickAccess), [quickAccess]);
-
-  const handleQuickAccessClick = (item) => {
-    setQuickAccess((currentItems) => updateQuickAccessUsage(currentItems, item.id));
-    navigate(item.link);
-  };
 
   // Usuario logueado: la portada pública (hero/accesos/noticias) se reemplaza por el Mural
   // Digital — un tablero personalizado por rol (evaluaciones propias, eventos que le
@@ -144,43 +87,6 @@ export default function Home() {
               alt="Estudiantes en el colegio"
               className={styles.fachadaColegioBO}
             />
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.quickAccessSection} id="admision">
-        <div className={styles.container}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <h2 className={styles.sectionTitle}>Accesos Rápidos</h2>
-              <p className={styles.sectionSubtitle}>
-                Accede rápidamente a las herramientas más utilizadas del portal
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.cardsGrid}>
-            {recommendedQuickAccess.map((item) => (
-              <div key={item.id} className={styles.card}>
-                <div className={styles.cardIcon}>
-                  <img
-                    src={item.icon}
-                    alt={`Icono de ${item.title}`}
-                    className={styles.iconImage}
-                  />
-                </div>
-                <h3 className={styles.cardTitle}>{item.title}</h3>
-                <p className={styles.cardDescription}>{item.description}</p>
-                <button
-                  type="button"
-                  className={styles.cardLinkButton}
-                  onClick={() => handleQuickAccessClick(item)}
-                  aria-label={`Ir a ${item.title}`}
-                >
-                  Ir a {item.title} →
-                </button>
-              </div>
-            ))}
           </div>
         </div>
       </section>
