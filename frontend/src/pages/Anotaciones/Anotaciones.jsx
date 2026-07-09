@@ -123,6 +123,11 @@ export default function Anotaciones() {
       if (filterGravedad !== 'todas' && normalizar(item.anotGravedad) !== normalizar(filterGravedad)) {
         return false
       }
+      // Docente: solo ve anotaciones de estudiantes de sus propios cursos.
+      // Inspector y Directivo ven todo (no entran a este filtro).
+      if (esDocente && !rutsAlumnosDocente.has(String(item.estudianteUsuRut))) {
+        return false
+      }
       if (cursoBuscado && !normalizar(item.curso).includes(cursoBuscado)) {
         return false
       }
@@ -135,7 +140,15 @@ export default function Anotaciones() {
       }
       return true
     })
-  }, [anotaciones, filterTipo, filterGravedad, filterCurso, filterRut])
+  }, [anotaciones, filterTipo, filterGravedad, filterCurso, filterRut, esDocente, rutsAlumnosDocente])
+
+  // Cursos para el dropdown del filtro: se derivan de las anotaciones ya cargadas,
+  // así el valor coincide exactamente con el string `item.curso` (nivNum°curLetraSeccion)
+  // que arma el backend y evita depender del shape de otra API.
+  const cursosDisponibles = useMemo(
+    () => [...new Set(anotaciones.map((item) => item.curso).filter(Boolean))].sort(),
+    [anotaciones]
+  )
 
   const dashboardStats = useMemo(() => {
     const positivas = anotacionesFiltradas.filter((item) => String(item.anotTip || '').toLowerCase() === 'positiva').length
@@ -402,11 +415,11 @@ export default function Anotaciones() {
       <main className="anotaciones-shell">
         <section className="hero-card">
           <div className="hero-copy-block">
-            <h1>Gestión institucional de anotaciones con trazabilidad completa</h1>
+            <h1>Anotaciones</h1>
             <p className="hero-copy">
               {isEstudiante
                 ? 'Revisa aquí el historial completo de tus anotaciones.'
-                : 'Busca a un estudiante por su RUT para revisar su historial, o registra una nueva anotación indicando el RUT: la hoja de vida se detecta automáticamente.'}
+                : 'Historial de anotaciones de estudiantes'}
             </p>
           </div>
         </section>
@@ -426,6 +439,7 @@ export default function Anotaciones() {
             setFilterTipo={setFilterTipo}
             filterCurso={filterCurso}
             setFilterCurso={setFilterCurso}
+            cursos={cursosDisponibles}
             filterGravedad={filterGravedad}
             setFilterGravedad={setFilterGravedad}
           />
@@ -492,7 +506,11 @@ export default function Anotaciones() {
                     onDelete={handleDelete}
                     formatDate={formatDate}
                     canManage={puedeGestionar(anotacion)}
-                    onVincularCitacion={canCreate || canManage ? handleVincularCitacion : undefined}
+                    onVincularCitacion={
+                      canCreate && String(anotacion.funcionarioUsuRut) === String(userRut)
+                        ? handleVincularCitacion
+                        : undefined
+                    }
                   />
                 ))}
               </div>
