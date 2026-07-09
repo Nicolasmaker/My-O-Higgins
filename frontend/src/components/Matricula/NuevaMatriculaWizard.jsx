@@ -21,7 +21,7 @@ import {
   crearEstudiante,
   getComunas,
 } from '../../services/authService'
-import { crearMatricula } from '../../services/matriculaService'
+import { crearMatricula, getMatriculas } from '../../services/matriculaService'
 import { getCursos } from '../../services/academicoService'
 import { formatNivel } from '../Academico/entidadesConfig'
 import { rutConDvRules, rutValidoConDv, emailRules, passwordRules, limpiarRut, extraerDv } from '../../validators/fieldValidators'
@@ -131,6 +131,7 @@ export default function NuevaMatriculaWizard({ show, funcionarioUsuRut, onClose,
   const [guardando, setGuardando] = useState(false)
   const [comunas, setComunas] = useState([])
   const [cursos, setCursos] = useState([])
+  const [matriculas, setMatriculas] = useState([])
 
   // RUT buscado/creado del apoderado
   const [apoderadoRutInput, setApoderadoRutInput] = useState('')
@@ -156,8 +157,20 @@ export default function NuevaMatriculaWizard({ show, funcionarioUsuRut, onClose,
     matForm.reset({ cursoId: '', tipoAlumno: 'NUEVO', parentesco: '' })
     getComunas().then((r) => setComunas(Array.isArray(r.data) ? r.data : [])).catch(() => setComunas([]))
     getCursos().then((r) => setCursos(Array.isArray(r.data) ? r.data : [])).catch(() => setCursos([]))
+    getMatriculas().then((r) => setMatriculas(Array.isArray(r.data) ? r.data : [])).catch(() => setMatriculas([]))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show])
+
+  // Cupos por curso: el tope es cupos del curso si está definido, si no la capacidad
+  // de la sala asignada. Disponibles = tope − matrículas ACTIVAS de ese curso.
+  const cuposInfo = (curso) => {
+    const tope = curso?.cupos ?? curso?.sala?.salaCapacidad ?? null
+    const activas = matriculas.filter(
+      (m) => m.cursoId === curso.idCur && m.matriculaEstado === 'ACTIVA'
+    ).length
+    const disponibles = tope === null ? null : tope - activas
+    return { tope, activas, disponibles }
+  }
 
   const buscarApoderado = async () => {
     if (!apoderadoRutInput.trim()) {
@@ -261,6 +274,15 @@ export default function NuevaMatriculaWizard({ show, funcionarioUsuRut, onClose,
   }
 
   const registrarMatricula = async (data) => {
+    // Bloquea si el curso elegido ya no tiene cupos (defensa además del <option disabled>).
+    const cursoElegido = cursos.find((c) => String(c.idCur) === String(data.cursoId))
+    if (cursoElegido) {
+      const { disponibles } = cuposInfo(cursoElegido)
+      if (disponibles !== null && disponibles <= 0) {
+        toast.error('El curso seleccionado no tiene cupos disponibles')
+        return
+      }
+    }
     setGuardando(true)
     try {
       await crearMatricula({
@@ -410,11 +432,17 @@ export default function NuevaMatriculaWizard({ show, funcionarioUsuRut, onClose,
                     <Form.Label>Curso *</Form.Label>
                     <Form.Select isInvalid={!!matForm.formState.errors.cursoId} {...matForm.register('cursoId', { required: 'Obligatorio' })}>
                       <option value="">Selecciona un curso</option>
-                      {cursos.map((c) => (
-                        <option key={c.idCur} value={c.idCur}>
-                          {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar})
-                        </option>
-                      ))}
+                      {cursos.map((c) => {
+                        const { disponibles } = cuposInfo(c)
+                        const sinCupo = disponibles !== null && disponibles <= 0
+                        const etiquetaCupo =
+                          disponibles === null ? 'sin cupo definido' : `${disponibles} cupos disponibles`
+                        return (
+                          <option key={c.idCur} value={c.idCur} disabled={sinCupo}>
+                            {formatNivel(c.nivel)} {c.curLetraSeccion} ({c.curAnioEscolar}) — {sinCupo ? 'SIN CUPOS' : etiquetaCupo}
+                          </option>
+                        )
+                      })}
                     </Form.Select>
                   </Form.Group>
                 </Col>

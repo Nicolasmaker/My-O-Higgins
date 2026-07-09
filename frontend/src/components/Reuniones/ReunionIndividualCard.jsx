@@ -34,6 +34,8 @@ export default function ReunionIndividualCard({
   onRellenarBitacora,
   canEdit,
   puedeConfirmar,
+  puedeFirmarFuncionario,
+  puedeFirmarApoderado,
 }) {
   const [saving, setSaving] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
@@ -184,14 +186,17 @@ export default function ReunionIndividualCard({
           </div>
         )}
 
-        {canEdit && (!firmaDoc || !firmaApo) && (
+        {/* Cada quien firma solo SU sección: el funcionario la del funcionario,
+            el apoderado dueño la del apoderado. Un funcionario no puede firmar
+            por el apoderado ni viceversa. */}
+        {((puedeFirmarFuncionario && !firmaDoc) || (puedeFirmarApoderado && !firmaApo)) && (
           <div className="d-flex gap-2 justify-content-end">
-            {!firmaDoc && (
+            {puedeFirmarFuncionario && !firmaDoc && (
               <Button size="sm" variant="outline-secondary" disabled={saving} onClick={() => handleFirmar('doc')}>
                 Firmar funcionario
               </Button>
             )}
-            {!firmaApo && (
+            {puedeFirmarApoderado && !firmaApo && (
               <Button size="sm" variant="outline-secondary" disabled={saving} onClick={() => handleFirmar('apo')}>
                 Firmar apoderado
               </Button>
@@ -211,4 +216,6 @@ ReunionIndividualCard.propTypes = {
   onRellenarBitacora: PropTypes.func,
   canEdit: PropTypes.bool,
   puedeConfirmar: PropTypes.bool,
+  puedeFirmarFuncionario: PropTypes.bool,
+  puedeFirmarApoderado: PropTypes.bool,
 }
