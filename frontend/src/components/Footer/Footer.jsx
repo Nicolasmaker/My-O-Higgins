@@ -71,7 +71,7 @@ export default function Footer() {
 
           <div>
             <p className={styles.contactLabel}>Teléfono</p>
-            <p className={styles.contactValue}>+56 51 2 313 192</p>
+            <p className={styles.contactValue}>+56 51 231 3192</p>
           </div>
         </div>
 
