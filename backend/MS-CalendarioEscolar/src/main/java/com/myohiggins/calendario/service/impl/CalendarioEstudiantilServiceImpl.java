@@ -32,8 +32,8 @@ public class CalendarioEstudiantilServiceImpl implements CalendarioEstudiantilSe
 
     @Override
     public CalendarioEstudiantilDTO crear(CalendarioEstudiantilDTO dto) {
-        // Validamos que la asignatura exista en el microservicio de Gestion Academica
-        if (!existeAsignatura(dto.getIdAsignatura())) {
+        // Institucional/Actividad no llevan asignatura ("No aplica"): se omite la validación.
+        if (dto.getIdAsignatura() != null && !existeAsignatura(dto.getIdAsignatura())) {
             throw new IllegalArgumentException("No se puede crear el evento: la asignatura con ID " + dto.getIdAsignatura() + " no existe en el sistema.");
         }
 
@@ -58,8 +58,8 @@ public class CalendarioEstudiantilServiceImpl implements CalendarioEstudiantilSe
 
     @Override
     public CalendarioEstudiantilDTO actualizar(Long id, CalendarioEstudiantilDTO dto) {
-        // Validamos que la asignatura exista en el microservicio de Gestion Academica
-        if (!existeAsignatura(dto.getIdAsignatura())) {
+        // Institucional/Actividad no llevan asignatura ("No aplica"): se omite la validación.
+        if (dto.getIdAsignatura() != null && !existeAsignatura(dto.getIdAsignatura())) {
             throw new IllegalArgumentException("No se puede actualizar el evento: la asignatura con ID " + dto.getIdAsignatura() + " no existe en el sistema.");
         }
 
