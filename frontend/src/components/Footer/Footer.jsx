@@ -83,7 +83,7 @@ export default function Footer() {
 
           <div>
             <p className={styles.contactLabel}>Correo</p>
-            <p className={styles.contactValue}>ohigginscqbo@gmail.com</p>
+            <p className={styles.contactValue}>contacto@myohiggins.cl</p>
           </div>
         </div>
 
@@ -94,7 +94,7 @@ export default function Footer() {
     {/* Barra inferior */}
     <div className={styles.bottomBar}>
       <div className={styles.copyright}>
-        <p>&copy; {currentYear} Colegio Bernardo O'Higgins. Todos los derechos reservados.</p>
+        <p>&copy; {currentYear} Equipo CahuinLabs. Todos los derechos reservados.</p>
       </div>
 
       <div className={styles.legalLinks}>
