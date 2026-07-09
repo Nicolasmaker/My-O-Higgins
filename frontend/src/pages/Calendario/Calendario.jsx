@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { FiCalendar, FiChevronLeft, FiChevronRight, FiClock, FiList, FiPlus, FiRefreshCw } from 'react-icons/fi'
+import { Modal } from 'react-bootstrap' // <-- Agregamos la importación del Modal
 import Button from '../../components/UI/Button'
 import Input from '../../components/UI/Input'
 import { useAuth } from '../../hooks/useAuth'
@@ -117,8 +118,7 @@ export default function Calendario() {
   const esEstudiante = hasRole('ROLE_ESTUDIANTE')
   const puedeGestionar = esDirectivo || esDocente
 
-  // Matrículas: para resolver "de qué curso es este usuario" (Apoderado: cursos de sus
-  // hijos; Estudiante: su propio curso) y así filtrar qué eventos puede ver en su calendario.
+  // Matrículas: para resolver "de qué curso es este usuario"
   const [matriculas, setMatriculas] = useState([])
   useEffect(() => {
     getMatriculas()
@@ -159,9 +159,7 @@ export default function Calendario() {
     return false
   }
 
-  // Visibilidad por audiencia: eventos sin ningún campo de audiencia (Institucional/
-  // Actividad creados directamente en Calendario) son visibles para todos, sin cambio.
-  // Evaluación/Reunión sí traen audiencia real y se filtran según el rol.
+  // Visibilidad por audiencia
   const eventoVisiblePorAudiencia = (evento) => {
     if (esDirectivo || esInspector) return true
     const sinAudiencia =
@@ -194,6 +192,11 @@ export default function Calendario() {
     return asignaturas.filter((a) => idsAsignaturaPropias.has(a.idAsi))
   }, [asignaturas, esDocente, idsAsignaturaPropias])
   const [loading, setLoading] = useState(true)
+  
+  // Estados para el Modal de Confirmación
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState(null)
+  
   const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [editingId, setEditingId] = useState(null)
@@ -391,19 +394,27 @@ export default function Calendario() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm('¿Eliminar este evento del calendario?')
-    if (!confirmDelete) return
+  // --- NUEVAS FUNCIONES PARA EL MODAL DE ELIMINAR ---
+  const clickEliminar = (id) => {
+    setItemToDelete(id)
+    setShowConfirm(true)
+  }
 
+  const confirmarEliminacion = async () => {
+    if (!itemToDelete) return
     try {
-      await eliminarEvento(id)
+      await eliminarEvento(itemToDelete)
       toast.success('Evento eliminado')
       await loadData()
     } catch (error) {
       console.error(error)
       toast.error(error.response?.data?.message || 'No se pudo eliminar el evento')
+    } finally {
+      setShowConfirm(false)
+      setItemToDelete(null)
     }
   }
+  // ----------------------------------------------------
 
   const resetForm = () => {
     setEditingId(null)
@@ -504,10 +515,7 @@ export default function Calendario() {
       <main className={styles.shell}>
         <section className={styles.heroCard}>
           <div>
-
             <h1>Calendario Escolar</h1>
-
-
             <div className={styles.heroActions}>
               <Button type="button" variant="outline" onClick={() => loadData()}>
                 <FiRefreshCw /> Recargar
@@ -623,7 +631,7 @@ export default function Calendario() {
                           <Button type="button" variant="outline" onClick={() => handleEdit(evento)}>
                             Editar
                           </Button>
-                          <Button type="button" variant="danger" onClick={() => handleDelete(evento.idCalEst)}>
+                          <Button type="button" variant="danger" onClick={() => clickEliminar(evento.idCalEst)}>
                             Eliminar
                           </Button>
                         </div>
@@ -758,7 +766,7 @@ export default function Calendario() {
                           <Button type="button" variant="outline" onClick={() => handleEdit(evento)}>
                             Editar
                           </Button>
-                          <Button type="button" variant="danger" onClick={() => handleDelete(evento.idCalEst)}>
+                          <Button type="button" variant="danger" onClick={() => clickEliminar(evento.idCalEst)}>
                             Eliminar
                           </Button>
                         </div>
@@ -772,6 +780,31 @@ export default function Calendario() {
         </section>
         )}
       </main>
+
+      {/* --- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN --- */}
+      <Modal show={showConfirm} onHide={() => setShowConfirm(false)} centered>
+        <Modal.Header closeButton className={styles.modalHeader}>
+          <Modal.Title className={styles.modalTitle}>
+            Confirmar eliminación
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-0 fs-5 text-dark">
+            ¿Estás seguro de que deseas eliminar este evento del calendario?
+          </p>
+          <p className="text-muted small mt-2 mb-0">
+            Esta acción no se puede deshacer.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline" onClick={() => setShowConfirm(false)}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={confirmarEliminacion}>
+            Sí, eliminar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   )
 }
