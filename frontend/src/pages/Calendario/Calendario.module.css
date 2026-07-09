@@ -31,6 +31,7 @@
   padding: 32px;
   border-radius: 28px;
   background: #ffffff;
+  border-left: 5px solid var(--color-primary);
 }
 
 .eyebrow {
@@ -274,6 +275,14 @@
 }
 
 .eventChip {
+  /* display:block + width:100% (en vez del inline-flex heredado) para que el chip
+     colapse al ancho de la celda y el ellipsis recorte el título largo al final,
+     en lugar de desbordar/cortarse a la mitad. */
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
