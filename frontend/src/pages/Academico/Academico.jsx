@@ -26,7 +26,7 @@ import { getEstudiante } from '../../services/authService'
 import EntidadForm from '../../components/Academico/EntidadForm'
 import { ENTIDADES, formatNivel } from '../../components/Academico/entidadesConfig'
 import { formatRut } from '../../utils/formatRut'
-import styles from "../../pages/Academico/Academico.module.css";
+import styles from "../../styles/Academico.module.css";
 
 // Directivo: acceso completo (rw) a las 8 secciones.
 // Docente: rw solo en Notas/Bitácoras; lectura filtrada a lo suyo en

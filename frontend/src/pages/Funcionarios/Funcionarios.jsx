@@ -7,7 +7,7 @@
 // seeder, sin ninguna UI.
 // =============================================================
 import { useEffect, useState } from 'react'
-import './Funcionarios.css';
+import '../../styles/Funcionarios.css';
 import { useForm } from 'react-hook-form'
 import { Row, Col, Form, Button, Spinner, Alert, Table, Badge, Dropdown } from 'react-bootstrap'
 import { toast } from 'react-toastify'
@@ -26,7 +26,7 @@ import {
   extraerDv,
 } from '../../validators/fieldValidators'
 import { formatRut } from '../../utils/formatRut'
-import styles from '../Matricula/Matricula.module.css'
+import styles from '../../styles/Matricula.module.css'
 
 // Cada rol guarda su dato distintivo en un campo propio (dcteEspecialidad/insNivel/dirCargo)
 // que no comparten entre sí — se resuelve el que exista en el objeto para mostrarlo en la tabla.

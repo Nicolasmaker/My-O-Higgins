@@ -17,7 +17,7 @@ import { limpiarRut, rutValido, rutValidoConDv } from '../../validators/fieldVal
 import AnotacionCard from '../../components/Anotaciones/AnotacionCard'
 import AnotacionesToolbar from '../../components/Anotaciones/AnotacionesToolbar'
 import AnotacionForm from '../../components/Anotaciones/AnotacionForm'
-import './anotaciones.css'
+import '../../styles/anotaciones.css'
 
 // Segun los comentarios de permiso en MS-Anotaciones (AnotacionController.java):
 // crear -> Docentes e Inspectores | editar/eliminar -> solo Directivos

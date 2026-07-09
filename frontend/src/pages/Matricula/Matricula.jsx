@@ -28,7 +28,7 @@ import { formatNivel } from '../../components/Academico/entidadesConfig'
 import { formatRut } from '../../utils/formatRut'
 import MatriculaForm from '../../components/Matricula/MatriculaForm'
 import NuevaMatriculaWizard from '../../components/Matricula/NuevaMatriculaWizard'
-import styles from './Matricula.module.css'
+import styles from '../../styles/Matricula.module.css'
 
 const ROLES_GESTION = ['ROLE_DIRECTIVO']
 

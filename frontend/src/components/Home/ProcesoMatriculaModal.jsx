@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Button, Form } from 'react-bootstrap';
-import styles from './ProcesoMatriculaModal.module.css';
+import styles from '../../styles/ProcesoMatriculaModal.module.css';
 
 const PASOS = ['Requisitos', 'Documentos', 'Datos personales', 'Confirmación'];
 

@@ -9,7 +9,7 @@ import { crearEvento, actualizarEvento, eliminarEvento, getEventos } from '../..
 import { getAsignaturas } from '../../services/asignaturaService'
 import { getImpartirByDocente } from '../../services/academicoService'
 import { getMatriculas } from '../../services/matriculaService'
-import styles from './Calendario.module.css'
+import styles from '../../styles/Calendario.module.css'
 
 const eventTypes = ['Institucional', 'Académico', 'Actividad']
 

@@ -2,7 +2,7 @@ import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
 import { toast } from 'react-toastify'
 import Button from '../UI/Button'
-import styles from './UserPanel.module.css'
+import styles from '../../styles/UserPanel.module.css'
 
 export default function UserPanel({ show, usuario, onClose }) {
   if (!show) return null

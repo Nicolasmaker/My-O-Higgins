@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/UI/Button';
 import ProcesoMatriculaModal from '../../components/Home/ProcesoMatriculaModal';
 import MuralDigital from '../../components/Home/MuralDigital';
-import styles from './Home.module.css';
+import styles from '../../styles/Home.module.css';
 import fachadaColegioBO from '../../assets/fachadaColegioBO.png';
 import iconoCalendario from '../../assets/iconoCalendario.png';
 import iconoPortal from '../../assets/iconoPortal.png';

@@ -14,7 +14,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { getEventos, getMurales } from '../../services/calendarioService'
 import { getEvaluaciones } from '../../services/academicoService'
 import { getMatriculas } from '../../services/matriculaService'
-import styles from './MuralDigital.module.css'
+import styles from '../../styles/MuralDigital.module.css'
 
 function toneClass(tipo) {
   const n = String(tipo || '').toLowerCase()

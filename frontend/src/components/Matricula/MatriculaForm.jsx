@@ -14,7 +14,7 @@ import { Modal, Form, Row, Col, Button, Spinner } from 'react-bootstrap'
 import { rutRules, rutValido, limpiarRut } from '../../validators/fieldValidators'
 import { getEstudiante, getApoderado } from '../../services/authService'
 import { formatNivel } from '../Academico/entidadesConfig'
-import styles from '../../pages/Matricula/Matricula.module.css'
+import styles from '../../styles/Matricula.module.css'
 
 const emptyValues = {
   alumnoRut: '',

@@ -39,7 +39,7 @@ import { formatNivel } from '../../components/Academico/entidadesConfig'
 import AgendarReunionForm from '../../components/Reuniones/AgendarReunionForm'
 import ReunionIndividualCard from '../../components/Reuniones/ReunionIndividualCard'
 import ReunionGeneralCard from '../../components/Reuniones/ReunionGeneralCard'
-import styles from './Reuniones.module.css'
+import styles from '../../styles/Reuniones.module.css'
 
 function formatDate(value) {
   if (!value) return 'Sin fecha'

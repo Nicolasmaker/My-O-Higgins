@@ -1,5 +1,5 @@
 import Button from '../UI/Button'
-import './AnotacionesToolbar.css'
+import '../../styles/AnotacionesToolbar.css'
 
 export default function AnotacionesToolbar({
   filterRut,

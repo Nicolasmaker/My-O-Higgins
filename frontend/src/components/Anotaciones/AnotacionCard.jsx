@@ -1,6 +1,6 @@
 import Button from '../UI/Button'
 import { formatRut } from '../../utils/formatRut'
-import './AnotacionCard.css'
+import '../../styles/AnotacionCard.css'
 
 function labelRolFuncionario(rol) {
   const rolNormalizado = String(rol || '').toUpperCase()

@@ -7,7 +7,7 @@ import Button from '../../components/UI/Button/Button'
 import Input from '../../components/UI/Input/Input'
 import { emailRules, passwordRules } from '../../validators/fieldValidators'
 import colegioFachada from '../../assets/colegioFachada.webp'
-import './login.css'
+import '../../styles/login.css'
 
 export default function Login() {
   const {

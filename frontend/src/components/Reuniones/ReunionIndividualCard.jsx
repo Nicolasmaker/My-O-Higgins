@@ -8,7 +8,7 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Card, Badge, Button, Form } from 'react-bootstrap'
-import styles from '../../pages/Reuniones/Reuniones.module.css'
+import styles from '../../styles/Reuniones.module.css'
 
 function FirmaBadge({ firmado, label }) {
   return (

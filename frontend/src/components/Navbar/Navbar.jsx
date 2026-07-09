@@ -18,7 +18,7 @@ import Button from '../UI/Button';
 import UserPanel from '../UserPanel/UserPanel';
 import { ACCESO_RUTA } from '../../constants/roles';
 import logoColegio from '../../assets/logoColegio.png';
-import styles from './Navbar.module.css';
+import styles from '../../styles/Navbar.module.css';
 
 const MODULOS = [
   { to: '/', label: 'Inicio', end: true },
