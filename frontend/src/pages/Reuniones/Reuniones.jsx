@@ -269,7 +269,6 @@ export default function Reuniones() {
         {/* ── Encabezado compacto ── */}
         <header className={styles.pageHeader}>
           <div>
-            <p className={styles.eyebrow}>MS-GestionReuniones</p>
             <h1 className={styles.title}>Reuniones</h1>
           </div>
           <div className={styles.headerActions}>
@@ -326,6 +325,12 @@ export default function Reuniones() {
                     esApoderado &&
                     String(item.bitReunionApoderado?.apoderadoUsuRut) === String(userRut) &&
                     item.bitReunionApoderado?.estadoConfirmacion === 'PENDIENTE'
+                  }
+                  puedeFirmarFuncionario={
+                    esDirectivo || String(item.bitReunionApoderado?.docenteUsuRut) === String(userRut)
+                  }
+                  puedeFirmarApoderado={
+                    esApoderado && String(item.bitReunionApoderado?.apoderadoUsuRut) === String(userRut)
                   }
                 />
               ),
