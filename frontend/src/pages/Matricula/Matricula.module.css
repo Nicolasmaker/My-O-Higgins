@@ -163,9 +163,4 @@
   border-radius: var(--radius-lg);
 }
 
-.big-muted {
-  font-size: 2.5rem; /* Esto equivale a los 40px que buscas */
-  color: #6c757d;    /* Mantiene el color gris apagado de text-muted */
-  display: inline-block;
-}
 
