@@ -14,6 +14,9 @@ import com.cahuinlabs.autenticacion.models.request.AuthRequest;
 import com.cahuinlabs.autenticacion.models.response.AuthResponse;
 import com.cahuinlabs.autenticacion.security.JwtService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -39,12 +42,17 @@ public class AuthController {
      //Se busca al usuario en la bd para generar el token
         UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getEmail());
 
-     //Generar token
-        String jwtToken = jwtService.generarToken(userDetails);
-
      //Extraer datos del usuario para incluirlos en la respuesta
         Usuario usuario = (Usuario) userDetails;
         String rolNombre = usuario.getRol() != null ? usuario.getRol().getRolNombre() : null;
+
+     //Generar token incluyendo el rol como claim, para que los demas microservicios
+     //puedan leer el rol del usuario desde el token sin consultar la BD de Autenticacion.
+        Map<String, Object> claims = new HashMap<>();
+        if (rolNombre != null) {
+            claims.put("rol", rolNombre);
+        }
+        String jwtToken = jwtService.generarToken(claims, userDetails);
 
         return ResponseEntity.ok(new AuthResponse(
             jwtToken,
