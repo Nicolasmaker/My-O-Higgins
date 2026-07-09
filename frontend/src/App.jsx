@@ -70,6 +70,7 @@ export default function App() {
             <Route path="/hoja-de-vida" element={<ProtectedRoute><HojaDeVida /></ProtectedRoute>} />
             <Route path="/academico" element={<ProtectedRoute roles={ACCESO_RUTA['/academico']}><Academico /></ProtectedRoute>} />
             <Route path="/funcionarios" element={<ProtectedRoute roles={ACCESO_RUTA['/funcionarios']}><Funcionarios /></ProtectedRoute>} />
+            <Route path="/inicio" element={<Navigate to="/" replace />} />
           </Route>
 
           {/* Catch-all: cualquier ruta no definida redirige a "/" */}
