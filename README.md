@@ -2,7 +2,8 @@
 
 ---
 
-LINK de la pagina: http://98.89.45.152/
+LINK de la pagina: http://98.89.45.152/  solo se ve con la sesion de aws abierta, sin embargo en la rama de feat/conexion-backend-bdAWS esta el despliegue.
+Si desea ver el proyecto lea este README para saber como correrlo en local host.
 
 ---
 
