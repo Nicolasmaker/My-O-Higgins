@@ -1,0 +1,32 @@
+# ============================================================
+# EC2 SV_AUTH_ACAD (10.0.100.254, cuenta 1)
+#   Autenticacion (8080) + GestionAcademica (8087)
+# Levantar PRIMERO: Autenticacion es dependencia de todos.
+#   docker compose -f docker-compose.auth-acad.yml up -d --build
+# ============================================================
+name: myohiggins-auth-acad
+
+services:
+  autenticacion:
+    build:
+      context: ../backend/MS-Autenticacion
+    container_name: ms-autenticacion
+    restart: unless-stopped
+    env_file:
+      - deploy.env
+    ports:
+      - "8080:8080"
+    # No llama a ningún otro MS (es el hub de autenticación).
+
+  gestionacademica:
+    build:
+      context: ../backend/MS-GestionAcademica
+    container_name: ms-gestionacademica
+    restart: unless-stopped
+    env_file:
+      - deploy.env
+    environment:
+      - APP_SERVICES_AUTENTICACION_URL=http://10.0.100.254:8080
+      - APP_SERVICES_CALENDARIO_URL=http://10.1.10.150:8085
+    ports:
+      - "8087:8087"

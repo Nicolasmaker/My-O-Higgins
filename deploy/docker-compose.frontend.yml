@@ -1,0 +1,17 @@
+# ============================================================
+# EC2 SV_FRONTEND (10.0.10.49, cuenta 1)
+#   React build servido por Nginx (puerto 80) + reverse proxy
+#   a todos los MS (ver frontend/nginx.conf).
+# Levantar AL FINAL, cuando los MS ya estén arriba.
+#   docker compose -f docker-compose.frontend.yml up -d --build
+# ============================================================
+name: myohiggins-frontend
+
+services:
+  frontend:
+    build:
+      context: ../frontend
+    container_name: myohiggins-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"

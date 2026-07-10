@@ -1,0 +1,37 @@
+# ============================================================
+# EC2 SV_ANOTACIONES_HOJAVIDA (10.0.200.61, cuenta 1)
+#   Anotaciones (8083) + HojaDeVida (8084)
+# Levantar DESPUÉS de auth-acad y calendario-matricula:
+#   el seeder de HojaDeVida consulta Autenticacion y referencia
+#   matrículas creadas por GestionMatricula.
+#   docker compose -f docker-compose.anotaciones-hojavida.yml up -d --build
+# ============================================================
+name: myohiggins-anotaciones-hojavida
+
+services:
+  anotaciones:
+    build:
+      context: ../backend/MS-Anotaciones
+    container_name: ms-anotaciones
+    restart: unless-stopped
+    env_file:
+      - deploy.env
+    environment:
+      - APP_SERVICES_AUTENTICACION_URL=http://10.0.100.254:8080
+      - APP_SERVICES_HOJADEVIDA_URL=http://10.0.200.61:8084
+      - APP_SERVICES_GESTIONACADEMICA_URL=http://10.0.100.254:8087
+    ports:
+      - "8083:8083"
+
+  hojavida:
+    build:
+      context: ../backend/MS-HojaDeVida
+    container_name: ms-hojavida
+    restart: unless-stopped
+    env_file:
+      - deploy.env
+    environment:
+      - APP_SERVICES_AUTENTICACION_URL=http://10.0.100.254:8080
+      - APP_SERVICES_MATRICULA_URL=http://10.1.10.150:8086
+    ports:
+      - "8084:8084"

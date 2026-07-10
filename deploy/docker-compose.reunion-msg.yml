@@ -1,0 +1,33 @@
+# ============================================================
+# EC2 SV_REUNION_MSG (10.1.10.253, cuenta 2)
+#   GestionReuniones (8081) + Mensajeria (8089)
+#   docker compose -f docker-compose.reunion-msg.yml up -d --build
+# ============================================================
+name: myohiggins-reunion-msg
+
+services:
+  reuniones:
+    build:
+      context: ../backend/MS-GestionReuniones
+    container_name: ms-gestionreuniones
+    restart: unless-stopped
+    env_file:
+      - deploy.env
+    environment:
+      - APP_SERVICES_AUTENTICACION_URL=http://10.0.100.254:8080
+      - APP_SERVICES_CALENDARIO_URL=http://10.1.10.150:8085
+      - APP_SERVICES_MENSAJERIA_URL=http://10.1.10.253:8089
+    ports:
+      - "8081:8081"
+
+  mensajeria:
+    build:
+      context: ../backend/MS-Mensajeria
+    container_name: ms-mensajeria
+    restart: unless-stopped
+    env_file:
+      - deploy.env
+    environment:
+      - APP_SERVICES_AUTENTICACION_URL=http://10.0.100.254:8080
+    ports:
+      - "8089:8089"
