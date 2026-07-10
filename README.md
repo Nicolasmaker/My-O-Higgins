@@ -2,6 +2,10 @@
 
 ---
 
+LINK de la pagina: http://98.89.45.152/
+
+---
+
 ## 1. Introducción y contexto
 
 **My-O-Higgins** es una plataforma web de gestión escolar desarrollada para el Colegio Bernardo O'Higgins (Coquimbo, Chile), en el marco del proyecto académico de la carrera de Ingenieria Informatica (asignatura Fullstack3). Su propósito es digitalizar y centralizar los procesos administrativos y académicos que tradicionalmente se llevan en papel o en sistemas dispersos: la matrícula de estudiantes, el seguimiento de calificaciones y asistencia, el registro de anotaciones de convivencia, la coordinación de reuniones entre docentes y apoderados, la comunicación interna y la publicación de información institucional.
