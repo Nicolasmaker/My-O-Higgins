@@ -34,7 +34,7 @@
 --   6, 7, 8, 9, 10 = publicaciones informativas sin evento de calendario asociado
 -- ============================================================================
 
-INSERT INTO MURAL_DIGITAL (
+INSERT INTO mural_digital (
   mur_dig_titulo,
   mur_dig_contenido,
   mur_dig_fec_pub,
@@ -51,7 +51,7 @@ INSERT INTO MURAL_DIGITAL (
 ('Taller de Ajedrez', 'Club de ajedrez abierto todos los martes en horario de almuerzo, biblioteca CRA. No se necesita experiencia previa.', '2026-04-08', 14256789),
 ('Taller de Huerto Escolar', 'Programa de huerto escolar sustentable: todos los cursos de enseñanza básica participan una vez al mes en el cuidado del huerto del colegio.', '2026-03-23', 16543987);
 
-INSERT INTO CALENDARIO_ESTUDIANTIL (
+INSERT INTO calendario_estudiantil (
   cal_est_tit_eve,
   cal_est_tip_eve,
   cal_est_fec_ini,
