@@ -1,0 +1,512 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+
+/* Home.module.css */
+
+.page {
+  font-family: var(--font-family);
+  color: var(--color-text-primary);
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+}
+
+/* =====================================================
+ SECCIÓN HERO
+   ===================================================== */
+.heroSection {
+  background-color: rgb(243, 236, 232);
+  padding: var(--spacing-xl) 0 var(--spacing-3xl) 0;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  scroll-margin-top: 80px;
+}
+.heroContainer {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr; 
+  gap: var(--spacing-3xl);
+  align-items: center;
+}
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  text-align: left; 
+  align-items: flex-start; 
+  justify-content: center;
+}
+.heroTitle {
+  font-size: 50px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+  line-height: 1.2;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -1px;
+}
+.heroDescription {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  line-height: 1.9;
+  margin: 0;
+  max-width: 500px;
+  color: #413c3c;
+}
+
+.heroButtons > * {
+  width: auto !important; /* Quitamos los 500px fijos */
+  min-width: 250px;       /* Un tamaño razonable */
+  display: inline-flex;
+  justify-content: center;
+}
+
+.heroButtons {
+  display: flex;
+  flex: 1;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+  justify-content: flex-start; /* Asegura que los botones se peguen a la izquierda */
+}
+
+.heroButtons button,
+.heroButtons a {
+  flex-shrink:1;
+  min-width: 150px;
+  margin-top: 12px;
+
+}
+
+
+.fachadaColegioBO {
+  max-width: 100%;    
+  height: auto;    
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%);
+  mask-image: linear-gradient(to right, transparent 0%, black 10%);
+  border-right: 2px solid #03045083;
+}
+
+.heroImg {
+  width: 100%; 
+  height: 100%;
+  max-height: 500px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* =====================================================
+   SECCIÓN ACCESOS RÁPIDOS
+   ===================================================== */
+.quickAccessSection {
+ box-shadow: 
+    inset 0px 15px 20px -10px rgb(39, 1, 1), 
+    inset 0px -15px 20px -10px  rgb(39, 1, 1);
+  background-color: #7a0e0eab;
+  padding: var(--spacing-3xl) 0;
+  scroll-margin-top: 80px;
+}
+/* 1. Pintamos el fondo de tooooda la sección de Borgoña Oscuro */
+.quickAccessSection {
+  background-color: #570b01 !important; /* Este es un borgoña bien oscuro y elegante */
+}
+
+/* 2. Hacemos que el título "Accesos Rápidos" sea blanco puro */
+.quickAccessSection .sectionTitle {
+  color: #ffffff !important;
+}
+
+/* 3. Hacemos que el subtítulo debajo también sea blanco (o un blanco un poco más suave si prefieres) */
+.quickAccessSection .sectionSubtitle {
+  color: #f8f9fa !important; /* Un gris muuuy clarito casi blanco para que lea bien */
+}
+
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  margin-bottom: var(--spacing-2xl);
+}
+
+
+
+.sectionTitle {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: rgb(12, 12, 12);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.sectionSubtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.quickAccessHint {
+  text-align: left;
+  color: #f8f9fa;
+  font-size: 0.95rem;
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.9;
+}
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.card {
+  background-color: var(--color-bg-hero);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  transition: all var(--transition-normal);
+  border: 1px solid transparent;
+  text-align: center;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+
+.cardTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.cardDescription {
+  font-size: var(--font-size-base);
+  color: #555555;
+  margin: 0;
+  flex-grow: 1;
+  line-height: 1.6;
+}
+
+.cardLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  transition: color var(--transition-fast);
+  align-self: flex-start;
+  margin: 0 auto;
+  display:inline-block;
+}
+
+.cardLink:hover {
+  color: var(--color-primary-dark);
+}
+
+.cardLinkButton {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  padding: 0;
+  margin: 0 auto;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.cardLinkButton:hover {
+  color: var(--color-primary-dark);
+}
+
+
+.cardIcon {
+  margin: 0 auto 20px auto;
+  width: 80px; 
+  height: 80px; 
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+ }
+ 
+
+.iconImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+  display: block;
+  mix-blend-mode: multiply;
+}
+/* =====================================================
+   SECCIÓN NOTICIAS
+   ===================================================== */
+.newsSection {
+  background-color: var(--color-bg-news);
+  padding: var(--spacing-3xl) 0;
+  scroll-margin-top: 80px;
+}
+
+.newsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  gap: var(--spacing-xl);
+}
+
+.viewAllLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.viewAllLink:hover {
+  color: var(--color-primary-dark);
+}
+
+.newsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.newsCard {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.newsCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.newsImageWrapper {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.newsImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
+}
+
+.newsCard:hover .newsImage {
+  transform: scale(1.05);
+}
+
+.newsContent {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  flex-grow: 1;
+}
+
+.newsCategory {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.newsTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.newsExcerpt {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+.newsLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  transition: color var(--transition-fast);
+  display: inline-block;
+}
+
+.newsLink:hover {
+  color: var(--color-primary-dark);
+}
+/* =====================================================
+   SECCIÓN NOTICIAS
+   ===================================================== */
+.newsSection {
+  background-color: var(--color-bg-news);
+  padding: var(--spacing-3xl) 0;
+  scroll-margin-top: 80px;
+  
+
+  position: relative; 
+}
+
+.newsSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 12px; 
+  margin-bottom: 100px;
+  
+  /* Degradado elegante de borgoña oscuro a un tono un poco más claro en el centro */
+  background: linear-gradient(90deg, #570b0163 0%, var(--color-primary) 50%, #02057c81 100%);
+  
+  /* Una pequeña sombra hacia abajo para darle volumen y separar las secciones */
+  box-shadow: 0 7px 11px rgba(0, 0, 0, 0.15);
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+@media (max-width: 1024px) {
+  .heroContainer {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .heroImage {
+    min-height: 400px;
+  }
+
+  .heroTitle {
+    font-size: var(--font-size-3xl);
+  }
+
+  .newsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .viewAllLink {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroSection {
+    padding: var(--spacing-2xl) 0;
+    min-height: auto;
+  }
+
+  .heroContainer {
+    gap: var(--spacing-xl);
+  }
+
+  .heroTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .heroDescription {
+    font-size: var(--font-size-base);
+  }
+
+  .heroButtons {
+    flex-direction: column;
+  }
+
+  .heroButtons button,
+  .heroButtons a {
+    width: 100%;
+  }
+
+  .heroImage {
+    min-height: 300px;
+  }
+
+  /* Accesos Rápidos */
+  .quickAccessSection {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  /* Noticias */
+  .newsSection {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .newsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .sectionHeader,
+  .newsHeader {
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .heroContainer {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .heroTitle {
+    font-size: var(--font-size-xl);
+  }
+
+  .heroDescription {
+    font-size: var(--font-size-sm);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-xl);
+  }
+
+  .sectionSubtitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .card {
+    padding: var(--spacing-lg);
+  }
+
+  .newsCard {
+    box-shadow: var(--shadow-sm);
+  }
+}

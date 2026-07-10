@@ -1,0 +1,213 @@
+.header {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  color: var(--color-text-light);
+  border-bottom: none;
+}
+
+.header :global(.btn-close) {
+  filter: invert(1);
+}
+
+.title {
+  color: #fff !important;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ===================================
+   CUERPO DEL MODAL
+=================================== */
+
+.modalBody {
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===================================
+   STEPPER
+=================================== */
+
+.stepper {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+/* Línea gris */
+
+.stepper::before {
+  content: "";
+  position: absolute;
+
+  top: 15px;
+
+  left: calc(12.5% + 15px);
+  right: calc(12.5% + 15px);
+
+  height: 4px;
+  background: #d9d9d9;
+
+  border-radius: 999px;
+
+  z-index: 0;
+}
+
+/* Barra granate */
+
+.progressBar {
+  position: absolute;
+
+  top: 15px;
+
+  left: calc(12.5% + 15px);
+
+  height: 4px;
+
+  background: var(--color-primary);
+
+  border-radius: 999px;
+
+  z-index: 1;
+
+  transition: width .45s ease;
+}
+
+.pasos {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+
+  position: relative;
+  z-index: 2;
+}
+
+.paso {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  opacity: .55;
+  transition: opacity .3s ease;
+}
+
+.pasoActivo {
+  opacity: 1;
+}
+
+.pasoCompletado {
+  opacity: .9;
+}
+
+.pasoNumero {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+
+  background: #e9ecef;
+  color: var(--color-text-primary);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: .9rem;
+  font-weight: 600;
+
+  transition: all .3s ease;
+}
+
+.pasoActivo .pasoNumero,
+.pasoCompletado .pasoNumero {
+  background: var(--color-primary);
+  color: white;
+  transform: scale(1.08);
+}
+
+.pasoLabel {
+  font-size: .75rem;
+  color: var(--color-text-secondary);
+}
+
+/* ===================================
+   CONTENIDO
+=================================== */
+
+.stepContent {
+  flex: 1;
+
+  min-height: 250px;
+  height: 250px;
+
+  animation: slideFade .35s ease;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.stepContent h5 {
+  margin-bottom: 1rem;
+}
+
+.stepContent ul {
+  padding-left: 1.2rem;
+}
+
+.stepContent li {
+  margin-bottom: .6rem;
+  line-height: 1.6;
+}
+
+@keyframes slideFade {
+  from {
+    opacity: 0;
+    transform: translateX(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===================================
+   CONFIRMACIÓN
+=================================== */
+
+.confirmacion {
+  text-align: center;
+  margin: auto 0;
+}
+
+.confirmacion h5 {
+  margin-bottom: 1rem;
+}
+
+.confirmacion p {
+  line-height: 1.8;
+}
+
+/* ===================================
+   BOTÓN
+=================================== */
+
+.btnGranate {
+  --bs-btn-bg: var(--color-primary);
+  --bs-btn-border-color: var(--color-primary);
+
+  --bs-btn-hover-bg: var(--color-primary-dark);
+  --bs-btn-hover-border-color: var(--color-primary-dark);
+
+  --bs-btn-active-bg: var(--color-primary-dark);
+  --bs-btn-active-border-color: var(--color-primary-dark);
+
+  transition: all .25s ease;
+}
+
+.btnGranate:hover {
+  transform: translateY(-1px);
+}

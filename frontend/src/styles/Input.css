@@ -1,0 +1,31 @@
+.ui-field {
+  display: grid;
+  gap: 8px;
+}
+
+.ui-field__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a2626;
+}
+
+.ui-input {
+  width: 100%;
+  border: 1px solid rgba(107, 35, 35, 0.16);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #fff;
+  color: #1a1a1a;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ui-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(107, 35, 35, 0.12);
+}
+
+.ui-field__error {
+  font-size: 12px;
+  color: #b91c1c;
+}

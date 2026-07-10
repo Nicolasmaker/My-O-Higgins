@@ -1,0 +1,262 @@
+/*
+  Página Hoja de Vida — identidad My O'Higgins sobre Bootstrap 5.
+  Master-detail: lista de hojas a la izquierda, expediente con
+  Accordion a la derecha. Granate (#6B2323) + marino (#172033).
+*/
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-hero);
+}
+
+.shell {
+  flex: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-2xl);
+}
+
+/* ── Encabezado ─────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.subtitle {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ── Botón granate ──────────────────────────────────────────── */
+.btnGranate {
+  --bs-btn-bg: var(--color-primary);
+  --bs-btn-border-color: var(--color-primary);
+  --bs-btn-hover-bg: var(--color-primary-dark);
+  --bs-btn-hover-border-color: var(--color-primary-dark);
+  --bs-btn-active-bg: var(--color-primary-dark);
+  --bs-btn-active-border-color: var(--color-primary-dark);
+  --bs-btn-disabled-bg: var(--color-primary-light);
+  --bs-btn-disabled-border-color: var(--color-primary-light);
+  box-shadow: 0 4px 12px rgba(107, 35, 35, 0.25);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btnGranate:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(107, 35, 35, 0.35);
+}
+
+/* ── Lista de hojas ─────────────────────────────────────────── */
+.searchInput {
+  margin-bottom: var(--spacing-sm);
+}
+
+.hojaList {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.hojaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-color: var(--color-border);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  border-left: 3px solid transparent;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.hojaItem:hover:not(:global(.active)) {
+  background-color: var(--color-hover);
+  border-left-color: var(--color-primary-light);
+}
+
+.hojaItem:global(.active) {
+  background: linear-gradient(135deg, var(--color-footer) 0%, #24314d 100%);
+  border-color: var(--color-footer);
+  border-left: 3px solid var(--color-primary-light);
+}
+
+.hojaItemMeta {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+}
+
+/* ── Panel de detalle ───────────────────────────────────────── */
+.detailPane {
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-md);
+}
+
+.detailTitle {
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.detailMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ── Accordion ──────────────────────────────────────────────── */
+.accordion :global(.accordion-button) {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.accordion :global(.accordion-button:not(.collapsed)) {
+  background: linear-gradient(90deg, #f7efef 0%, #fdf9f9 100%);
+  color: var(--color-primary);
+  box-shadow: inset 4px 0 0 var(--color-primary);
+}
+
+.accordion :global(.accordion-button:focus) {
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 0.2rem rgba(107, 35, 35, 0.15);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-right: var(--spacing-md);
+  gap: var(--spacing-md);
+}
+
+.sectionEmpty {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.sectionTable {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.sectionTable th {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+/* ── Tarjeta antecedente médico ─────────────────────────────── */
+.medicoCard {
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  transition: box-shadow var(--transition-fast);
+}
+
+.medicoCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.medicoCard:last-child {
+  margin-bottom: 0;
+}
+
+.medicoTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.medicoGrid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: var(--spacing-xs) var(--spacing-md);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.medicoGrid dt {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.medicoGrid dd {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+/* ── Modales ────────────────────────────────────────────────── */
+.modalHeader {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-text-light);
+}
+
+.modalHeader :global(.btn-close) {
+  filter: invert(1);
+}
+
+.modalTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: #ffffff !important; /* header granate: título blanco (gana al color oscuro global de .h4) */
+}
+
+/* ── Estados vacíos ─────────────────────────────────────────── */
+.emptyState {
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-white);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}

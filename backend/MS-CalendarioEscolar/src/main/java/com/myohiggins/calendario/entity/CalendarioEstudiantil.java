@@ -1,0 +1,64 @@
+package com.myohiggins.calendario.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+
+/**
+ * Entidad que mapea la tabla CALENDARIO_ESTUDIANTIL de la base de datos.
+ * Utiliza Lombok (@Data, @NoArgsConstructor, @AllArgsConstructor) para
+ * generar automáticamente getters, setters y constructores.
+ */
+@Entity
+@Table(name = "CALENDARIO_ESTUDIANTIL")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CalendarioEstudiantil {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_cal_est")
+    private Long idCalEst;
+
+    @Column(name = "cal_est_tit_eve", length = 100, nullable = false)
+    private String tituloEvento;
+
+    @Column(name = "cal_est_tip_eve", length = 100, nullable = false)
+    private String tipoEvento;
+
+    @Column(name = "cal_est_fec_ini", nullable = false)
+    private LocalDate fechaInicio;
+
+    @Column(name = "cal_est_fec_fin", nullable = false)
+    private LocalDate fechaFin;
+
+    // Se guardan las FKs como campos simples ya que son IDs a otros MS o módulos
+    @Column(name = "MURAL_DIGITAL_id_mur_dig")
+    private Long idMuralDigital;
+
+    // Nullable: los eventos institucionales/actividades generales (actos cívicos,
+    // reuniones de apoderados, semana de la chilenidad, etc.) no pertenecen a una
+    // asignatura concreta. Solo los eventos académicos (pruebas/clases) la llevan.
+    @Column(name = "ASIGNATURA_id_asi")
+    private Long idAsignatura;
+
+    @Column(name = "cal_est_des_eve", length = 300)
+    private String descripcionEvento;
+
+    // Campos de audiencia (todos nullable) — determinan quién puede ver el evento.
+    // Eventos Institucional/Actividad los dejan en null (visibles para todos, sin cambio).
+    @Column(name = "CURSO_id_cur")
+    private Long cursoId;
+
+    @Column(name = "docente_usu_rut")
+    private Long docenteUsuRut;
+
+    @Column(name = "apoderado_usu_rut")
+    private Long apoderadoUsuRut;
+
+    @Column(name = "alumno_rut")
+    private Long alumnoRut;
+}

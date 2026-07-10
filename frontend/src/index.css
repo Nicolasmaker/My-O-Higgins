@@ -1,25 +1,24 @@
+/* Importar Variables de My O'Higgins */
+@import './styles/_variables.css';
+
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Forzamos a Bootstrap a usar nuestros colores de _variables.css */ 
+  --bs-body-color: var(--color-text-secondary); 
+  --bs-heading-color: var(--color-text-primary); 
+  --bs-link-color: var(--color-primary); 
+  --bs-link-hover-color: var(--color-primary-dark); 
+  --bs-secondary-color: var(--color-text-secondary); 
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* MODO CLARO FIJO */
+  color-scheme: light; 
 
-  font: 18px/145% var(--sans);
+  font: 18px/145% var(--font-family);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--color-text-secondary);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -30,82 +29,92 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
 body {
+  background-color: var(--color-bg-hero);
   margin: 0;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  min-height: 100vh;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+/* REGLA DE SEGURIDAD PARA TÍTULOS */
+/* Esto garantiza que cualquier título de Bootstrap obedezca a tu color oscuro */
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  color: var(--color-text-primary);
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+/* =========================================
+   PARCHE PARA FILTROS Y CALENDARIO
+   ========================================= */
+
+/* 1. Fuerza el color oscuro en los textos de los filtros (checkboxes/radios) */
+.form-check-label,
+label {
+  color: var(--color-text-primary) !important;
+  opacity: 1 !important; /* Evita que Bootstrap los ponga transparentes */
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* 2. Rescata los textos "silenciados" para que sean legibles */
+.text-muted, 
+.text-secondary {
+  color: var(--color-text-secondary) !important; 
+  opacity: 1 !important;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* 3. Asegura que los números y días del calendario se vean (cubre tablas y librerías comunes) */
+table td, 
+table th,
+.fc-col-header-cell-cushion, /* Por si usas FullCalendar */
+.fc-daygrid-day-number,      /* Por si usas FullCalendar */
+.rbc-button-link             /* Por si usas React Big Calendar */ {
+  color: var(--color-text-primary) !important;
+}
+
+/* Fuerza el color en celdas que puedan estar usando variables locales de opacidad */
+[class*="calendar"], [class*="fc-"] {
+  --bs-text-opacity: 1;
+}
+
+/* =========================================
+   ESTÉTICA GLOBAL DE FORMULARIOS (patrón Funcionarios.css)
+   Foco granate en TODOS los inputs, selects, textareas, checks y
+   dropdowns de la app (páginas y modales).
+   ========================================= */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.dropdown-toggle:focus,
+.dropdown-toggle:focus-visible {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(107, 35, 35, 0.25) !important;
+}
+
+/* Radios y checkboxes seleccionados en granate */
+.form-check-input:checked {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Menú desplegable personalizado (mismo estilo que Funcionarios) */
+.dropdown-menu-custom {
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  border-color: #dee2e6;
+  background-color: #ffffff;
+  z-index: 1050;
+}
+.opcion-granate {
+  border-radius: 0.5rem;
+  padding: 8px 12px;
+  color: #333;
+}
+.opcion-granate:hover {
+  background-color: rgba(107, 35, 35, 0.1);
+  color: #333;
+}
+.opcion-granate.active,
+.opcion-granate:active {
+  background-color: var(--color-primary);
+  color: #fff;
 }
